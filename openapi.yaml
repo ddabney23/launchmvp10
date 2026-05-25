@@ -1,0 +1,1941 @@
+openapi: 3.1.0
+info:
+  title: Community Platform API
+  description: |
+    Complete REST API for a Next.js community platform with social features, vendor marketplace, 
+    bookings, gamification, and admin capabilities.
+    
+    ## Features
+    - 🔐 Authentication via Clerk
+    - 🛡️ Rate limiting with Upstash Redis
+    - ✅ Zod validation on all inputs
+    - 📊 Supabase PostgreSQL with RLS
+    - 💳 Stripe payment integration
+    - 📧 Webhook support
+    
+    ## Authentication
+    All authenticated endpoints require a valid Clerk session token in the Authorization header:
+    ```
+    Authorization: Bearer <clerk_jwt_token>
+    ```
+    
+    ## Rate Limiting
+    Rate limits vary by endpoint and authentication status:
+    - Anonymous read: 20 requests/minute
+    - Anonymous write: 5 requests/minute
+    - Authenticated read: 100 requests/minute
+    - Authenticated write: 30 requests/minute
+    - Admin operations: 10 requests/minute
+    - Webhooks: 100 requests/minute
+    
+    Rate limit headers are included in responses:
+    - `X-RateLimit-Limit`: Maximum requests allowed
+    - `X-RateLimit-Remaining`: Remaining requests in window
+    - `X-RateLimit-Reset`: Timestamp when limit resets
+    
+    ## Error Responses
+    All errors follow a consistent format:
+    ```json
+    {
+      "error": "Error message",
+      "details": "Additional error details or validation errors"
+    }
+    ```
+    
+    Common HTTP status codes:
+    - `400` Bad Request - Invalid input or validation error
+    - `401` Unauthorized - Missing or invalid authentication
+    - `403` Forbidden - Insufficient permissions
+    - `404` Not Found - Resource does not exist
+    - `429` Too Many Requests - Rate limit exceeded
+    - `500` Internal Server Error - Server error
+    
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.yourdomain.com
+    description: Production server
+
+tags:
+  - name: Posts
+    description: Social media posts operations
+  - name: Comments
+    description: Post comments management
+  - name: Likes
+    description: Post likes/unlikes
+  - name: Follow
+    description: User follow/unfollow system
+  - name: Notifications
+    description: User notifications
+  - name: Admin
+    description: Admin-only operations (user management, badges, exports)
+  - name: Vendor
+    description: Vendor verification and application management
+  - name: Bookings
+    description: Service booking management
+  - name: Gamification
+    description: Points and achievements system
+  - name: Upload
+    description: File upload to cloud storage
+  - name: Webhooks
+    description: External webhook integrations (Stripe, etc.)
+
+components:
+  securitySchemes:
+    ClerkAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Clerk JWT token obtained from user authentication.
+        Include in Authorization header: `Authorization: Bearer <token>`
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: Validation failed
+        details:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+          description: Additional error details or validation errors
+          example:
+            - field: content
+              message: String must contain at least 1 character(s)
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - details
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Field that failed validation
+                example: content
+              message:
+                type: string
+                description: Validation error message
+                example: String must contain at least 1 character(s)
+
+    RateLimitError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Rate limit exceeded
+        retryAfter:
+          type: integer
+          description: Seconds until rate limit resets
+          example: 45
+
+    Comment:
+      type: object
+      required:
+        - id
+        - post_id
+        - user_id
+        - content
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique comment identifier
+        post_id:
+          type: string
+          format: uuid
+          description: ID of the post this comment belongs to
+        user_id:
+          type: string
+          description: Clerk user ID of comment author
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Comment text content
+        parent_comment_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of parent comment for nested replies
+        is_deleted:
+          type: boolean
+          default: false
+          description: Soft delete flag
+        created_at:
+          type: string
+          format: date-time
+          description: Comment creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        author:
+          $ref: '#/components/schemas/ProfileSummary'
+        likes:
+          type: array
+          items:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: Total number of likes
+
+    CommentCreate:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Comment text content
+          example: Great post! Very informative.
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Parent comment ID for nested replies
+          example: null
+
+    ProfileSummary:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Profile ID
+        username:
+          type: string
+          description: User's username
+        display_name:
+          type: string
+          description: User's display name
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Profile picture URL
+        is_verified:
+          type: boolean
+          description: User verification status
+        vendor_verified:
+          type: boolean
+          description: Vendor verification status
+
+    VendorVerification:
+      type: object
+      required:
+        - businessName
+        - businessType
+      properties:
+        businessName:
+          type: string
+          minLength: 2
+          maxLength: 200
+          description: Legal business name
+          example: Acme Corporation
+        businessType:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Type of business
+          example: Technology Services
+        taxId:
+          type: string
+          nullable: true
+          description: Business tax identification number
+          example: 12-3456789
+        businessAddress:
+          type: object
+          properties:
+            street:
+              type: string
+              default: ""
+              example: 123 Main Street
+            city:
+              type: string
+              default: ""
+              example: San Francisco
+            state:
+              type: string
+              nullable: true
+              example: CA
+            zip:
+              type: string
+              default: ""
+              example: "94105"
+            country:
+              type: string
+              default: US
+              example: US
+        phoneNumber:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          default: "+1234567890"
+          description: Business phone in E.164 format
+          example: "+14155551234"
+        idDocumentUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to uploaded ID document
+        businessLicenseUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to uploaded business license
+        additionalDocuments:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: URLs to additional supporting documents
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Additional notes for verification team
+
+    VendorApplicationAction:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [approve, deny]
+          description: Approval decision
+          example: approve
+        message:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Optional message (required for denial)
+          example: Please provide additional documentation
+
+    GamificationUpdate:
+      type: object
+      required:
+        - userId
+        - action
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User ID to award points to
+        action:
+          type: string
+          enum:
+            - purchase
+            - post_created
+            - comment_created
+            - like_given
+            - follow_user
+            - listing_created
+            - booking_created
+            - review_created
+          description: Action that triggered point award
+          example: post_created
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Additional context about the action
+
+    BookingCreate:
+      type: object
+      required:
+        - listing_id
+        - start_time
+        - end_time
+      properties:
+        listing_id:
+          type: string
+          format: uuid
+          description: ID of service listing to book
+        start_time:
+          type: string
+          format: date-time
+          description: Booking start time (ISO 8601)
+          example: "2024-12-01T10:00:00Z"
+        end_time:
+          type: string
+          format: date-time
+          description: Booking end time (ISO 8601)
+          example: "2024-12-01T11:00:00Z"
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Additional booking notes
+          example: Prefer morning appointments
+
+    BookingUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, canceled, completed]
+          description: Updated booking status
+          example: confirmed
+        start_time:
+          type: string
+          format: date-time
+          description: Updated start time
+        end_time:
+          type: string
+          format: date-time
+          description: Updated end time
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Updated notes
+
+    BadgeAssign:
+      type: object
+      required:
+        - badge_id
+      properties:
+        badge_id:
+          type: string
+          format: uuid
+          description: ID of badge to assign
+          example: 123e4567-e89b-12d3-a456-426614174000
+
+    PaginationParams:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 50
+          description: Number of items per page
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of items to skip
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized. Please sign in.
+
+    Forbidden:
+      description: Insufficient permissions for this operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Forbidden. Admin access required.
+
+    NotFound:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Resource not found
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Maximum requests allowed
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests in window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RateLimitError'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Internal server error
+
+  parameters:
+    PostId:
+      name: id
+      in: path
+      required: true
+      description: Post UUID
+      schema:
+        type: string
+        format: uuid
+      example: 123e4567-e89b-12d3-a456-426614174000
+
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: User UUID or Clerk ID
+      schema:
+        type: string
+      example: 123e4567-e89b-12d3-a456-426614174000
+
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of items to return
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+
+    Offset:
+      name: offset
+      in: query
+      description: Number of items to skip (for pagination)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+paths:
+  /api/posts/{id}/comments:
+    get:
+      tags:
+        - Comments
+      summary: Get all comments for a post
+      description: |
+        Retrieve paginated comments for a specific post. Includes author information and like counts.
+        Supports nested comments via parent_comment_id.
+      operationId: getPostComments
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Comments retrieved successfully
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Rate limit (20 anonymous, 100 authenticated)
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - comments
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                  total:
+                    type: integer
+                    description: Total number of comments
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Comments
+      summary: Add a comment to a post
+      description: |
+        Create a new comment on a post. Requires authentication.
+        Automatically creates notification for post author (unless commenting on own post).
+        Updates post comment count.
+      operationId: createPostComment
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+      responses:
+        '201':
+          description: Comment created successfully
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Rate limit (30 requests/minute for authenticated writes)
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - comment
+                  - message
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/Comment'
+                  message:
+                    type: string
+                    example: Comment added successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Post not found or deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Post not found
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/vendor/verify:
+    post:
+      tags:
+        - Vendor
+      summary: Submit vendor verification application
+      description: |
+        Submit application for vendor verification. Requires authentication.
+        Creates vendor_applications record for admin review.
+        Rate limited to 10 requests/minute to prevent spam.
+      operationId: submitVendorVerification
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorVerification'
+      responses:
+        '201':
+          description: Verification application submitted successfully
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Rate limit (10 requests/minute - strict)
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Vendor verification application submitted successfully
+                  application:
+                    type: object
+                    description: Created application record
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/vendor/applications/{id}:
+    patch:
+      tags:
+        - Vendor
+      summary: Approve or deny vendor application
+      description: |
+        Admin-only endpoint to approve or deny vendor verification applications.
+        Updates application status and optionally sets vendor_verified flag on user profile.
+        Rate limited to 10 requests/minute (strict admin limit).
+      operationId: processVendorApplication
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Vendor application UUID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorApplicationAction'
+      responses:
+        '200':
+          description: Application processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Vendor application approved
+                  application:
+                    type: object
+                    description: Updated application record
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gamification/update:
+    post:
+      tags:
+        - Gamification
+      summary: Update user points and achievements
+      description: |
+        Award points to user for completing actions (post created, comment, like, etc.).
+        Automatically checks for badge unlocks based on point thresholds.
+        Creates notifications for badge awards.
+      operationId: updateGamification
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GamificationUpdate'
+      responses:
+        '200':
+          description: Points updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Points updated successfully
+                  pointsAwarded:
+                    type: integer
+                    example: 10
+                  newTotal:
+                    type: integer
+                    example: 250
+                  badgesUnlocked:
+                    type: array
+                    items:
+                      type: object
+                      description: Newly unlocked badges
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/create:
+    post:
+      tags:
+        - Bookings
+      summary: Create a service booking
+      description: |
+        Create new booking for a service listing. Requires authentication.
+        Validates listing exists and times are valid ISO 8601 datetimes.
+      operationId: createBooking
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Booking created successfully
+                  booking:
+                    type: object
+                    description: Created booking record
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/update:
+    patch:
+      tags:
+        - Bookings
+      summary: Update booking status or details
+      description: |
+        Update existing booking. Can modify status, times, or notes.
+        All fields are optional. Validates datetime formats.
+      operationId: updateBooking
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdate'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Booking updated successfully
+                  booking:
+                    type: object
+                    description: Updated booking record
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/search:
+    get:
+      tags:
+        - Admin
+      summary: Search and filter users
+      description: |
+        Admin-only endpoint to search users by query, filter by role/status, with pagination.
+        Returns user profiles with statistics.
+      operationId: searchUsers
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: query
+          in: query
+          description: Search query (username, email, display name)
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: role
+          in: query
+          description: Filter by user role
+          schema:
+            type: string
+            enum: [vendor, admin, regular]
+        - name: status
+          in: query
+          description: Filter by account status
+          schema:
+            type: string
+            enum: [active, suspended, banned]
+        - $ref: '#/components/parameters/Limit'
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProfileSummary'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/export:
+    get:
+      tags:
+        - Admin
+      summary: Export users to CSV
+      description: |
+        Admin-only endpoint to export user data to CSV format.
+        Supports filtering by role and status.
+        Rate limited to 10 requests/minute (strict admin limit).
+      operationId: exportUsers
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: format
+          in: query
+          description: Export format
+          schema:
+            type: string
+            enum: [csv, json]
+            default: csv
+        - name: role
+          in: query
+          description: Filter by role
+          schema:
+            type: string
+            enum: [vendor, admin, regular]
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [active, suspended, banned]
+      responses:
+        '200':
+          description: Users exported successfully
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Get user details with statistics
+      description: |
+        Admin-only endpoint to retrieve detailed user information including:
+        - Profile data
+        - Post/comment/like counts
+        - Follower/following counts
+        - Badges and points
+      operationId: getUserDetails
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/ProfileSummary'
+                  stats:
+                    type: object
+                    properties:
+                      posts:
+                        type: integer
+                      comments:
+                        type: integer
+                      likes:
+                        type: integer
+                      followers:
+                        type: integer
+                      following:
+                        type: integer
+                      points:
+                        type: integer
+                      badges:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - Admin
+      summary: Update user profile
+      description: |
+        Admin-only endpoint to update user profile fields.
+        Can modify roles, status, verification, points, etc.
+      operationId: updateUserProfile
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_admin:
+                  type: boolean
+                is_vendor:
+                  type: boolean
+                vendor_verified:
+                  type: boolean
+                account_status:
+                  type: string
+                  enum: [active, suspended, banned]
+                points:
+                  type: integer
+                  minimum: 0
+                admin_notes:
+                  type: string
+                  maxLength: 1000
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/ProfileSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Admin
+      summary: Delete user account
+      description: |
+        Admin-only endpoint to permanently delete user account.
+        Use with caution - this is irreversible.
+      operationId: deleteUserAccount
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/{id}/roles:
+    patch:
+      tags:
+        - Admin
+      summary: Update user roles
+      description: |
+        Admin-only endpoint to update user roles (admin, vendor, vendor_verified).
+        Validates role changes and updates profile accordingly.
+      operationId: updateUserRoles
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_admin:
+                  type: boolean
+                  description: Grant/revoke admin role
+                is_vendor:
+                  type: boolean
+                  description: Grant/revoke vendor role
+                vendor_verified:
+                  type: boolean
+                  description: Verify/unverify vendor status
+      responses:
+        '200':
+          description: Roles updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User roles updated successfully
+                  user:
+                    $ref: '#/components/schemas/ProfileSummary'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/users/{id}/badges:
+    get:
+      tags:
+        - Admin
+      summary: Get user's badges
+      description: |
+        Admin-only endpoint to retrieve all badges assigned to a user.
+      operationId: getUserBadges
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Badges retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  badges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        awarded_at:
+                          type: string
+                          format: date-time
+                        badge:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            key:
+                              type: string
+                            name:
+                              type: string
+                            description:
+                              type: string
+                            icon:
+                              type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Admin
+      summary: Assign badge to user
+      description: |
+        Admin-only endpoint to manually assign badge to user.
+        Verifies badge exists before assignment.
+        Rate limited to 10 requests/minute (strict admin limit).
+      operationId: assignUserBadge
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeAssign'
+      responses:
+        '201':
+          description: Badge assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      userBadge:
+                        type: object
+                        description: Created badge assignment record
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Badge or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/admin/badges:
+    get:
+      tags:
+        - Admin
+      summary: Get all available badges
+      description: |
+        Admin-only endpoint to retrieve list of all badges in the system.
+      operationId: getAllBadges
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: Badges retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  badges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        key:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        icon:
+                          type: string
+                        category:
+                          type: string
+                        points_required:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/vendor/applications:
+    get:
+      tags:
+        - Vendor
+      summary: Get vendor applications list
+      description: |
+        Admin-only endpoint to retrieve all vendor verification applications.
+        Supports filtering by status and pagination.
+      operationId: getVendorApplications
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by application status
+          schema:
+            type: string
+            enum: [pending, approved, denied]
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Applications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        user_id:
+                          type: string
+                        businessName:
+                          type: string
+                        businessType:
+                          type: string
+                        status:
+                          type: string
+                          enum: [pending, approved, denied]
+                        created_at:
+                          type: string
+                          format: date-time
+                        reviewed_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/posts/{id}/like:
+    post:
+      tags:
+        - Likes
+      summary: Like a post
+      description: |
+        Like a post. Requires authentication. Creates notification for post author.
+        Updates post like count. Prevents duplicate likes.
+      operationId: likePost
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Post liked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Post liked successfully
+        '400':
+          description: Already liked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: You already liked this post
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Likes
+      summary: Unlike a post
+      description: |
+        Remove like from a post. Requires authentication.
+        Updates post like count.
+      operationId: unlikePost
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Post unliked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Post unliked successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/{id}/follow:
+    get:
+      tags:
+        - Follow
+      summary: Get followers or following list
+      description: |
+        Get list of users who follow this user (followers) or users this user follows (following).
+        Use query parameter 'type' to specify which list to retrieve.
+      operationId: getFollowList
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: type
+          in: query
+          description: Type of list to retrieve
+          schema:
+            type: string
+            enum: [followers, following]
+            default: followers
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Follow list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProfileSummary'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+                  type:
+                    type: string
+                    enum: [followers, following]
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Follow
+      summary: Follow a user
+      description: |
+        Follow a user. Requires authentication. Creates notification for target user.
+        Prevents self-follows. Updates follower/following counts.
+      operationId: followUser
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User followed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User followed successfully
+        '400':
+          description: Already following or attempted self-follow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                alreadyFollowing:
+                  value:
+                    error: Already following this user
+                selfFollow:
+                  value:
+                    error: Cannot follow yourself
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Follow
+      summary: Unfollow a user
+      description: |
+        Unfollow a user. Requires authentication.
+        Updates follower/following counts.
+      operationId: unfollowUser
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User unfollowed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User unfollowed successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get user notifications
+      description: |
+        Get paginated notifications for authenticated user.
+        Supports filtering by unread status.
+      operationId: getNotifications
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: unread
+          in: query
+          description: Filter to unread notifications only
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        type:
+                          type: string
+                          enum: [comment, like, follow, badge, system]
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        action_url:
+                          type: string
+                        is_read:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/notifications/{id}/read:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark notification as read
+      description: |
+        Mark a specific notification as read. Requires authentication.
+        Only the notification owner can mark it as read.
+      operationId: markNotificationRead
+      security:
+        - ClerkAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Notification UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Notification marked as read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/notifications/read-all:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      description: |
+        Mark all unread notifications as read for authenticated user.
+      operationId: markAllNotificationsRead
+      security:
+        - ClerkAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: All notifications marked as read
+                  count:
+                    type: integer
+                    description: Number of notifications updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/upload:
+    post:
+      tags:
+        - Upload
+      summary: Upload file to cloud storage
+      description: |
+        Upload file to Supabase Storage. Requires authentication.
+        Supports multiple buckets: vendor-assets, vendor-docs, listings, avatars, posts.
+        Returns public URL for uploaded file.
+      operationId: uploadFile
+      security:
+        - ClerkAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - bucket
+                - path
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload
+                bucket:
+                  type: string
+                  enum: [vendor-assets, vendor-docs, listings, avatars, posts]
+                  description: Storage bucket name
+                path:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: File path within bucket
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Public URL of uploaded file
+                    example: https://storage.example.com/bucket/path/file.jpg
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/webhooks/stripe:
+    post:
+      tags:
+        - Webhooks
+      summary: Stripe webhook handler
+      description: |
+        Handle Stripe webhook events. Verifies webhook signature.
+        Processes payment intents, checkout sessions, and other Stripe events.
+        Rate limited to 100 requests/minute.
+      operationId: stripeWebhook
+      parameters:
+        - name: stripe-signature
+          in: header
+          required: true
+          description: Stripe webhook signature for verification
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe event object
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid signature or event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/webhooks/logs:
+    get:
+      tags:
+        - Webhooks
+      summary: Get webhook audit logs
+      description: |
+        Retrieve webhook event logs for debugging. Admin only.
+        Shows event type, status, timestamps, and error details.
+      operationId: getWebhookLogs
+      security:
+        - ClerkAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Webhook logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        event_type:
+                          type: string
+                        status:
+                          type: string
+                          enum: [success, failed, pending]
+                        created_at:
+                          type: string
+                          format: date-time
+                        error:
+                          type: string
+                          nullable: true
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+security:
+  - ClerkAuth: []

@@ -1,0 +1,98 @@
+# CodeRabbit Configuration for Optimix Social Commerce Platform
+# 
+# Note: Some properties may show linter warnings but are valid for CodeRabbit.
+# CodeRabbit uses its own schema validation at runtime.
+#
+# This configuration tailors CodeRabbit reviews to our Next.js, TypeScript, Supabase, and Clerk stack
+
+# Language setting (en, en-US, etc.)
+language: en
+
+# Paths to include/exclude from reviews
+paths:
+  include:
+    - "app/**/*.{ts,tsx}"
+    - "src/**/*.{ts,tsx}"
+    - "lib/**/*.{ts,tsx}"
+    - "scripts/**/*.{ts,js}"
+    - "prisma/**/*.prisma"
+    - "supabase/migrations/**/*.sql"
+  exclude:
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+    - "build/**"
+    - "coverage/**"
+    - "*.config.{js,ts,mjs}"
+    - "**/*.test.{ts,tsx}"
+    - "**/*.spec.{ts,tsx}"
+    - "**/__tests__/**"
+    - "**/*.md"
+    - "public/**"
+    - ".vercel/**"
+    - ".turbo/**"
+
+# Review settings
+review:
+  # Review only changed files (set to false to review all files)
+  review_only_changed_files: false
+  # Request changes for critical issues
+  request_changes_workflow: true
+  # Comment on specific lines
+  line_comments: true
+  # Maximum number of comments per file
+  max_comments_per_file: 50
+
+# Focus areas specific to our tech stack
+focus:
+  - "Next.js 16 App Router best practices"
+  - "TypeScript strict mode compliance"
+  - "API route security and error handling"
+  - "Database query optimization (Prisma/Supabase)"
+  - "React Server Components vs Client Components"
+  - "Clerk authentication patterns"
+  - "Row Level Security (RLS) policy verification"
+  - "Rate limiting implementation"
+  - "Zod schema validation"
+  - "React Query (TanStack Query) patterns"
+  - "React Hook Form integration"
+  - "Stripe payment security"
+  - "Webhook security and validation"
+
+# Custom instructions for CodeRabbit
+instructions:
+  - "Check for proper authentication checks in API routes using Clerk"
+  - "Verify RLS policies are properly implemented for Supabase queries"
+  - "Ensure sensitive data is not exposed in client components"
+  - "Check for SQL injection vulnerabilities in raw queries"
+  - "Verify webhook signatures are validated (Stripe, Clerk)"
+  - "Ensure environment variables are not exposed to client"
+  - "Check for proper CORS configuration"
+  - "Verify rate limiting is implemented on public API endpoints"
+  - "API routes must have proper error handling with try-catch blocks"
+  - "API routes should return consistent error response formats"
+  - "Check for proper HTTP status codes (200, 201, 400, 401, 403, 404, 500)"
+  - "Verify input validation using Zod schemas"
+  - "Check for proper async/await error handling"
+  - "Prisma queries should be optimized (avoid N+1 queries)"
+  - "Check for proper transaction handling where needed"
+  - "Verify database migrations follow naming conventions"
+  - "Ensure indexes are added for frequently queried fields"
+  - "Ensure strict TypeScript compliance (no 'any' types without justification)"
+  - "Check for proper type definitions for API responses"
+  - "Verify Prisma types are properly generated and used"
+  - "Check for proper null/undefined handling"
+  - "Verify proper use of 'use client' and 'use server' directives"
+  - "Check for proper Server Component vs Client Component separation"
+  - "Ensure proper error boundaries are implemented"
+  - "Check for proper loading states and Suspense usage"
+  - "Verify proper form handling with React Hook Form"
+  - "Check for proper state management (avoid prop drilling)"
+  - "Check for unnecessary re-renders"
+  - "Verify proper memoization where needed (useMemo, useCallback)"
+  - "Check for proper image optimization (next/image)"
+  - "Verify proper code splitting"
+  - "Functions should be small and focused (single responsibility)"
+  - "Check for code duplication"
+  - "Verify proper naming conventions (camelCase for variables, PascalCase for components)"
+  - "Ensure proper comments for complex logic"

@@ -1,0 +1,14 @@
+-- Baseline Migration: Initialize Prisma Migrations
+-- 
+-- This is a baseline migration for an existing Supabase database.
+-- The database schema already exists via Supabase migrations in supabase/migrations/.
+-- 
+-- This empty migration marks the current database state as the baseline
+-- for Prisma's migration tracking system.
+--
+-- To mark this migration as applied (since schema already exists):
+--   npx prisma migrate resolve --applied 0_init
+--
+-- After marking as applied, Prisma will track future schema changes
+-- through its migration system.
+

@@ -1,0 +1,52 @@
+name: CodeRabbit Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: CodeRabbit Review
+        uses: coderabbitai/pr-review@latest
+        if: always()
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Path to CodeRabbit configuration
+          config_path: .coderabbit.yaml
+          # Language for the review
+          language: typescript
+          # Enable inline comments
+          inline: true
+          # Comment on PR
+          comment: true
+
+      - name: Post Review Summary
+        if: always()
+        run: |
+          echo "CodeRabbit review completed. Check the PR comments for detailed feedback."
+

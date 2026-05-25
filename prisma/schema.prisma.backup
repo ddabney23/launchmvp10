@@ -1,0 +1,689 @@
+// Prisma Schema - Generated from Supabase Migrations
+// This schema represents the complete database structure
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// CORE TABLES
+// ============================================
+
+model Profile {
+  id            String   @id @default(uuid()) @db.Uuid
+  username      String   @unique
+  displayName   String?  @map("display_name")
+  bio           String?
+  avatarUrl     String?  @map("avatar_url")
+  isVendor      Boolean  @default(false) @map("is_vendor")
+  vendorVerified Boolean @default(false) @map("vendor_verified")
+  credits       Int      @default(0)
+  points        Int      @default(0)
+  email         String?
+  isAdmin       Boolean? @default(false) @map("is_admin")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  postsAsAuthor       Post[]              @relation("PostAuthor")
+  followsAsFollower   Follow[]            @relation("Follower")
+  followsAsFollowing  Follow[]            @relation("Following")
+  comments            Comment[]
+  likes               Like[]
+  listings            Listing[]
+  ordersAsBuyer       Order[]             @relation("OrderBuyer")
+  ordersAsVendor      Order[]             @relation("OrderVendor")
+  bookingsAsBuyer     Booking[]           @relation("BookingBuyer")
+  bookingsAsVendor    Booking[]           @relation("BookingVendor")
+  messages            Message[]
+  notifications       Notification[]
+  userBadges          UserBadge[]
+  vendorProfile       VendorProfile?
+  groupOwner          Group[]             @relation("GroupOwner")
+  groupMembers        GroupMember[]
+  transactionsAsUser  Transaction[]       @relation("TransactionUser")
+  transactionsAsVendor Transaction[]      @relation("TransactionVendor")
+  payouts             Payout[]
+  reviews             Review[]
+  userPoints          UserPoint[]
+  newsAsAuthor        News[]              @relation("NewsAuthor")
+  coupons             Coupon[]
+  twoFactor           UserTwoFactor?
+  twoFactorBackupCodes TwoFactorBackupCode[]
+  twoFactorAttempts   TwoFactorAttempt?
+  pushSubscriptions   PushSubscription[]
+  auditLogs           AuditLog[]
+  leaderboard         Leaderboard[]
+
+  @@index([isAdmin], map: "idx_profiles_is_admin")
+  @@index([email], map: "idx_profiles_email")
+  @@map("profiles")
+}
+
+model Post {
+  id         String   @id @default(uuid()) @db.Uuid
+  authorId   String   @map("author") @db.Uuid
+  content    String
+  mediaUrls  String[] @default([]) @map("media_urls") @db.Text
+  visibility String   @default("public") // 'public', 'private', 'followers'
+  groupId    String?  @map("group_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  author   Profile   @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  comments Comment[]
+  // Note: likes are polymorphic (handled via targetType/targetId in Like model)
+
+  @@index([createdAt(sort: Desc)], map: "idx_posts_created_at")
+  @@index([authorId], map: "idx_posts_author")
+  @@index([visibility], map: "idx_posts_visibility")
+  @@index([groupId], map: "idx_posts_group_id")
+  @@map("posts")
+}
+
+model Follow {
+  id         String   @id @default(uuid()) @db.Uuid
+  followerId String   @map("follower") @db.Uuid
+  followingId String  @map("following") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  follower  Profile @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following Profile @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId], map: "idx_follows_follower")
+  @@index([followingId], map: "idx_follows_following")
+  @@map("follows")
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  authorId  String   @map("author") @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author Profile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Note: likes are polymorphic (handled via targetType/targetId in Like model)
+
+  @@index([postId], map: "idx_comments_post_id")
+  @@index([authorId], map: "idx_comments_author")
+  @@map("comments")
+}
+
+model Like {
+  id         String   @id @default(uuid()) @db.Uuid
+  targetType String   @map("target_type") // 'post', 'comment', 'listing'
+  targetId   String   @map("target_id") @db.Uuid
+  authorId   String   @map("author") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  author Profile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@unique([targetType, targetId, authorId])
+  @@index([targetType, targetId], map: "idx_likes_target")
+  @@index([authorId], map: "idx_likes_author")
+  @@map("likes")
+}
+
+// ============================================
+// MARKETPLACE TABLES
+// ============================================
+
+model Listing {
+  id          String   @id @default(uuid()) @db.Uuid
+  vendorId    String   @map("vendor") @db.Uuid
+  title       String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  images      String[] @default([])
+  quantity    Int      @default(0)
+  category    String?
+  location    Json?    // {lat, lng, address, city, state}
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  vendor      Profile     @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  bookings    Booking[]
+  // Note: likes are polymorphic (handled via targetType/targetId in Like model)
+
+  @@index([vendorId], map: "idx_listings_vendor")
+  @@index([active], map: "idx_listings_active")
+  @@index([category], map: "idx_listings_category")
+  @@map("listings")
+}
+
+model Order {
+  id                String   @id @default(uuid()) @db.Uuid
+  buyerId           String?  @map("buyer") @db.Uuid
+  vendorId          String?  @map("vendor") @db.Uuid
+  status            String   @default("pending") // 'pending', 'paid', 'shipped', 'completed', 'refunded', 'canceled'
+  total             Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD")
+  stripePaymentIntent String? @map("stripe_payment_intent")
+  metadata          Json?
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  buyer       Profile?      @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: SetNull)
+  vendor      Profile?      @relation("OrderVendor", fields: [vendorId], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  transactions Transaction[]
+  reviews     Review[]
+  couponUsages CouponUsage[]
+
+  @@index([buyerId], map: "idx_orders_buyer")
+  @@index([vendorId], map: "idx_orders_vendor")
+  @@index([status], map: "idx_orders_status")
+  @@index([createdAt(sort: Desc)], map: "idx_orders_created_at")
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  listingId String?  @map("listing_id") @db.Uuid
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@index([orderId], map: "idx_order_items_order_id")
+  @@index([listingId], map: "idx_order_items_listing_id")
+  @@map("order_items")
+}
+
+model Booking {
+  id        String   @id @default(uuid()) @db.Uuid
+  listingId String   @map("listing_id") @db.Uuid
+  buyerId   String?  @map("buyer") @db.Uuid
+  vendorId  String?  @map("vendor") @db.Uuid
+  startTime DateTime @map("start_time") @db.Timestamptz(6)
+  endTime   DateTime @map("end_time") @db.Timestamptz(6)
+  status    String   @default("pending") // 'pending', 'confirmed', 'canceled', 'completed'
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  listing Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer   Profile? @relation("BookingBuyer", fields: [buyerId], references: [id], onDelete: SetNull)
+  vendor  Profile? @relation("BookingVendor", fields: [vendorId], references: [id], onDelete: SetNull)
+
+  @@index([listingId], map: "idx_bookings_listing_id")
+  @@index([buyerId], map: "idx_bookings_buyer")
+  @@index([vendorId], map: "idx_bookings_vendor")
+  @@index([status], map: "idx_bookings_status")
+  @@map("bookings")
+}
+
+// ============================================
+// MESSAGING & NOTIFICATIONS
+// ============================================
+
+model Message {
+  id         String   @id @default(uuid()) @db.Uuid
+  channelId  String   @map("channel_id")
+  senderId   String?  @map("sender") @db.Uuid
+  body       String?
+  attachments String[] @default([])
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  sender Profile? @relation(fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([channelId], map: "idx_messages_channel_id")
+  @@index([createdAt(sort: Desc)], map: "idx_messages_created_at")
+  @@index([senderId], map: "idx_messages_sender")
+  @@map("messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String
+  data      Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_notifications_user_id")
+  @@index([userId, read], map: "idx_notifications_read")
+  @@index([createdAt(sort: Desc)], map: "idx_notifications_created_at")
+  @@map("notifications")
+}
+
+// ============================================
+// GAMIFICATION
+// ============================================
+
+model Badge {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  name        String
+  description String?
+  icon        String?
+
+  // Relations
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  badgeId   String   @map("badge_id") @db.Uuid
+  awardedAt DateTime @default(now()) @map("awarded_at") @db.Timestamptz(6)
+
+  // Relations
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge   @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId], map: "idx_user_badges_user_id")
+  @@map("user_badges")
+}
+
+model UserPoint {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  points    Int
+  reason    String
+  metadata  Json?    @default("{}")
+  awardedAt DateTime @default(now()) @map("awarded_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_user_points_user_id")
+  @@index([awardedAt(sort: Desc)], map: "idx_user_points_awarded_at")
+  @@map("user_points")
+}
+
+model Leaderboard {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  period       String   @default("all_time") // 'daily', 'weekly', 'monthly', 'all_time'
+  points       Int      @default(0)
+  rank         Int?
+  calculatedAt DateTime @default(now()) @map("calculated_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period])
+  @@index([period], map: "idx_leaderboard_period")
+  @@index([period, points(sort: Desc)], map: "idx_leaderboard_points")
+  @@map("leaderboard")
+}
+
+// ============================================
+// VENDOR & STORE MANAGEMENT
+// ============================================
+
+model VendorProfile {
+  id                 String   @id @db.Uuid
+  businessName       String   @map("business_name")
+  businessEmail      String?  @map("business_email")
+  businessPhone      String?  @map("business_phone")
+  businessAddress    Json?    @default("{}") @map("business_address")
+  taxIdHash          String?  @map("tax_id_hash")
+  documents          Json?    @default("[]")
+  payoutAccountId    String?  @map("payout_account_id")
+  payoutBalance      Decimal  @default(0) @db.Decimal(12, 2) @map("payout_balance")
+  stripeOnboardStatus String  @default("not_started") @map("stripe_onboard_status")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  profile      Profile       @relation(fields: [id], references: [id], onDelete: Cascade)
+  storeProfiles StoreProfile[]
+  payouts      Payout[]
+
+  @@index([id], map: "idx_vendor_profiles_id")
+  @@map("vendor_profiles")
+}
+
+model Group {
+  id           String   @id @default(uuid()) @db.Uuid
+  slug         String   @unique
+  name         String
+  description  String?
+  ownerId      String?  @map("owner") @db.Uuid
+  isPublic     Boolean  @default(true) @map("is_public")
+  avatarUrl    String?  @map("avatar_url")
+  coverImageUrl String? @map("cover_image_url")
+  memberCount  Int      @default(0) @map("member_count")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  owner   Profile?     @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  members GroupMember[]
+  posts   Post[]
+
+  @@index([slug], map: "idx_groups_slug")
+  @@index([ownerId], map: "idx_groups_owner")
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      String   @default("member") // 'admin', 'moderator', 'member'
+  joinedAt  DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  // Relations
+  group Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([groupId], map: "idx_group_members_group_id")
+  @@index([userId], map: "idx_group_members_user_id")
+  @@map("group_members")
+}
+
+model StoreProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  vendorProfileId String   @map("vendor_profile_id") @db.Uuid
+  name            String
+  slug            String   @unique
+  tagline         String?
+  description     String?
+  images          String[] @default([])
+  categories      String[] @default([])
+  location        Json?    @default("{}")
+  rating          Decimal  @default(0) @db.Decimal(3, 2)
+  reviewsCount    Int      @default(0) @map("reviews_count")
+  isFeatured      Boolean  @default(false) @map("is_featured")
+  isVerified      Boolean  @default(false) @map("is_verified")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  vendorProfile VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  reviews       Review[]
+
+  @@index([slug], map: "idx_store_profiles_slug")
+  @@index([vendorProfileId], map: "idx_store_profiles_vendor_id")
+  @@map("store_profiles")
+}
+
+model Review {
+  id               String   @id @default(uuid()) @db.Uuid
+  storeId          String   @map("store_id") @db.Uuid
+  buyerId          String?  @map("buyer") @db.Uuid
+  orderId          String?  @map("order_id") @db.Uuid
+  rating           Int      // 1-5
+  title            String?
+  body             String?
+  images           String[] @default([])
+  isVerifiedPurchase Boolean @default(false) @map("is_verified_purchase")
+  helpfulCount     Int      @default(0) @map("helpful_count")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  store StoreProfile @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  buyer Profile?     @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  order Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([storeId, buyerId, orderId])
+  @@index([storeId], map: "idx_reviews_store_id")
+  @@index([buyerId], map: "idx_reviews_buyer")
+  @@map("reviews")
+}
+
+// ============================================
+// FINANCIAL TABLES
+// ============================================
+
+model Transaction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  kind                String   // 'order', 'payout', 'refund', 'fee', 'commission'
+  userId              String?  @map("user_id") @db.Uuid
+  vendorId            String?  @map("vendor_id") @db.Uuid
+  orderId             String?  @map("order_id") @db.Uuid
+  amount              Decimal  @db.Decimal(12, 2)
+  currency            String   @default("USD")
+  status              String   @default("pending") // 'pending', 'completed', 'failed', 'cancelled'
+  metadata            Json?    @default("{}")
+  stripePaymentIntentId String? @map("stripe_payment_intent_id")
+  stripeTransferId    String?  @map("stripe_transfer_id")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user   Profile? @relation("TransactionUser", fields: [userId], references: [id], onDelete: SetNull)
+  vendor Profile? @relation("TransactionVendor", fields: [vendorId], references: [id], onDelete: SetNull)
+  order  Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_transactions_user_id")
+  @@index([vendorId], map: "idx_transactions_vendor_id")
+  @@index([orderId], map: "idx_transactions_order_id")
+  @@map("transactions")
+}
+
+model Payout {
+  id              String   @id @default(uuid()) @db.Uuid
+  vendorId        String   @map("vendor_id") @db.Uuid
+  vendorProfileId String   @map("vendor_profile_id") @db.Uuid
+  stripePayoutId  String?  @unique @map("stripe_payout_id")
+  amount          Decimal  @db.Decimal(12, 2)
+  currency        String   @default("USD")
+  status          String   @default("pending") // 'pending', 'paid', 'failed', 'cancelled'
+  payoutMethod    String?  @map("payout_method")
+  metadata        Json?    @default("{}")
+  processedAt     DateTime? @map("processed_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  vendor        Profile       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorProfile VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId], map: "idx_payouts_vendor_id")
+  @@index([status], map: "idx_payouts_status")
+  @@map("payouts")
+}
+
+// ============================================
+// COUPONS
+// ============================================
+
+model Coupon {
+  id            String    @id @default(uuid()) @db.Uuid
+  vendorId      String    @map("vendor_id") @db.Uuid
+  code          String
+  discountType  String    @map("discount_type") // 'percentage', 'fixed'
+  discountValue Decimal   @db.Decimal(10, 2) @map("discount_value")
+  minPurchase   Decimal?  @db.Decimal(10, 2) @map("min_purchase")
+  maxDiscount   Decimal?  @db.Decimal(10, 2) @map("max_discount")
+  expiresAt     DateTime? @map("expires_at") @db.Timestamptz(6)
+  usageLimit    Int?
+  usageCount    Int       @default(0) @map("usage_count")
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  vendor Profile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  usages CouponUsage[]
+
+  @@unique([vendorId, code])
+  @@index([vendorId], map: "idx_coupons_vendor_id")
+  @@index([code], map: "idx_coupons_code")
+  @@index([active], map: "idx_coupons_active")
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id        String   @id @default(uuid()) @db.Uuid
+  couponId  String   @map("coupon_id") @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  usedAt    DateTime @default(now()) @map("used_at") @db.Timestamptz(6)
+
+  // Relations
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, orderId])
+  @@map("coupon_usages")
+}
+
+// ============================================
+// NEWS & CONTENT
+// ============================================
+
+model News {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  content     String
+  excerpt     String?
+  imageUrl    String?  @map("image_url")
+  authorId    String?  @map("author") @db.Uuid
+  category    String   @default("announcement") // 'announcement', 'update', 'feature', 'community'
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  isPublished Boolean  @default(true) @map("is_published")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  author Profile? @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)], map: "idx_news_created_at")
+  @@index([category], map: "idx_news_category")
+  @@index([isPublished], map: "idx_news_published")
+  @@index([isPinned], map: "idx_news_pinned")
+  @@map("news")
+}
+
+// ============================================
+// SECURITY & AUTH
+// ============================================
+
+model UserTwoFactor {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  secret    String
+  enabled   Boolean  @default(false)
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_user_two_factor_user_id")
+  @@map("user_two_factor")
+}
+
+model TwoFactorBackupCode {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  codeHash  String   @map("code_hash")
+  used      Boolean  @default(false)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, codeHash])
+  @@index([userId], map: "idx_two_factor_backup_codes_user_id")
+  @@index([userId, used], map: "idx_two_factor_backup_codes_used")
+  @@map("two_factor_backup_codes")
+}
+
+model TwoFactorAttempt {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @unique @map("user_id") @db.Uuid
+  attemptCount Int       @default(1) @map("attempt_count")
+  lastAttemptAt DateTime @default(now()) @map("last_attempt_at") @db.Timestamptz(6)
+  lockedUntil  DateTime? @map("locked_until") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_two_factor_attempts_user_id")
+  @@index([userId, lockedUntil], map: "idx_two_factor_attempts_locked")
+  @@map("two_factor_attempts")
+}
+
+// ============================================
+// PUSH NOTIFICATIONS
+// ============================================
+
+model PushSubscription {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String
+  p256dhKey String   @map("p256dh_key")
+  authKey   String   @map("auth_key")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId], map: "idx_push_subscriptions_user_id")
+  @@index([endpoint], map: "idx_push_subscriptions_endpoint")
+  @@map("push_subscriptions")
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String?   @map("user_id") @db.Uuid
+  action       String
+  resourceType String    @map("resource_type")
+  resourceId   String?   @map("resource_id") @db.Uuid
+  details      Json?
+  ipAddress    String?   @map("ip_address") @db.Inet
+  userAgent    String?   @map("user_agent")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user Profile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_audit_logs_user_id")
+  @@index([action], map: "idx_audit_logs_action")
+  @@index([resourceType], map: "idx_audit_logs_resource_type")
+  @@index([resourceId], map: "idx_audit_logs_resource_id")
+  @@index([createdAt(sort: Desc)], map: "idx_audit_logs_created_at")
+  @@index([resourceType, resourceId], map: "idx_audit_logs_resource_composite")
+  @@index([userId, action], map: "idx_audit_logs_user_action")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_audit_logs_user_created")
+  @@map("audit_logs")
+}

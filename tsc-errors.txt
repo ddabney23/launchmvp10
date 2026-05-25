@@ -1,0 +1,1416 @@
+﻿error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/admin/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/admin/payments/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/admin/realtime-diagnostics/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/admin/users/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/admin/vendors/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/badges/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/billing/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/cancel/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/cart/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/checkout/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/compare/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/create/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/debug-admin/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/events/[id]/layout.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/events/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/events/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/explore/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/feed/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/friends/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/groups/[id]/layout.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/groups/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/groups/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/help/faq/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/help/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/home/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/leaderboard/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/listing/[id]/layout.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/listing/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/marketplace/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/messages/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/news/[id]/layout.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/news/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/news/archive/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/news/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/notifications/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/onboarding/customer/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/onboarding/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/onboarding/vendor/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/order/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/orders/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/post/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/privacy/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/product/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/products/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/profile/[id]/edit/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/profile/[id]/layout.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/profile/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/rewards/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/search/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/settings/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/store/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/stories/[userId]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/subscribe/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/success/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/terms/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/u/[username]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/vendor/[id]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/vendor/apply/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/vendor/dashboard/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/vendor/products/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/vendors/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(app)/wishlist/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/auth/[[...rest]]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/auth/callback/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/login/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/logout/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/register/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/reset-password/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/(auth)/signup/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/account/recover/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/account/login-history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/account/recover/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/account/security-alerts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/account/sessions/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/account/sessions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/actions/history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/actions/undo/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/activity/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/analytics/api-usage/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/analytics/dashboard/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/analytics/news/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/analytics/predictions/models/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/analytics/predictions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/audit-logs/admin-actions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/audit-logs/export/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/audit-logs/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/badges/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/clerk/users/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/clerk/users/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/compliance/audit/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/compliance/audit/scan/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/compliance/audit/self-assessment/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/dashboard/layout/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/dashboard/widgets/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/env-check/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/export/all/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/feature-flags/[id]/results/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/feature-flags/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/ip-bans/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/maintenance/schedules/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/maintenance/settings/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/maintenance/status/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/apply/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/bulk/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/queue/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/rules/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/rules/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/rules/statistics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/moderation/rules/test/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/news/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/news/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/notifications/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/payments/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/process-price-alerts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/process-restock-notifications/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/rate-limit/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/rate-limit/block/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/rate-limit/unblock/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/rate-limit/violations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/[id]/run/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/[id]/schedules/[scheduleId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/[id]/schedules/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/process-scheduled/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reports/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/reviews/flagged/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/roles/assign/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/roles/assignments/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/roles/permissions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/roles/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/spam/classify/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/spam/review/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/stats/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/takedown/requests/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/test/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/[id]/badges/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/[id]/roles/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/bulk-import/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/bulk/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/export/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/users/search/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/admin/vendors/[id]/capabilities/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/[id]/approve/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/[id]/deny/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/[id]/payment/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/[id]/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/active/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/pending/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/ads/submit/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/affiliates/apply/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/affiliates/programs/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/affiliates/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/analytics/cohorts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/analytics/conversion-funnel/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/analytics/realtime/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/analytics/revenue-attribution/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/auth/supabase-token/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/availability/blocks/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/availability/blocks/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/addons/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/pay-balance/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/pay-deposit/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/reschedule/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/[id]/waitlist/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/availability/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/create/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/process-reminders/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bookings/update/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bundles/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/bundles/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cart/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cart/checkout/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cart/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/categories/[id]/listings/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/categories/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/categories/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/challenge/verify/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/compare/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/compare/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/conversations/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/conversations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cookies/consent/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/coupons/available/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cron/event-reminders/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cron/publish-scheduled-news/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/cron/saved-search-alerts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/csrf-token/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/currency/preferences/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/currency/rate/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/digital/purchases/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/disputes/[id]/respond/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/disputes/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/events/[id]/attend/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/events/[id]/attendees/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/events/[id]/check-in/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/events/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/events/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/feature-flags/[key]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/feed/personalized/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/list/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/lists/[id]/members/[userId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/lists/[id]/members/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/lists/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/lists/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/mutual/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/requests/[requestId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/requests/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/suggestions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/friends/user/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/achievements/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/challenges/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/events/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/events/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/expire-points/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/points/expiring-soon/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/points/history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/redeem/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/rewards/catalog/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/shares/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/streaks/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/tiers/benefits/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/tiers/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/tiers/user/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gamification/update/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gift-cards/[code]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gift-cards/purchase/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/gift-cards/redeem/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/badges/[badgeId]/award/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/badges/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/invitations/[invitationId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/invitations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/join-requests/[requestId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/join-requests/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/join/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/members/[userId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/posts/[postId]/approve/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/posts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/groups/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/hashtags/[tag]/posts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/hashtags/trending/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/health/cache/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/health/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/leaderboard/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listing-templates/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listing-templates/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/addons/[addonId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/addons/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/also-bought/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/availability/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/cancellation-policy/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/download/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/duplicate/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/notify-restock/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/quick-buy/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/recommendations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/related/[relatedId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/related/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/sale/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/status-history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/variants/[variantId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/variants/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/watch-price/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/wholesale/[tierId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/wholesale/price/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/[id]/wholesale/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/bulk-edit/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/bulk/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/compare/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/preorders/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/recently-viewed/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/listings/sales/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/messages/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/messages/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/messages/search/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/messages/typing/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/comments/[commentId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/comments/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/engagement/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/react/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/reactions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/related/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/[id]/view/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/news/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/[id]/archive/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/[id]/read/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/[id]/status/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/analytics/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/archived/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/auto-archive/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/groups/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/mute/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/preferences/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/read-all/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/request-permission/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/topics/subscribe/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/notifications/topics/unsubscribe/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/onboarding/complete/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/[orderId]/cancel/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/[orderId]/invoice/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/[orderId]/receipt/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/[orderId]/refunds/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/[orderId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/create-multi-vendor/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/export/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/orders/guest/lookup/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-methods/[id]/default/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-methods/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-methods/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-methods/setup-intent/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-plans/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment-plans/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment/create-intent/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment/retry/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/payment/split/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/personalization/behavior/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/personalization/preferences/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/personalization/recommendations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/polls/[pollId]/results/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/polls/[pollId]/vote/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/polls/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/archive/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/comments/[commentId]/report/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/comments/[commentId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/comments/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/pin/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/reactions/count/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/report/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/save/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/share-link/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/share/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/[postId]/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/drafts/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/drafts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/react/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/saved/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/share/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/posts/view/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/profile/update/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/profiles/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/push/process-scheduled/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/push/schedule/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/push/schedule/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/push/send/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/push/subscribe/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/referrals/apply/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/referrals/code/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/referrals/complete/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/referrals/stats/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/referrals/validate/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/returns/[id]/label/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/returns/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/returns/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/[id]/helpful/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/[id]/replies/[replyId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/[id]/replies/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/process-reminders/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/reviews/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/autocomplete/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/click/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/history/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/popular/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/saved/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/saved/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/search/suggestions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/address/validate/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/calculator/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/labels/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/notifications/status-update/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/pickup-locations/[locationId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/pickup-locations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/pickups/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/pickups/schedule/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/rates/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/track/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/zones/[zoneId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/zones/rates/[rateId]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/zones/rates/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/shipping/zones/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/[id]/highlight/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/[id]/react/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/highlights/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/likes/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/replies/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/stories/views/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/tags/[id]/listings/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/tags/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/tags/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/takedown/request/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/test-auth/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/upload/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/activity-log/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/connected-accounts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/data-deletion/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/data-export/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/data-export/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/email/change/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/email/resend-verification/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/email/verification-status/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/group-invitations/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/user/preferences/notifications/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/[id]/block/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/[id]/follow/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/[id]/mute/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/[id]/report/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/blocked/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/muted/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/users/suggestions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/applications/[id]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/applications/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/backorders/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/balance/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/capabilities/definitions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/capabilities/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/categories/[key]/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/categories/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/categories/update/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/connect/onboard/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/connect/status/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/inventory/low-stock/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/inventory/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/listings/export/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/payouts/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/refund/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/reviews/analytics/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/reviews/pending-response/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/shipping/settings/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/subscriptions/checkout/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/subscriptions/portal/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/subscriptions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/verify/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendor/wholesale/approvals/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendors/[id]/rating/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/vendors/[id]/response-rate/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/wallet/balance/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/wallet/transactions/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/wallet/use/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/webhooks/logs/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/webhooks/resend/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/webhooks/shippo/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/webhooks/stripe/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/wishlist/check/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/api/wishlist/route.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/hashtags/[tag]/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/offline/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/app/reviews/guidelines/page.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/.next/types/validator.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '.next/types/**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/lib/api-error.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/lib/check-pwned-password.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/lib/supabase-helpers.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
+error TS6053: File 'C:/Users/Optimix/Downloads/my-app-master-main/lib/types.ts' not found.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in 'C:/Users/Optimix/Downloads/my-app-master-main/tsconfig.json'
