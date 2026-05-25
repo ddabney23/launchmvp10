@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node scripts/run-build.mjs",
+    "build:local": "next build --webpack",
     "build:ntfs": "powershell -ExecutionPolicy Bypass -File scripts/build-ntfs.ps1",
     "build:turbo": "next build",
     "start": "next start",

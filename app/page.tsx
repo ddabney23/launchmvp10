@@ -1,17 +1,16 @@
 import Index from '@/views/Index'
-import { createClient } from '@/integrations/supabase/client'
+import { createClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 
 // Fetch news on the server side
 async function getLatestNews() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    
-    if (!supabaseUrl || !supabaseKey) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return []
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = await createClient()
     
     const { data, error } = await supabase
       .from('news')

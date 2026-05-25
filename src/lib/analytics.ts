@@ -38,7 +38,7 @@ class Analytics {
   private initializeSentry() {
     if (this.sentryDsn && typeof window !== "undefined") {
       // Lazy load Sentry only if DSN is provided
-      import("@sentry/react").then((Sentry) => {
+      import("@sentry/nextjs").then((Sentry) => {
         Sentry.init({
           dsn: this.sentryDsn!,
           integrations: [
@@ -86,7 +86,7 @@ class Analytics {
 
     // Also send to Sentry as breadcrumb
     if (this.sentryDsn && typeof window !== "undefined") {
-      import("@sentry/react").then((Sentry) => {
+      import("@sentry/nextjs").then((Sentry) => {
         Sentry.addBreadcrumb({
           category: "analytics",
           message: event,
@@ -121,7 +121,7 @@ class Analytics {
 
     // Send to Sentry
     if (this.sentryDsn && typeof window !== "undefined") {
-      import("@sentry/react").then((Sentry) => {
+      import("@sentry/nextjs").then((Sentry) => {
         Sentry.captureException(error, {
           contexts: {
             custom: context || {},
@@ -138,7 +138,7 @@ class Analytics {
    */
   setUser(userId: string, traits?: Record<string, unknown>) {
     if (this.sentryDsn && typeof window !== "undefined") {
-      import("@sentry/react").then((Sentry) => {
+      import("@sentry/nextjs").then((Sentry) => {
         Sentry.setUser({
           id: userId,
           ...traits,
@@ -154,7 +154,7 @@ class Analytics {
    */
   clearUser() {
     if (this.sentryDsn && typeof window !== "undefined") {
-      import("@sentry/react").then((Sentry) => {
+      import("@sentry/nextjs").then((Sentry) => {
         Sentry.setUser(null);
       }).catch(() => {
         // Sentry not available

@@ -141,16 +141,11 @@ npx web-push generate-vapid-keys
 
 ## Windows builds
 
-If `npm run build` fails with `EISDIR: illegal operation on a directory, readlink`:
+See [docs/BUILD.md](docs/BUILD.md). Summary:
 
-1. **exFAT / non-NTFS drives** (e.g. external `O:`): Next.js cannot use symlinks/junctions reliably. Use an **NTFS** copy on `C:`:
-   ```powershell
-   npm run build:ntfs
-   ```
-   This mirrors the project to `%LOCALAPPDATA%\optimix-mvp-build` and runs `next build` there.
-2. Delete `.next` and rebuild: `Remove-Item -Recurse -Force .next; npm run build`
-3. Prefer a path **without spaces** on NTFS (e.g. `C:\dev\optimix-MVP1.0-beta`)
-4. Use `npm run build` (webpack). Turbopack (`npm run build:turbo`) may fail on SUBST/network drives.
+- **`npm run build`** auto-detects exFAT (e.g. external `O:`) and mirrors to `%LOCALAPPDATA%\optimix-mvp-build` (NTFS) because Next.js needs symlinks/junctions that exFAT does not support (`EISDIR` / `readlink` errors).
+- **`npm run build:local`** always builds in the current folder (use on NTFS paths).
+- Long-term: clone to `C:\dev\optimix-MVP1.0-beta` (NTFS, no spaces).
 
 ## Verification
 

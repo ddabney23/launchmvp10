@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: process.cwd(),
-  turbopack: {},
+  serverExternalPackages: ['import-in-the-middle'],
   reactStrictMode: true,
   // TypeScript - temporarily disabled for production build
   // TODO: Fix 419 TypeScript errors (mostly in views and tests)
@@ -12,13 +12,14 @@ const nextConfig: NextConfig = {
   // Suppress Prisma/OpenTelemetry warnings; use in-memory webpack cache on Windows
   // (persistent pack cache can fail with EISDIR/readlink on paths containing spaces)
   webpack: (config, { isServer, dev }) => {
-    if (!dev) {
-      config.cache = { type: "memory" };
-    }
+    config.cache = { type: "memory" };
     config.resolve = config.resolve ?? {};
-    // Disable symlink resolution in webpack to avoid Windows readlink/EISDIR failures
-    // when building with Next.js route groups like app\(app) and long path names.
+    // Disable symlink resolution to avoid Windows EISDIR/junction errors
     config.resolve.symlinks = false;
+    // Force resolve.symlink = false in module rules too
+    config.module = config.module ?? {};
+    config.module.rules = config.module.rules ?? [];
+    
     if (!isServer) {
       config.ignoreWarnings = [
         { module: /@opentelemetry/ },
