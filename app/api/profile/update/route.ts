@@ -27,11 +27,11 @@ const ProfileUpdateSchema = z.object({
   store_name: z.string().max(200).optional(),
   store_description: z.string().max(2000).nullable().optional(),
   store_banner_url: z.string().url().nullable().optional(),
-  store_policies: z.record(z.any()).nullable().optional(),
-  store_hours: z.record(z.any()).nullable().optional(),
+  store_policies: z.record(z.string(), z.any()).nullable().optional(),
+  store_hours: z.record(z.string(), z.any()).nullable().optional(),
   store_location: z.string().max(200).nullable().optional(),
-  store_social_links: z.record(z.string()).nullable().optional(),
-}).passthrough()
+  store_social_links: z.record(z.string(), z.string()).nullable().optional(),
+}).strict()
 
 export const PUT = withErrorHandling(async (req: NextRequest) => {
   let userId: string
@@ -58,7 +58,7 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
 
   const validationResult = ProfileUpdateSchema.safeParse(body)
   if (!validationResult.success) {
-    return validationErrorResponse(validationResult.error.errors)
+    return validationErrorResponse(validationResult.error)
   }
 
   const updates = validationResult.data
@@ -78,25 +78,32 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
   if (!existingProfile) {
     const email = user?.email || ''
     const emailPrefix = email.split('@')[0] || `user_${Date.now()}`
+    const metadata = user?.user_metadata ?? {}
 
-    const newProfileData: Record<string, unknown> = {
+    const newProfileData = {
       id: userId,
       username: updates.username || updates.display_name || emailPrefix,
       display_name:
         updates.display_name ||
-        (user?.user_metadata?.display_name as string) ||
+        (metadata.display_name as string) ||
         emailPrefix,
       email,
       avatar_url:
         updates.avatar_url ||
-        (user?.user_metadata?.avatar_url as string) ||
+        (metadata.avatar_url as string) ||
         null,
       bio: updates.bio ?? null,
       is_vendor: updates.is_vendor ?? false,
       vendor_verified: false,
       onboarding_completed: updates.onboarding_completed ?? false,
       credits: updates.credits ?? 0,
-      ...updates,
+      store_name: updates.store_name ?? null,
+      store_description: updates.store_description ?? null,
+      store_banner_url: updates.store_banner_url ?? null,
+      store_policies: updates.store_policies ?? null,
+      store_hours: updates.store_hours ?? null,
+      store_location: updates.store_location ?? null,
+      store_social_links: updates.store_social_links ?? null,
     }
 
     if (!updates.username) {
@@ -118,7 +125,7 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
 
     const { data: created, error: createError } = await adminClient
       .from('profiles')
-      .insert(newProfileData)
+      .insert([newProfileData])
       .select('*')
       .single()
 
@@ -130,9 +137,29 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
     return successResponse(created, 'Profile created successfully')
   }
 
+  // Build update object with only defined fields
+  const updatePayload: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  }
+
+  if (updates.username !== undefined) updatePayload.username = updates.username
+  if (updates.display_name !== undefined) updatePayload.display_name = updates.display_name
+  if (updates.bio !== undefined) updatePayload.bio = updates.bio
+  if (updates.avatar_url !== undefined) updatePayload.avatar_url = updates.avatar_url
+  if (updates.is_vendor !== undefined) updatePayload.is_vendor = updates.is_vendor
+  if (updates.onboarding_completed !== undefined) updatePayload.onboarding_completed = updates.onboarding_completed
+  if (updates.credits !== undefined) updatePayload.credits = updates.credits
+  if (updates.store_name !== undefined) updatePayload.store_name = updates.store_name
+  if (updates.store_description !== undefined) updatePayload.store_description = updates.store_description
+  if (updates.store_banner_url !== undefined) updatePayload.store_banner_url = updates.store_banner_url
+  if (updates.store_policies !== undefined) updatePayload.store_policies = updates.store_policies
+  if (updates.store_hours !== undefined) updatePayload.store_hours = updates.store_hours
+  if (updates.store_location !== undefined) updatePayload.store_location = updates.store_location
+  if (updates.store_social_links !== undefined) updatePayload.store_social_links = updates.store_social_links
+
   const { data: updated, error: updateError } = await adminClient
     .from('profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq('id', userId)
     .select('*')
     .single()

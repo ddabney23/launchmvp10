@@ -275,7 +275,7 @@ export async function updateProfile(userId: string, updates: ProfileUpdate): Pro
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
       body: JSON.stringify(updates),
     });
 
@@ -371,7 +371,7 @@ export async function createPost(post: PostCreate & { mentions?: string[] }): Pr
     const response = await fetch(resolveApiUrl('/api/posts'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
       body: JSON.stringify(post),
     });
 
@@ -404,7 +404,7 @@ export async function updatePost(postId: string, updates: PostUpdate): Promise<P
     const response = await fetch(resolveApiUrl(`/api/posts/${postId}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
       body: JSON.stringify(updates),
     });
 
@@ -436,7 +436,7 @@ export async function deletePost(postId: string): Promise<void> {
   try {
     const response = await fetch(resolveApiUrl(`/api/posts/${postId}`), {
       method: 'DELETE',
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
     });
 
     if (!response.ok) {
@@ -635,7 +635,7 @@ export async function followUser(follow: FollowCreate): Promise<Follow> {
     const response = await fetch(resolveApiUrl(`/api/users/${follow.following}/follow`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
     });
 
     if (!response.ok) {
@@ -673,7 +673,7 @@ export async function unfollowUser(followingId: string): Promise<void> {
     const response = await fetch(resolveApiUrl(`/api/users/${followingId}/follow`), {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
     });
 
     if (!response.ok) {
@@ -703,7 +703,7 @@ export async function isFollowing(followerId: string, followingId: string): Prom
     const response = await fetch(resolveApiUrl(`/api/users/${followingId}/follow?check=true`), {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
     });
 
     if (!response.ok) {
@@ -791,7 +791,7 @@ export async function createComment(comment: CommentCreate & { mentions?: string
       response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies for Clerk auth
+        credentials: 'include', // Include cookies for Supabase session
         body: JSON.stringify({
           content: comment.content,
           parent_id: comment.parent_id || null,
@@ -909,7 +909,7 @@ export async function deleteComment(commentId: string): Promise<void> {
     // Delete via API route
     const response = await fetch(resolveApiUrl(`/api/posts/${comment.post_id}/comments?commentId=${commentId}`), {
       method: 'DELETE',
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
     });
 
     if (!response.ok) {
@@ -940,7 +940,7 @@ export async function like(targetType: "post" | "comment" | "listing", targetId:
     const response = await fetch(resolveApiUrl('/api/posts/react'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
       body: JSON.stringify({ postId: targetId, reaction: 'like' }),
     });
     
@@ -975,7 +975,7 @@ export async function unlike(targetType: "post" | "comment" | "listing", targetI
     const response = await fetch(resolveApiUrl('/api/posts/react'), {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include', // Include cookies for Supabase session
       body: JSON.stringify({ postId: targetId }),
     });
     
@@ -1032,7 +1032,7 @@ export async function isLiked(targetType: "post" | "comment" | "listing", target
       const response = await fetch(resolveApiUrl(`/api/posts/react?postId=${targetId}`), {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies for Clerk auth
+        credentials: 'include', // Include cookies for Supabase session
       });
       
       if (!response.ok) {

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { SupabaseAuthForm } from '@/components/auth/SupabaseAuthForm'
 import { isAdminEmail } from '@/lib/admin'
 import { getProfile } from '@/lib/api'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +43,7 @@ export default function AuthPage() {
       }
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session?.user) {
         void redirectIfSignedIn(session.user.id, session.user.email)
       } else {
@@ -52,7 +53,7 @@ export default function AuthPage() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
         void redirectIfSignedIn(session.user.id, session.user.email)
       } else {

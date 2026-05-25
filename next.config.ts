@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: process.cwd(),
   turbopack: {},
   reactStrictMode: true,
   // TypeScript - temporarily disabled for production build

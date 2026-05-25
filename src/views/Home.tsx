@@ -244,6 +244,7 @@ export default function Home() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             <ContinueSection />
+            <NewsTeaser />
             {/* Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link href="/rewards">
