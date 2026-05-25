@@ -16,6 +16,8 @@ DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabas
 # REQUIRED - SUPABASE AUTH (service role for admin API / migrations)
 # ============================================
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+# Database password for CLI migrations (Dashboard → Database → reset password)
+SUPABASE_DB_PASSWORD=your_database_password_here
 
 # Configure in Supabase Dashboard → Authentication:
 # - Site URL: http://localhost:3000 (and production URL)
@@ -139,11 +141,16 @@ npx web-push generate-vapid-keys
 
 ## Windows builds
 
-If `npm run build` fails with `EISDIR: illegal operation on a directory, readlink` on a route file, try:
+If `npm run build` fails with `EISDIR: illegal operation on a directory, readlink`:
 
-1. Delete `.next` and rebuild: `Remove-Item -Recurse -Force .next; npm run build`
-2. Clone or move the repo to a path **without spaces** (e.g. `O:\Project\optimix-MVP1.0-beta`)
-3. Use `npm run build` (webpack). Turbopack (`npm run build:turbo`) may fail on some Windows drives when creating junctions under `.next`.
+1. **exFAT / non-NTFS drives** (e.g. external `O:`): Next.js cannot use symlinks/junctions reliably. Use an **NTFS** copy on `C:`:
+   ```powershell
+   npm run build:ntfs
+   ```
+   This mirrors the project to `%LOCALAPPDATA%\optimix-mvp-build` and runs `next build` there.
+2. Delete `.next` and rebuild: `Remove-Item -Recurse -Force .next; npm run build`
+3. Prefer a path **without spaces** on NTFS (e.g. `C:\dev\optimix-MVP1.0-beta`)
+4. Use `npm run build` (webpack). Turbopack (`npm run build:turbo`) may fail on SUBST/network drives.
 
 ## Verification
 

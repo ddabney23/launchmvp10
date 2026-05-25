@@ -23,7 +23,6 @@ import { z } from "zod";
 import { Loader2, Upload, Save, Bell, Lock, User, Shield, Mail, Trash2, AlertTriangle } from "lucide-react";
 import { updateProfile, uploadFile } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
-import { UserProfile } from "@clerk/nextjs";
 import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 import {
   AlertDialog,
@@ -405,18 +404,32 @@ export default function Settings() {
                 <CardHeader>
                   <CardTitle>Account Security</CardTitle>
                   <CardDescription>
-                    Manage your password, multi-factor authentication, and security settings through Clerk
+                    Password and email are managed through Supabase Auth. Use sign out and sign in again to switch accounts.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <UserProfile
-                    appearance={{
-                      elements: {
-                        rootBox: "w-full",
-                        card: "shadow-none border-0",
-                      },
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    To change your password, use the reset link on the sign-in page or update it in the Supabase dashboard if you use email auth.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      const { error } = await supabase.auth.resetPasswordForEmail(
+                        user?.email ?? '',
+                        { redirectTo: `${window.location.origin}/auth/callback?redirect_url=/settings` }
+                      );
+                      if (error) {
+                        toast({ variant: 'destructive', title: 'Could not send reset email', description: error.message });
+                      } else {
+                        toast({ title: 'Check your email', description: 'We sent a password reset link if an account exists for this address.' });
+                      }
                     }}
-                  />
+                    disabled={!user?.email}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send password reset email
+                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>
