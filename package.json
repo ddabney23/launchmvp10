@@ -45,6 +45,7 @@
     "webhook:forward:unix": "bash scripts/webhook-forward.sh",
     "setup:buckets": "node scripts/setup-storage-buckets.js",
     "check:vendor-table": "node scripts/check-vendor-table.js",
+    "check:profile-onboarding": "node scripts/check-profile-onboarding.js",
     "test:vendor-api": "node scripts/test-vendor-api.js",
     "docs": "npx @scalar/cli serve openapi.yaml --port 5050",
     "docs:validate": "npx @scalar/cli validate openapi.yaml"

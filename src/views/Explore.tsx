@@ -36,8 +36,10 @@ export default function Explore() {
 
   // Real-time subscription for new posts
   useEffect(() => {
+    if (!user?.id) return;
+
     const channel = supabase
-      .channel("posts:explore")
+      .channel(`posts:explore:${user.id}`)
       .on(
         "postgres_changes",
         {
@@ -54,7 +56,7 @@ export default function Explore() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [user?.id, queryClient]);
 
   // Marketplace queries
   const {

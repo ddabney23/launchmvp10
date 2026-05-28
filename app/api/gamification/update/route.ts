@@ -1,7 +1,6 @@
 // CLERK MIGRATION: Updated to use Clerk authentication
 import { NextRequest } from 'next/server'
 import { createClientFromRequest, createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
 import { GamificationUpdateSchema } from '@/lib/validations/schemas'
 import { logger } from '@/lib/logger'
 import {
@@ -16,7 +15,7 @@ import {
   validateRequest,
   withErrorHandling,
 } from '@/lib/api-response'
-import { rateLimit } from '@/lib/rate-limit'
+import { verifyInternalApiSecret } from '@/lib/internal-api'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,21 +37,12 @@ const POINTS_MAP: Record<string, number> = {
  * This is typically called after successful operations (purchase, post creation, etc.)
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  // CLERK MIGRATION: Authenticate user with Clerk
-  let currentUserId: string
-  try {
-    currentUserId = await getAuthUserId() // Throws if not authenticated
-  } catch (authError) {
-    logger.error('Authentication error in gamification update', authError)
-    return unauthorizedResponse(
-      'Authentication failed',
-      authError instanceof Error ? authError.message : 'Unauthorized'
+  // Server-only: prevents clients from inflating points/credits
+  if (!verifyInternalApiSecret(req)) {
+    return forbiddenResponse(
+      'This endpoint is for internal server use only. Set x-internal-api-secret from trusted services.'
     )
   }
-
-  // Rate limit check (authenticated write: 30/min)
-  const rateLimitResponse = await rateLimit(req, { userId: currentUserId })
-  if (rateLimitResponse) return rateLimitResponse
 
   // Parse and validate request body
   const body = await safeJsonParse<unknown>(req)
@@ -62,26 +52,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   const { userId, action, metadata } = validateRequest(GamificationUpdateSchema, body)
 
-  // Use admin client for profile checks and updates (bypasses RLS)
   const adminClient = createAdminClient()
-
-  // Verify user can only update their own points (unless admin)
-  const { data: profile, error: profileCheckError } = await adminClient
-    .from('profiles')
-    .select('is_admin')
-    .eq('id', currentUserId)
-    .maybeSingle()
-
-  if (profileCheckError) {
-    logger.error('Failed to check admin status', profileCheckError, { userId: currentUserId })
-    return internalErrorResponse('Failed to verify permissions', profileCheckError)
-  }
-
-  const isAdmin = profile?.is_admin === true
-
-  if (userId !== currentUserId && !isAdmin) {
-    return forbiddenResponse('You can only update your own gamification data')
-  }
 
   // Get points for this action
   const pointsToAdd = POINTS_MAP[action] || 0

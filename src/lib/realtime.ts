@@ -22,7 +22,28 @@ import type { Database } from '@/integrations/supabase/types'
 import { logger } from './logger'
 
 export type RealtimeEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*'
-export type RealtimeTable = 'posts' | 'messages' | 'bookings' | 'notifications' | 'listings' | 'profiles' | 'comments'
+export type RealtimeTable =
+  | 'posts'
+  | 'messages'
+  | 'bookings'
+  | 'notifications'
+  | 'listings'
+  | 'profiles'
+  | 'comments'
+  | 'likes'
+  | 'stories'
+  | 'story_views'
+
+function debounceCallback<T extends (payload: unknown) => void>(
+  fn: T,
+  ms: number
+): T {
+  let timer: ReturnType<typeof setTimeout> | null = null
+  return ((payload: unknown) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => fn(payload), ms)
+  }) as T
+}
 
 export interface RealtimeSubscriptionOptions {
   /** Table to subscribe to */
@@ -37,6 +58,8 @@ export interface RealtimeSubscriptionOptions {
   channelName?: string
   /** Whether subscription is enabled */
   enabled?: boolean
+  /** Debounce callback (e.g. query invalidation storms) */
+  debounceMs?: number
 }
 
 export interface RealtimeSubscription {
@@ -57,8 +80,19 @@ export function createRealtimeSubscription(
   }
 
   const channelName = options.channelName || `realtime:${options.table}:${Date.now()}`
-  
-  // Use private channel for security (Supabase best practice)
+
+  // Drop stale channel with the same topic (Strict Mode remount / duplicate mount)
+  for (const existing of supabase.getChannels()) {
+    const topic = (existing as { topic?: string }).topic
+    if (topic === channelName || topic === `realtime:${channelName}`) {
+      supabase.removeChannel(existing)
+    }
+  }
+
+  const onPayload = options.debounceMs
+    ? debounceCallback(options.callback, options.debounceMs)
+    : options.callback
+
   const channel = supabase
     .channel(channelName, {
       config: { private: true }, // Private channel for production security
@@ -72,7 +106,7 @@ export function createRealtimeSubscription(
         filter: options.filter,
       },
       (payload) => {
-        options.callback(payload)
+        onPayload(payload)
       }
     )
     .subscribe((status, err) => {
@@ -132,8 +166,13 @@ export function useRealtimeSubscription(
 
     // Use ref for callback to ensure we always use the latest version
     const subscription = createRealtimeSubscription(supabase, {
-      ...options,
-      callback: (payload) => callbackRef.current(payload)
+      table: options.table,
+      event: options.event,
+      filter: options.filter,
+      channelName: options.channelName,
+      enabled: options.enabled,
+      debounceMs: options.debounceMs,
+      callback: (payload) => callbackRef.current(payload),
     })
     subscriptionRef.current = subscription
 
@@ -147,9 +186,20 @@ export function useRealtimeSubscription(
     options.table,
     options.event,
     options.filter,
+    options.channelName,
     options.enabled,
+    options.debounceMs,
     // callback is handled via ref above to avoid re-subscribing on every change
   ])
+}
+
+/** Channel naming: `{table}:{scope}:{userId}` — unique per mount scope */
+export function realtimeChannelName(
+  table: string,
+  scope: string,
+  userId?: string | null
+): string {
+  return userId ? `${table}:${scope}:${userId}` : `${table}:${scope}`
 }
 
 /**
@@ -236,7 +286,7 @@ export function subscribeToNotifications(
     event: 'INSERT',
     filter: `user_id=eq.${options.userId}`,
     callback: options.callback,
-    channelName: `notifications:${options.userId}`,
+    channelName: `notifications:${options.userId}:helper`,
     enabled: options.enabled,
   })
 }

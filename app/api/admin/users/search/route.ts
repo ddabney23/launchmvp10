@@ -1,12 +1,16 @@
 // Admin API route for searching users
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
+import { requireAdminUserId } from '@/lib/supabase-auth'
+import { escapeIlikePattern } from '@/lib/postgrest-sanitize'
 import { logger } from '@/lib/logger'
-import { safeEq, hasProperty } from '@/lib/supabase-helpers'
+import { safeEq } from '@/lib/supabase-helpers'
 import { strictRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 /**
  * GET /api/admin/users/search
@@ -14,38 +18,26 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(req: NextRequest) {
   try {
-    // Authenticate admin
     let adminUserId: string
     try {
-      adminUserId = await getAuthUserId()
+      adminUserId = await requireAdminUserId()
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
       return NextResponse.json(
-        { error: 'Unauthorized. Please sign in.' },
-        { status: 401 }
+        {
+          error:
+            message === 'Forbidden'
+              ? 'Forbidden. Admin access required.'
+              : 'Unauthorized. Please sign in.',
+        },
+        { status: message === 'Forbidden' ? 403 : 401 }
       )
     }
 
-    // Strict rate limit for admin operations (10/min)
     const rateLimitResponse = await strictRateLimit(req, adminUserId)
     if (rateLimitResponse) return rateLimitResponse
-    
+
     const adminClient = createAdminClient()
-
-    // Check if user is admin
-    const { data: adminProfile } = await safeEq(
-      adminClient
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      adminUserId
-    ).maybeSingle()
-
-    if (!(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
-      return NextResponse.json(
-        { error: 'Forbidden. Admin access required.' },
-        { status: 403 }
-      )
-    }
 
     // Get query parameters
     const { searchParams } = new URL(req.url)
@@ -70,7 +62,15 @@ export async function GET(req: NextRequest) {
 
     // Apply search filters
     if (query) {
-      dbQuery = dbQuery.or(`username.ilike.%${query}%,display_name.ilike.%${query}%,email.ilike.%${query}%,id.eq.${query}`)
+      const trimmed = query.trim()
+      if (UUID_RE.test(trimmed)) {
+        dbQuery = dbQuery.eq('id', trimmed)
+      } else {
+        const safe = escapeIlikePattern(trimmed)
+        dbQuery = dbQuery.or(
+          `username.ilike.%${safe}%,display_name.ilike.%${safe}%,email.ilike.%${safe}%`
+        )
+      }
     }
 
     // Filter by role

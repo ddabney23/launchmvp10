@@ -75,24 +75,25 @@ export default function CustomerOnboarding() {
   });
 
   // CLERK MIGRATION: Use Clerk user hook
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refetch } = useAuth();
   const isLoaded = !authLoading;
+  const authUserId = user?.id;
 
   useEffect(() => {
     if (!isLoaded) return;
     
-    if (!user) {
+    if (!authUserId) {
       router.push("/auth");
       return;
     }
     
-    setUserId(user.id);
+    setUserId(authUserId);
 
     // Check if profile already exists and onboarding is complete
     const checkProfile = async () => {
       try {
-        const profile = await getProfile(user.id);
-        if (profile && profile.onboarding_completed) {
+        const profile = await getProfile(authUserId);
+        if (profile && isOnboardingComplete(profile)) {
           // Onboarding already completed, redirect to home
           router.push("/home");
           return;
@@ -105,8 +106,8 @@ export default function CustomerOnboarding() {
       }
     };
     
-    checkProfile();
-  }, [router]);
+    void checkProfile();
+  }, [isLoaded, authUserId, router]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -215,6 +216,12 @@ export default function CustomerOnboarding() {
       } catch (rewardError) {
         // Don't fail onboarding if rewards fail
         console.error("Failed to award welcome rewards:", rewardError);
+      }
+
+      try {
+        await refetch();
+      } catch (refreshError) {
+        console.warn("Failed to refresh auth profile after onboarding:", refreshError);
       }
 
       toast({

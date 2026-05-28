@@ -1,13 +1,12 @@
 import { NextRequest } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
+import { requireAdminUserId } from '@/lib/supabase-auth'
 import { logger } from '@/lib/logger'
 import { BadgeAssignSchema, BadgeRemoveSchema } from '@/lib/validations/schemas'
-import { safeEq, hasProperty } from '@/lib/supabase-helpers'
+import { safeEq } from '@/lib/supabase-helpers'
 import {
   successResponse,
   errorResponse,
-  unauthorizedResponse,
   forbiddenResponse,
   notFoundResponse,
   internalErrorResponse,
@@ -19,42 +18,29 @@ import { strictRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+async function requireAdminForRequest(req: NextRequest) {
+  const adminUserId = await requireAdminUserId()
+  const rateLimitResponse = await strictRateLimit(req, adminUserId)
+  if (rateLimitResponse) {
+    return { error: rateLimitResponse } as const
+  }
+  return { adminUserId, supabase: createAdminClient() } as const
+}
+
 // GET /api/admin/users/[id]/badges - Get user's badges
 export const GET = withErrorHandling(
   async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    // Authenticate admin
-    let userId: string
+    let supabase: ReturnType<typeof createAdminClient>
     try {
-      userId = await getAuthUserId()
-    } catch (authError) {
-      logger.error('Authentication error in admin user badges', authError)
-      return unauthorizedResponse(
-        'Authentication failed',
-        authError instanceof Error ? authError.message : 'Unauthorized'
-      )
-    }
-
-    // Strict rate limit check (admin: 10/min)
-    const rateLimitResponse = await strictRateLimit(req, userId)
-    if (rateLimitResponse) return rateLimitResponse
-
-    const supabase = createAdminClient()
-    const { id } = await params
-
-    // Check if requester is admin
-    const { data: adminProfile, error: adminCheckError } = await safeEq(
-      supabase
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      userId
-    ).maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
+      const admin = await requireAdminForRequest(req)
+      if ('error' in admin) return admin.error
+      supabase = admin.supabase
+    } catch {
       return forbiddenResponse('Admin access required')
     }
 
-    // Get user's badges with badge details
+    const { id } = await params
+
     const { data: userBadges, error } = await safeEq(
       supabase
         .from('profile_badges')
@@ -87,39 +73,19 @@ export const GET = withErrorHandling(
 // POST /api/admin/users/[id]/badges - Add badge to user
 export const POST = withErrorHandling(
   async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    // Authenticate admin
     let userId: string
+    let supabase: ReturnType<typeof createAdminClient>
     try {
-      userId = await getAuthUserId()
-    } catch (authError) {
-      logger.error('Authentication error in admin user badges POST', authError)
-      return unauthorizedResponse(
-        'Authentication failed',
-        authError instanceof Error ? authError.message : 'Unauthorized'
-      )
-    }
-
-    // Strict rate limit check (admin: 10/min)
-    const rateLimitResponse = await strictRateLimit(req, userId)
-    if (rateLimitResponse) return rateLimitResponse
-
-    const supabase = createAdminClient()
-    const { id } = await params
-
-    // Check if requester is admin
-    const { data: adminProfile, error: adminCheckError } = await safeEq(
-      supabase
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      userId
-    ).maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
+      const admin = await requireAdminForRequest(req)
+      if ('error' in admin) return admin.error
+      userId = admin.adminUserId
+      supabase = admin.supabase
+    } catch {
       return forbiddenResponse('Admin access required')
     }
 
-    // Parse and validate request body
+    const { id } = await params
+
     const body = await safeJsonParse<unknown>(req)
     if (!body) {
       return errorResponse('Invalid request body', 'PARSE_ERROR', 'Failed to parse JSON request body')
@@ -127,11 +93,8 @@ export const POST = withErrorHandling(
 
     const { badge_id } = validateRequest(BadgeAssignSchema, body)
 
-    // Verify badge exists
     const { data: badge, error: badgeError } = await safeEq(
-      supabase
-        .from('badges')
-        .select('id, name'),
+      supabase.from('badges').select('id, name'),
       'id',
       badge_id
     ).maybeSingle()
@@ -145,7 +108,6 @@ export const POST = withErrorHandling(
       return notFoundResponse('Badge not found')
     }
 
-    // Add badge to user
     const { data: userBadge, error } = await supabase
       .from('profile_badges')
       // @ts-expect-error - Supabase insert type inference issue with strict mode
@@ -181,31 +143,23 @@ export const POST = withErrorHandling(
       return internalErrorResponse('Failed to create badge assignment')
     }
 
-    // Log audit trail (non-blocking)
     try {
       await supabase.from('audit_logs')
         // @ts-expect-error - Supabase insert type inference issue with strict mode
         .insert({
-        user_id: userId,
-        action: 'badge_awarded',
-        resource_type: 'user_badge',
-        resource_id: id,
-        metadata: {
-          badge_id: badge_id,
-          badge_name: 'name' in badge ? badge.name : 'Unknown',
-          target_user_id: id,
-        },
-      })
+          user_id: userId,
+          action: 'badge_awarded',
+          resource_type: 'user_badge',
+          resource_id: id,
+          metadata: {
+            badge_id: badge_id,
+            badge_name: 'name' in badge ? badge.name : 'Unknown',
+            target_user_id: id,
+          },
+        })
     } catch (auditError) {
       logger.error('Failed to create audit log', auditError)
     }
-
-    logger.info('Badge added to user', {
-      adminId: userId,
-      userId: id,
-      badgeId: badge_id,
-      badgeName: 'name' in badge ? badge.name : 'Unknown',
-    })
 
     return successResponse({ badge: userBadge })
   }
@@ -214,35 +168,19 @@ export const POST = withErrorHandling(
 // DELETE /api/admin/users/[id]/badges - Remove badge from user
 export const DELETE = withErrorHandling(
   async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    // Authenticate admin
     let userId: string
+    let supabase: ReturnType<typeof createAdminClient>
     try {
-      userId = await getAuthUserId()
-    } catch (authError) {
-      logger.error('Authentication error in admin user badges DELETE', authError)
-      return unauthorizedResponse(
-        'Authentication failed',
-        authError instanceof Error ? authError.message : 'Unauthorized'
-      )
-    }
-
-    const supabase = createAdminClient()
-    const { id } = await params
-
-    // Check if requester is admin
-    const { data: adminProfile, error: adminCheckError } = await safeEq(
-      supabase
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      userId
-    ).maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
+      const admin = await requireAdminForRequest(req)
+      if ('error' in admin) return admin.error
+      userId = admin.adminUserId
+      supabase = admin.supabase
+    } catch {
       return forbiddenResponse('Admin access required')
     }
 
-    // Parse and validate request body
+    const { id } = await params
+
     const body = await safeJsonParse<unknown>(req)
     if (!body) {
       return errorResponse('Invalid request body', 'PARSE_ERROR', 'Failed to parse JSON request body')
@@ -250,11 +188,8 @@ export const DELETE = withErrorHandling(
 
     const { badge_id } = validateRequest(BadgeRemoveSchema, body)
 
-    // Get badge name for audit log
     const { data: badge, error: badgeError } = await safeEq(
-      supabase
-        .from('badges')
-        .select('name'),
+      supabase.from('badges').select('name'),
       'id',
       badge_id
     ).maybeSingle()
@@ -263,15 +198,8 @@ export const DELETE = withErrorHandling(
       logger.error('Failed to fetch badge', badgeError, { badge_id })
     }
 
-    // Remove badge from user
     const { error } = await safeEq(
-      safeEq(
-        supabase
-          .from('profile_badges')
-          .delete(),
-        'profile_id',
-        id
-      ),
+      safeEq(supabase.from('profile_badges').delete(), 'profile_id', id),
       'badge_id',
       badge_id
     )
@@ -281,31 +209,23 @@ export const DELETE = withErrorHandling(
       return internalErrorResponse('Failed to remove badge', error)
     }
 
-    // Log audit trail (non-blocking)
     try {
       await supabase.from('audit_logs')
         // @ts-expect-error - Supabase insert type inference issue with strict mode
         .insert({
-        user_id: userId,
-        action: 'badge_removed',
-        resource_type: 'user_badge',
-        resource_id: id,
-        metadata: {
-          badge_id: badge_id,
-          badge_name: badge && 'name' in badge ? badge.name : null,
-          target_user_id: id,
-        },
-      })
+          user_id: userId,
+          action: 'badge_removed',
+          resource_type: 'user_badge',
+          resource_id: id,
+          metadata: {
+            badge_id: badge_id,
+            badge_name: badge && 'name' in badge ? badge.name : null,
+            target_user_id: id,
+          },
+        })
     } catch (auditError) {
       logger.error('Failed to create audit log', auditError)
     }
-
-    logger.info('Badge removed from user', {
-      adminId: userId,
-      userId: id,
-      badgeId: badge_id,
-      badgeName: badge && 'name' in badge ? badge.name : null,
-    })
 
     return successResponse({ success: true })
   }

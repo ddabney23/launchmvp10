@@ -1,14 +1,18 @@
 /**
- * Test authentication endpoint
- * GET /api/test-auth - Test if Supabase authentication is working
+ * Test authentication endpoint (development only)
+ * GET /api/test-auth
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, getAuthUserId } from '@/lib/supabase-auth'
+import { productionDisabledResponse } from '@/lib/dev-only'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+  const disabled = productionDisabledResponse()
+  if (disabled) return disabled
+
   try {
     const user = await getAuthUser()
     let userId: string | null = null

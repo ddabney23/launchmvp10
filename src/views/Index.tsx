@@ -32,7 +32,7 @@ const Index = ({ initialNews = [] }: IndexProps) => {
         router.replace("/home");
       }, 100);
     }
-  }, [user, loading, router]);
+  }, [user?.id, loading, router]);
 
   return (
     <div className="min-h-screen bg-background">

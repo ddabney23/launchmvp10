@@ -66,43 +66,46 @@ export const Navigation = () => {
             Optimix
           </Link>
 
-          <div className="hidden md:flex items-center gap-2">
-            <Link href="/home">
-              <Button variant={isActive("/home") ? "default" : "ghost"} size="icon" aria-label="Home">
-                <Home className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/feed">
-              <Button variant={isActive("/feed") ? "default" : "ghost"} size="icon" aria-label="Feed">
-                <Rss className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/marketplace">
-              <Button variant={isActive("/marketplace") ? "default" : "ghost"} size="icon" aria-label="Marketplace">
-                <ShoppingBag className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/groups">
-              <Button variant={isActive("/groups") ? "default" : "ghost"} size="icon" aria-label="Groups">
-                <Users className="h-5 w-5" />
-              </Button>
-            </Link>
+          <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
+              <Link href="/home">
+                <Button variant={isActive("/home") ? "default" : "ghost"} size="icon" aria-label="Home">
+                  <Home className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/feed">
+                <Button variant={isActive("/feed") ? "default" : "ghost"} size="icon" aria-label="Feed">
+                  <Rss className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/marketplace">
+                <Button variant={isActive("/marketplace") ? "default" : "ghost"} size="icon" aria-label="Marketplace">
+                  <ShoppingBag className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/groups">
+                <Button variant={isActive("/groups") ? "default" : "ghost"} size="icon" aria-label="Groups">
+                  <Users className="h-5 w-5" />
+                </Button>
+              </Link>
 
-            <Link href="/cart">
-              <Button variant={isActive("/cart") ? "default" : "ghost"} size="icon" aria-label="Cart" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px]">
-                    {cartItemCount > 9 ? "9+" : cartItemCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+              <Link href="/cart">
+                <Button variant={isActive("/cart") ? "default" : "ghost"} size="icon" aria-label="Cart" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartItemCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[10px]">
+                      {cartItemCount > 9 ? "9+" : cartItemCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            </div>
 
+            {/* Single instance — duplicate mounts caused realtime channel collision */}
             <NotificationsDropdown />
 
             {profile && (
-              <Link href={profilePath}>
+              <Link href={profilePath} className="hidden md:block" aria-label="Your profile">
                 <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
                   <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
@@ -111,7 +114,6 @@ export const Navigation = () => {
                 </Avatar>
               </Link>
             )}
-          </div>
 
           <div className="flex md:hidden items-center gap-2">
             {profile && (
@@ -124,7 +126,6 @@ export const Navigation = () => {
                 </Avatar>
               </Link>
             )}
-            <NotificationsDropdown />
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -225,6 +226,7 @@ export const Navigation = () => {
                 </div>
               </SheetContent>
             </Sheet>
+          </div>
           </div>
         </div>
       </nav>

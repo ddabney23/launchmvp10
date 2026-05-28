@@ -19,6 +19,7 @@ import type { PostCreate } from "@/lib/types";
 import { getUserFriendlyError } from "@/lib/errorMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import { isOnboardingComplete } from "@/lib/profile-utils";
 import { useAuth } from "@/hooks/useAuth";
 
 interface FileWithPreview extends File {
@@ -149,8 +150,8 @@ export default function CreatePost() {
       return;
     }
 
-    // Ensure profile exists and is complete
-    if (!profile || (!profile.username && !profile.display_name)) {
+    // Ensure onboarding is complete before allowing post creation
+    if (!isOnboardingComplete(profile)) {
       toast({
         title: "Profile incomplete",
         description: "Please complete your profile before creating posts. Redirecting to onboarding...",

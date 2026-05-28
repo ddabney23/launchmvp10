@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeSubscription } from "@/lib/realtime";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import type { Notification } from "@/lib/types";
@@ -52,31 +53,20 @@ export function NotificationsDropdown() {
     },
   });
 
-  // Subscribe to real-time notifications
-  useEffect(() => {
+  const onNotificationInsert = useCallback(() => {
     if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`notifications:${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          // Refetch notifications when new one is created
-          queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
   }, [user?.id, queryClient]);
+
+  useRealtimeSubscription(supabase, {
+    table: "notifications",
+    event: "INSERT",
+    filter: user?.id ? `user_id=eq.${user.id}` : undefined,
+    channelName: user?.id ? `notifications:${user.id}:nav` : undefined,
+    enabled: !!user?.id,
+    debounceMs: 300,
+    callback: onNotificationInsert,
+  });
 
   const getNotificationLink = (notification: Notification): string => {
     const data = notification.data as Record<string, string | undefined>;
@@ -89,7 +79,7 @@ export function NotificationsDropdown() {
   };
 
   const getNotificationMessage = (notification: Notification): string => {
-    const data = notification.data as any;
+    const data = notification.data as Record<string, unknown>;
     switch (notification.type) {
       case "post_liked":
         return "liked your post";
@@ -152,7 +142,6 @@ export function NotificationsDropdown() {
               {notifications.map((notification) => {
                 const link = getNotificationLink(notification);
                 const message = getNotificationMessage(notification);
-                const data = notification.data as any;
 
                 return (
                   <Link
@@ -199,4 +188,3 @@ export function NotificationsDropdown() {
     </DropdownMenu>
   );
 }
-

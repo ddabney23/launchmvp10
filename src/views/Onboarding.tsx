@@ -21,11 +21,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { logger } from "@/lib/logger";
 import { useAuth } from "@/hooks/useAuth";
 import { isClerkId } from "@/lib/user-id-helpers";
+import { isOnboardingComplete } from "@/lib/profile-utils";
 
 export default function Onboarding() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, refetch } = useAuth();
+  const authUserId = user?.id;
+  const authEmail = user?.email;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -66,14 +69,14 @@ export default function Onboarding() {
       return;
     }
 
-    if (!user) {
+    if (!authUserId) {
       router.push("/auth");
       return;
     }
 
     // Check if profile already exists - use Clerk ID to query
     const checkProfile = async () => {
-      if (!user?.id) {
+      if (!authUserId) {
         setLoading(false);
         return;
       }
@@ -82,12 +85,12 @@ export default function Onboarding() {
         const { data: existingProfile } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", authUserId)
           .maybeSingle();
 
         if (existingProfile) {
           // Profile is complete if onboarding was finished
-          if (existingProfile.onboarding_completed) {
+          if (isOnboardingComplete(existingProfile)) {
             // Onboarding already done, redirect to home
             router.push("/home");
             return;
@@ -104,8 +107,8 @@ export default function Onboarding() {
           setIsVendor(existingProfile.is_vendor || false);
         } else {
           // If no profile exists, pre-fill with email-based defaults
-          if (user.email) {
-            const emailPrefix = user.email.split("@")[0];
+          if (authEmail) {
+            const emailPrefix = authEmail.split("@")[0];
             onboardingForm.reset({
               username: emailPrefix || "",
               display_name: emailPrefix || "",
@@ -123,7 +126,7 @@ export default function Onboarding() {
     };
 
     checkProfile();
-  }, [user, authLoading, router, onboardingForm]);
+  }, [authUserId, authEmail, authLoading, router, onboardingForm]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -206,6 +209,7 @@ export default function Onboarding() {
 
       // updateProfile accepts Clerk ID and handles the lookup
       await updateProfile(profileId, profileUpdate);
+      await refetch();
 
       toast({
         title: "Profile updated!",

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
+import { requireAdminUserId } from '@/lib/supabase-auth'
 import { NewsCreateSchema } from '@/lib/validators'
 import {
   successResponse,
@@ -16,25 +16,22 @@ import { logger } from '@/lib/logger'
 export const dynamic = 'force-dynamic'
 
 async function ensureAdmin(req: NextRequest) {
-  const adminUserId = await getAuthUserId()
-
-  const rateLimitResponse = await strictRateLimit(req, adminUserId)
-  if (rateLimitResponse) {
-    return { error: rateLimitResponse }
-  }
-
-  const adminClient = createAdminClient()
-  const { data: profile, error } = await adminClient
-    .from('profiles')
-    .select('id, is_admin')
-    .eq('id', adminUserId)
-    .maybeSingle()
-
-  if (error || !profile?.is_admin) {
+  try {
+    const adminUserId = await requireAdminUserId()
+    const rateLimitResponse = await strictRateLimit(req, adminUserId)
+    if (rateLimitResponse) {
+      return { error: rateLimitResponse }
+    }
+    const adminClient = createAdminClient()
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('id, is_admin')
+      .eq('id', adminUserId)
+      .maybeSingle()
+    return { adminClient, adminProfile: profile }
+  } catch {
     return { error: forbiddenResponse('Admin access required') }
   }
-
-  return { adminClient, adminProfile: profile }
 }
 
 export async function GET(req: NextRequest) {

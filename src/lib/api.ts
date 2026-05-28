@@ -4,6 +4,7 @@ import { ApiError } from "./types";
 import { mockApi, shouldUseMockApi } from "./api-mock";
 import { sanitizeString } from "./sanitize";
 import { logger } from "./logger";
+import { createMinimalProfileFallback } from "./profile-utils";
 import type {
   Profile,
   ProfileUpdate,
@@ -151,17 +152,7 @@ export async function getProfile(userId: string): Promise<Profile> {
       // Handle network errors (Failed to fetch)
       if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
         logger.warn("Network error fetching profile, returning minimal profile", { userId, error: fetchError });
-        return {
-          id: userId,
-          username: `user_${userId.substring(0, 8)}`,
-          display_name: "User",
-          email: "",
-          avatar_url: null,
-          bio: null,
-          created_at: new Date().toISOString(),
-          is_vendor: false,
-          vendor_verified: false,
-        } as Profile;
+        return createMinimalProfileFallback(userId);
       }
       throw fetchError;
     }
@@ -199,17 +190,7 @@ export async function getProfile(userId: string): Promise<Profile> {
         
         // Return minimal profile as fallback
         logger.warn("Returning minimal profile as fallback due to schema cache error");
-        return {
-          id: userId,
-          username: `user_${userId.substring(0, 8)}`,
-          display_name: "User",
-          email: "",
-          avatar_url: null,
-          bio: null,
-          created_at: new Date().toISOString(),
-          is_vendor: false,
-          vendor_verified: false,
-        } as Profile;
+        return createMinimalProfileFallback(userId);
       }
       
       // Handle 403 permission denied - might be RLS issue
@@ -217,17 +198,7 @@ export async function getProfile(userId: string): Promise<Profile> {
         // CLERK MIGRATION: Return minimal profile for RLS issues
         // User email would come from Clerk, but we'll use a generic fallback
         logger.warn("RLS permission denied, returning minimal profile");
-        return {
-          id: userId,
-          username: `user_${userId.substring(0, 8)}`,
-          display_name: "User",
-          email: "",
-          avatar_url: null,
-          bio: null,
-          created_at: new Date().toISOString(),
-          is_vendor: false,
-          vendor_verified: false,
-        } as Profile;
+        return createMinimalProfileFallback(userId);
       }
       
       // In test mode, fall back to mock instead of throwing
@@ -250,17 +221,7 @@ export async function getProfile(userId: string): Promise<Profile> {
       // In Clerk, we don't have direct access to user email here
       // The profile should be created via webhook or onboarding
       logger.warn("Error fetching profile, returning minimal profile");
-      return {
-        id: userId,
-        username: `user_${userId.substring(0, 8)}`,
-        display_name: "User",
-        email: "",
-        avatar_url: null,
-        bio: null,
-        created_at: new Date().toISOString(),
-        is_vendor: false,
-        vendor_verified: false,
-      } as Profile;
+      return createMinimalProfileFallback(userId);
     }
     
     throw error;
@@ -2661,52 +2622,19 @@ export async function getGroupPosts(groupId: string, page: number = 0, pageSize:
 
 // Gamification API
 /**
- * Update user points/credits via API route
- * CLERK MIGRATION: Uses API route with Clerk authentication
+ * @deprecated Gamification updates are server-only (INTERNAL_API_SECRET).
+ * Call from API routes/webhooks directly or use an internal server helper.
  */
 export async function updateGamification(
-  userId: string,
-  action: 'purchase' | 'post_created' | 'comment_created' | 'like_given' | 'follow_user' | 'listing_created' | 'booking_created' | 'review_created',
-  metadata?: Record<string, unknown>
+  _userId: string,
+  _action: 'purchase' | 'post_created' | 'comment_created' | 'like_given' | 'follow_user' | 'listing_created' | 'booking_created' | 'review_created',
+  _metadata?: Record<string, unknown>
 ): Promise<{ pointsAdded: number; newTotalPoints: number }> {
-  const response = await fetch(resolveApiUrl("/api/gamification/update"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include", // Include cookies for Clerk auth
-    body: JSON.stringify({
-      userId,
-      action,
-      metadata: metadata || {},
-    }),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new ApiError(
-      result.error || "Failed to update gamification",
-      result.code || "GAMIFICATION_ERROR",
-      response.status
-    );
-  }
-
-  // Backend returns: { success: true, data: { pointsAdded, newTotalPoints } }
-  // Handle both formats for backward compatibility
-  if (result.data) {
-    return {
-      pointsAdded: result.data.pointsAdded || 0,
-      newTotalPoints: result.data.newTotalPoints || 0,
-    };
-  }
-  if (result.pointsAdded !== undefined) {
-    return {
-      pointsAdded: result.pointsAdded,
-      newTotalPoints: result.newTotalPoints,
-    };
-  }
-  throw new ApiError("Invalid response format from gamification API", "INVALID_RESPONSE", 500);
+  throw new ApiError(
+    'Gamification updates are not available from the browser',
+    'GAMIFICATION_SERVER_ONLY',
+    403
+  )
 }
 
 export async function getUserBadges(userId: string): Promise<(Badge & { awarded_at?: string })[]> {

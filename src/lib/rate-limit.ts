@@ -119,8 +119,15 @@ export async function checkRateLimit(
 ): Promise<NextResponse<ApiResponse> | null> {
   const limiter = getRateLimiter(type)
 
-  // Skip rate limiting if Redis is not configured (development mode)
   if (!limiter) {
+    if (process.env.NODE_ENV === 'production') {
+      return errorResponse(
+        'Rate limiting unavailable',
+        'RATE_LIMIT_UNAVAILABLE',
+        { message: 'Service temporarily unavailable' },
+        503
+      )
+    }
     console.warn('⚠️ Rate limiting disabled - Redis not configured')
     return null
   }
@@ -157,8 +164,15 @@ export async function checkRateLimit(
     // Return null to indicate success (caller can add headers if needed)
     return null
   } catch (error) {
-    // Log error but don't block the request if rate limiting fails
     console.error('Rate limit check failed:', error)
+    if (process.env.NODE_ENV === 'production') {
+      return errorResponse(
+        'Rate limiting unavailable',
+        'RATE_LIMIT_UNAVAILABLE',
+        { message: 'Service temporarily unavailable' },
+        503
+      )
+    }
     return null
   }
 }

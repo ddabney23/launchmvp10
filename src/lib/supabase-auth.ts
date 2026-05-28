@@ -41,3 +41,23 @@ export async function isAuthenticated(): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * Require an authenticated admin (profiles.is_admin).
+ * Use in app/api/admin/** routes instead of duplicating checks.
+ */
+export async function requireAdminUserId(): Promise<string> {
+  const userId = await getAuthUserId()
+  const supabase = await createClient()
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error || !profile?.is_admin) {
+    throw new Error('Forbidden')
+  }
+
+  return userId
+}

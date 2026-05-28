@@ -1,5 +1,5 @@
 import Index from '@/views/Index'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/integrations/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,8 +10,9 @@ async function getLatestNews() {
       return []
     }
 
-    const supabase = await createClient()
-    
+    // Server-only read of published news (avoids RLS recursion until migration 054 is applied).
+    const supabase = createAdminClient()
+
     const { data, error } = await supabase
       .from('news')
       .select('*')

@@ -1,34 +1,33 @@
 'use client'
 
-// CLERK MIGRATION: Social features context with real-time updates
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useRealtimeSubscription } from '@/lib/realtime'
 import { ensureProfileUuid } from '@/lib/user-id-helpers'
 import type { Post, Comment, Like } from '@/lib/types'
 
 interface SocialContextType {
-  // Posts
   posts: Post[]
   loading: boolean
   createPost: (post: Omit<Post, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
   updatePost: (postId: string, updates: Partial<Post>) => Promise<void>
   deletePost: (postId: string) => Promise<void>
-  
-  // Comments
   getComments: (postId: string) => Comment[]
   addComment: (postId: string, content: string) => Promise<void>
   deleteComment: (commentId: string) => Promise<void>
-  
-  // Likes
   isLiked: (targetType: 'post' | 'comment', targetId: string) => boolean
   toggleLike: (targetType: 'post' | 'comment', targetId: string) => Promise<void>
   getLikeCount: (targetType: 'post' | 'comment', targetId: string) => number
-  
-  // Shares/Reposts
   sharePost: (postId: string) => Promise<void>
-  
-  // Friendships
   followUser: (userId: string) => Promise<void>
   unfollowUser: (userId: string) => Promise<void>
   isFollowing: (userId: string) => boolean
@@ -39,34 +38,23 @@ interface SocialContextType {
 const SocialContext = createContext<SocialContextType | undefined>(undefined)
 
 export function SocialProvider({ children }: { children: ReactNode }) {
-  const { user, profile, getProfileUuid } = useAuth()
+  const { user, profile } = useAuth()
+  const userId = user?.id
+  const profileId = profile?.id
+
   const [posts, setPosts] = useState<Post[]>([])
   const [comments, setComments] = useState<Comment[]>([])
   const [likes, setLikes] = useState<Like[]>([])
   const [follows, setFollows] = useState<{ follower_id: string; following_id: string }[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Load initial data
-  useEffect(() => {
-    if (!user) {
+  const loadInitialData = useCallback(async () => {
+    if (!userId) {
       setLoading(false)
       return
     }
 
-    loadInitialData()
-    const cleanup = setupRealtimeSubscriptions()
-
-    return () => {
-      // Cleanup subscriptions
-      if (cleanup) {
-        cleanup()
-      }
-    }
-  }, [user])
-
-  const loadInitialData = async () => {
     try {
-      // Load posts
       const { data: postsData } = await supabase
         .from('posts')
         .select('*')
@@ -75,7 +63,6 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
       if (postsData) setPosts(postsData)
 
-      // Load comments
       const { data: commentsData } = await supabase
         .from('comments')
         .select('*')
@@ -83,27 +70,26 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
       if (commentsData) setComments(commentsData)
 
-      // Load likes - use profile UUID
-      if (user && profile?.id) {
-        const profileUuid = profile.id
+      if (profileId) {
         const { data: likesData } = await supabase
           .from('likes')
           .select('*')
-          .eq('user_id', profileUuid)
+          .eq('user_id', profileId)
 
         if (likesData) setLikes(likesData)
 
-        // Load follows - use profile UUID
         const { data: followsData } = await supabase
           .from('follows')
           .select('*')
-          .eq('follower_id', profileUuid)
+          .eq('follower_id', profileId)
 
         if (followsData) {
-          setFollows(followsData.map(f => ({
-            follower_id: f.follower_id,
-            following_id: f.following_id,
-          })))
+          setFollows(
+            followsData.map((f) => ({
+              follower_id: f.follower_id,
+              following_id: f.following_id,
+            }))
+          )
         }
       }
     } catch (error) {
@@ -111,378 +97,344 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, profileId])
 
-  const setupRealtimeSubscriptions = (): (() => void) | undefined => {
-    if (!user) return undefined
-
-    try {
-      // Subscribe to posts (using private channel - Supabase best practice)
-      const postsChannel = supabase
-        .channel(`posts-changes-${Date.now()}`, {
-          config: { private: true }, // Private channel for security
-        })
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'posts',
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setPosts((prev) => [payload.new as Post, ...prev])
-            } else if (payload.eventType === 'UPDATE') {
-              setPosts((prev) =>
-                prev.map((p) => (p.id === payload.new.id ? (payload.new as Post) : p))
-              )
-            } else if (payload.eventType === 'DELETE') {
-              setPosts((prev) => prev.filter((p) => p.id !== payload.old.id))
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Posts channel subscribed')
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('Posts channel error')
-          }
-        })
-
-      // Subscribe to comments (using private channel)
-      const commentsChannel = supabase
-        .channel(`comments-changes-${Date.now()}`, {
-          config: { private: true },
-        })
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'comments',
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setComments((prev) => [...prev, payload.new as Comment])
-            } else if (payload.eventType === 'DELETE') {
-              setComments((prev) => prev.filter((c) => c.id !== payload.old.id))
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Comments channel subscribed')
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('Comments channel error')
-          }
-        })
-
-      // Subscribe to likes (using private channel)
-      const likesChannel = supabase
-        .channel(`likes-changes-${Date.now()}`, {
-          config: { private: true },
-        })
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'likes',
-          },
-          (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setLikes((prev) => [...prev, payload.new as Like])
-            } else if (payload.eventType === 'DELETE') {
-              setLikes((prev) => prev.filter((l) => l.id !== payload.old.id))
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Likes channel subscribed')
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('Likes channel error')
-          }
-        })
-
-      // Return cleanup function
-      return () => {
-        try {
-          postsChannel.unsubscribe()
-          commentsChannel.unsubscribe()
-          likesChannel.unsubscribe()
-          // Remove channels from Supabase client
-          supabase.removeChannel(postsChannel)
-          supabase.removeChannel(commentsChannel)
-          supabase.removeChannel(likesChannel)
-        } catch (error) {
-          console.error('Error cleaning up subscriptions:', error)
-        }
-      }
-    } catch (error) {
-      console.error('Error setting up real-time subscriptions:', error)
-      return undefined
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false)
+      return
     }
-  }
+    setLoading(true)
+    void loadInitialData()
+  }, [userId, profileId, loadInitialData])
 
-  const createPost = async (postData: Omit<Post, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
+  const onPostsRealtime = useCallback((payload: { eventType: string; new: Post; old: { id: string } }) => {
+    if (payload.eventType === 'INSERT') {
+      setPosts((prev) => [payload.new, ...prev])
+    } else if (payload.eventType === 'UPDATE') {
+      setPosts((prev) => prev.map((p) => (p.id === payload.new.id ? payload.new : p)))
+    } else if (payload.eventType === 'DELETE') {
+      setPosts((prev) => prev.filter((p) => p.id !== payload.old.id))
+    }
+  }, [])
 
-    const profileUuid = profile.id
+  const onCommentsRealtime = useCallback(
+    (payload: { eventType: string; new: Comment; old: { id: string } }) => {
+      if (payload.eventType === 'INSERT') {
+        setComments((prev) => [...prev, payload.new])
+      } else if (payload.eventType === 'DELETE') {
+        setComments((prev) => prev.filter((c) => c.id !== payload.old.id))
+      }
+    },
+    []
+  )
 
-    const { data, error } = await supabase
-      .from('posts')
-      .insert({
-        ...postData,
-        user_id: profileUuid, // Use profile UUID, not Clerk ID
-      })
-      .select()
-      .single()
+  const onLikesRealtime = useCallback(
+    (payload: { eventType: string; new: Like; old: { id: string } }) => {
+      if (payload.eventType === 'INSERT') {
+        setLikes((prev) => [...prev, payload.new])
+      } else if (payload.eventType === 'DELETE') {
+        setLikes((prev) => prev.filter((l) => l.id !== payload.old.id))
+      }
+    },
+    []
+  )
 
-    if (error) throw error
-    if (data) setPosts((prev) => [data, ...prev])
-  }
+  useRealtimeSubscription(supabase, {
+    table: 'posts',
+    event: '*',
+    channelName: userId ? `social:posts:${userId}` : undefined,
+    enabled: !!userId,
+    callback: onPostsRealtime,
+  })
 
-  const updatePost = async (postId: string, updates: Partial<Post>) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
+  useRealtimeSubscription(supabase, {
+    table: 'comments',
+    event: '*',
+    channelName: userId ? `social:comments:${userId}` : undefined,
+    enabled: !!userId,
+    callback: onCommentsRealtime,
+  })
 
-    const profileUuid = profile.id
+  useRealtimeSubscription(supabase, {
+    table: 'likes',
+    event: '*',
+    channelName: userId ? `social:likes:${userId}` : undefined,
+    enabled: !!userId,
+    callback: onLikesRealtime,
+  })
 
-    const { error } = await supabase
-      .from('posts')
-      .update(updates)
-      .eq('id', postId)
-      .eq('user_id', profileUuid) // Use profile UUID, not Clerk ID
+  const createPost = useCallback(
+    async (postData: Omit<Post, 'id' | 'created_at' | 'updated_at'>) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
 
-    if (error) throw error
-
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-    )
-  }
-
-  const deletePost = async (postId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
-
-    const profileUuid = profile.id
-
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', postId)
-      .eq('user_id', profileUuid) // Use profile UUID, not Clerk ID
-
-    if (error) throw error
-
-    setPosts((prev) => prev.filter((p) => p.id !== postId))
-  }
-
-  const getComments = (postId: string): Comment[] => {
-    return comments.filter((c) => c.post_id === postId)
-  }
-
-  const addComment = async (postId: string, content: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
-
-    const profileUuid = profile.id
-
-    const { data, error } = await supabase
-      .from('comments')
-      .insert({
-        post_id: postId,
-        user_id: profileUuid, // Use profile UUID, not Clerk ID
-        content,
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    if (data) setComments((prev) => [...prev, data])
-  }
-
-  const deleteComment = async (commentId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
-
-    const profileUuid = profile.id
-
-    const { error } = await supabase
-      .from('comments')
-      .delete()
-      .eq('id', commentId)
-      .eq('user_id', profileUuid) // Use profile UUID, not Clerk ID
-
-    if (error) throw error
-
-    setComments((prev) => prev.filter((c) => c.id !== commentId))
-  }
-
-  const isLiked = (targetType: 'post' | 'comment', targetId: string): boolean => {
-    if (!user || !profile?.id) return false
-    const profileUuid = profile.id
-    return likes.some(
-      (l) => l.target_type === targetType && l.target_id === targetId && l.user_id === profileUuid
-    )
-  }
-
-  const toggleLike = async (targetType: 'post' | 'comment', targetId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
-
-    const profileUuid = profile.id
-
-    const existingLike = likes.find(
-      (l) => l.target_type === targetType && l.target_id === targetId && l.user_id === profileUuid
-    )
-
-    if (existingLike) {
-      // Unlike
-      const { error } = await supabase
-        .from('likes')
-        .delete()
-        .eq('id', existingLike.id)
-
-      if (error) throw error
-      setLikes((prev) => prev.filter((l) => l.id !== existingLike.id))
-    } else {
-      // Like
       const { data, error } = await supabase
-        .from('likes')
+        .from('posts')
         .insert({
-          target_type: targetType,
-          target_id: targetId,
-          user_id: profileUuid, // Use profile UUID, not Clerk ID
+          ...postData,
+          user_id: profileId,
         })
         .select()
         .single()
 
       if (error) throw error
-      if (data) setLikes((prev) => [...prev, data])
-    }
-  }
+      if (data) setPosts((prev) => [data, ...prev])
+    },
+    [userId, profileId]
+  )
 
-  const getLikeCount = (targetType: 'post' | 'comment', targetId: string): number => {
-    return likes.filter((l) => l.target_type === targetType && l.target_id === targetId).length
-  }
+  const updatePost = useCallback(
+    async (postId: string, updates: Partial<Post>) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
 
-  const sharePost = async (postId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
+      const { error } = await supabase
+        .from('posts')
+        .update(updates)
+        .eq('id', postId)
+        .eq('user_id', profileId)
 
-    const profileUuid = profile.id
+      if (error) throw error
+      setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, ...updates } : p)))
+    },
+    [userId, profileId]
+  )
 
-    // Create a repost/share
-    const { error } = await supabase
-      .from('posts')
-      .insert({
-        user_id: profileUuid, // Use profile UUID, not Clerk ID
-        content: '', // Repost doesn't need content
+  const deletePost = useCallback(
+    async (postId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
+
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', profileId)
+
+      if (error) throw error
+      setPosts((prev) => prev.filter((p) => p.id !== postId))
+    },
+    [userId, profileId]
+  )
+
+  const getComments = useCallback(
+    (postId: string): Comment[] => comments.filter((c) => c.post_id === postId),
+    [comments]
+  )
+
+  const addComment = useCallback(
+    async (postId: string, content: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
+
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          post_id: postId,
+          user_id: profileId,
+          content,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      if (data) setComments((prev) => [...prev, data])
+    },
+    [userId, profileId]
+  )
+
+  const deleteComment = useCallback(
+    async (commentId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
+
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('user_id', profileId)
+
+      if (error) throw error
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+    },
+    [userId, profileId]
+  )
+
+  const isLiked = useCallback(
+    (targetType: 'post' | 'comment', targetId: string): boolean => {
+      if (!profileId) return false
+      return likes.some(
+        (l) =>
+          l.target_type === targetType && l.target_id === targetId && l.user_id === profileId
+      )
+    },
+    [likes, profileId]
+  )
+
+  const toggleLike = useCallback(
+    async (targetType: 'post' | 'comment', targetId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
+
+      const existingLike = likes.find(
+        (l) =>
+          l.target_type === targetType && l.target_id === targetId && l.user_id === profileId
+      )
+
+      if (existingLike) {
+        const { error } = await supabase.from('likes').delete().eq('id', existingLike.id)
+        if (error) throw error
+        setLikes((prev) => prev.filter((l) => l.id !== existingLike.id))
+      } else {
+        const { data, error } = await supabase
+          .from('likes')
+          .insert({
+            target_type: targetType,
+            target_id: targetId,
+            user_id: profileId,
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        if (data) setLikes((prev) => [...prev, data])
+      }
+    },
+    [userId, profileId, likes]
+  )
+
+  const getLikeCount = useCallback(
+    (targetType: 'post' | 'comment', targetId: string): number =>
+      likes.filter((l) => l.target_type === targetType && l.target_id === targetId).length,
+    [likes]
+  )
+
+  const sharePost = useCallback(
+    async (postId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
+
+      const { error } = await supabase.from('posts').insert({
+        user_id: profileId,
+        content: '',
         shared_post_id: postId,
         type: 'share',
       })
 
-    if (error) throw error
-  }
+      if (error) throw error
+    },
+    [userId, profileId]
+  )
 
-  const followUser = async (userId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
+  const followUser = useCallback(
+    async (targetUserId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
 
-    const profileUuid = profile.id
-    
-    // userId parameter should already be a UUID (from another profile)
-    // But ensure it's not a Clerk ID
-    const followingUuid = await ensureProfileUuid(userId)
-    
-    if (profileUuid === followingUuid) throw new Error('Cannot follow yourself')
+      const followingUuid = await ensureProfileUuid(targetUserId)
+      if (profileId === followingUuid) throw new Error('Cannot follow yourself')
 
-    const { error } = await supabase
-      .from('follows')
-      .insert({
-        follower_id: profileUuid, // Use profile UUID, not Clerk ID
-        following_id: followingUuid, // Ensure following_id is also UUID
+      const { error } = await supabase.from('follows').insert({
+        follower_id: profileId,
+        following_id: followingUuid,
       })
 
-    if (error) throw error
+      if (error) throw error
+      setFollows((prev) => [...prev, { follower_id: profileId, following_id: followingUuid }])
+    },
+    [userId, profileId]
+  )
 
-    setFollows((prev) => [...prev, { follower_id: profileUuid, following_id: followingUuid }])
-  }
+  const unfollowUser = useCallback(
+    async (targetUserId: string) => {
+      if (!userId) throw new Error('Not authenticated')
+      if (!profileId) throw new Error('Profile not found. Please complete onboarding.')
 
-  const unfollowUser = async (userId: string) => {
-    if (!user) throw new Error('Not authenticated')
-    if (!profile?.id) throw new Error('Profile not found. Please complete onboarding.')
+      const followingUuid = await ensureProfileUuid(targetUserId)
 
-    const profileUuid = profile.id
-    const followingUuid = await ensureProfileUuid(userId)
+      const { error } = await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', profileId)
+        .eq('following_id', followingUuid)
 
-    const { error } = await supabase
-      .from('follows')
-      .delete()
-      .eq('follower_id', profileUuid) // Use profile UUID, not Clerk ID
-      .eq('following_id', followingUuid) // Ensure following_id is also UUID
+      if (error) throw error
+      setFollows((prev) =>
+        prev.filter((f) => !(f.follower_id === profileId && f.following_id === followingUuid))
+      )
+    },
+    [userId, profileId]
+  )
 
-    if (error) throw error
+  const isFollowing = useCallback(
+    (targetUserId: string): boolean => {
+      if (!profileId) return false
+      return follows.some((f) => f.follower_id === profileId && f.following_id === targetUserId)
+    },
+    [follows, profileId]
+  )
 
-    setFollows((prev) =>
-      prev.filter((f) => !(f.follower_id === profileUuid && f.following_id === followingUuid))
-    )
-  }
-
-  const isFollowing = (userId: string): boolean => {
-    if (!user || !profile?.id) return false
-    const profileUuid = profile.id
-    // Note: userId parameter should be UUID, but we'll compare as-is
-    // If it's a Clerk ID, this comparison will fail (which is correct)
-    return follows.some((f) => f.follower_id === profileUuid && f.following_id === userId)
-  }
-
-  const getFollowers = async (userId: string): Promise<string[]> => {
+  const getFollowers = useCallback(async (targetUserId: string): Promise<string[]> => {
     const { data } = await supabase
       .from('follows')
       .select('follower_id')
-      .eq('following_id', userId)
+      .eq('following_id', targetUserId)
 
     return data?.map((f) => f.follower_id) || []
-  }
+  }, [])
 
-  const getFollowing = async (userId: string): Promise<string[]> => {
+  const getFollowing = useCallback(async (targetUserId: string): Promise<string[]> => {
     const { data } = await supabase
       .from('follows')
       .select('following_id')
-      .eq('follower_id', userId)
+      .eq('follower_id', targetUserId)
 
     return data?.map((f) => f.following_id) || []
-  }
+  }, [])
 
-  return (
-    <SocialContext.Provider
-      value={{
-        posts,
-        loading,
-        createPost,
-        updatePost,
-        deletePost,
-        getComments,
-        addComment,
-        deleteComment,
-        isLiked,
-        toggleLike,
-        getLikeCount,
-        sharePost,
-        followUser,
-        unfollowUser,
-        isFollowing,
-        getFollowers,
-        getFollowing,
-      }}
-    >
-      {children}
-    </SocialContext.Provider>
+  const value = useMemo(
+    (): SocialContextType => ({
+      posts,
+      loading,
+      createPost,
+      updatePost,
+      deletePost,
+      getComments,
+      addComment,
+      deleteComment,
+      isLiked,
+      toggleLike,
+      getLikeCount,
+      sharePost,
+      followUser,
+      unfollowUser,
+      isFollowing,
+      getFollowers,
+      getFollowing,
+    }),
+    [
+      posts,
+      loading,
+      createPost,
+      updatePost,
+      deletePost,
+      getComments,
+      addComment,
+      deleteComment,
+      isLiked,
+      toggleLike,
+      getLikeCount,
+      sharePost,
+      followUser,
+      unfollowUser,
+      isFollowing,
+      getFollowers,
+      getFollowing,
+    ]
   )
+
+  return <SocialContext.Provider value={value}>{children}</SocialContext.Provider>
 }
 
 export function useSocial() {
@@ -492,4 +444,3 @@ export function useSocial() {
   }
   return context
 }
-

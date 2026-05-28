@@ -23,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import { SkeletonPost, SkeletonProfile, SkeletonListing } from "@/components/Skeleton";
 import { AdsWidget } from "@/components/feed/widgets/AdsWidget";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { isOnboardingComplete } from "@/lib/profile-utils";
 
 export default function Home() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -102,7 +104,7 @@ export default function Home() {
     if (!authLoading && (!user || !profile)) {
       router.replace("/auth");
     }
-  }, [authLoading, user, profile, router]);
+  }, [authLoading, user?.id, profile?.id, router]);
 
   // Real-time subscription for new posts from users you follow
   useEffect(() => {
@@ -237,6 +239,23 @@ export default function Home() {
             </Link>
           </div>
         </div>
+
+        {profile && !isOnboardingComplete(profile) && (
+          <Alert className="mb-6">
+            <AlertTitle>Complete your profile</AlertTitle>
+            <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Finish onboarding to unlock posting, marketplace checkout, and your full personalized feed.
+              </span>
+              <Link href="/onboarding">
+                <Button variant="secondary" size="sm">
+                  Continue setup
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <AdsWidget placement="home" className="mb-6" />
 

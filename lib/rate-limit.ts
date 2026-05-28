@@ -1,80 +1,102 @@
 import { Redis } from '@upstash/redis'
 import { Ratelimit } from '@upstash/ratelimit'
-import { env } from './env'
 
-// Initialize Redis client
-const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-})
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+const hasRedis =
+  Boolean(redisUrl && redisToken) &&
+  redisUrl!.startsWith('https://') &&
+  !redisUrl!.includes('YOUR_')
 
-// Define all rate limiters
-export const rateLimiters = {
-  // General API rate limit: 60 requests per minute per user
-  api: new Ratelimit({
+const redis = hasRedis
+  ? new Redis({
+      url: redisUrl!,
+      token: redisToken!,
+    })
+  : null
+
+function createLimiter(
+  limiter: ReturnType<typeof Ratelimit.slidingWindow>,
+  prefix: string
+) {
+  if (!redis) return null
+  return new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(60, '1 m'),
+    limiter,
     analytics: true,
-    prefix: 'ratelimit:api',
-  }),
-  
-  // Strict rate limit for write operations: 10 requests per minute
-  write: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(10, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:write',
-  }),
-  
-  // Login attempts: 5 per 15 minutes
-  login: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '15 m'),
-    analytics: true,
-    prefix: 'ratelimit:login',
-  }),
-  
-  // IP-based fallback: 120 requests per minute per IP
-  ip: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(120, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:ip',
-  }),
-  
-  // Search queries: 30 per minute
-  search: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(30, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:search',
-  }),
-  
-  // File uploads: 5 per 5 minutes
-  upload: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '5 m'),
-    analytics: true,
-    prefix: 'ratelimit:upload',
-  }),
+    prefix,
+  })
 }
 
-// Helper function with response headers
+export const rateLimiters = {
+  api: createLimiter(Ratelimit.slidingWindow(60, '1 m'), 'ratelimit:api'),
+  write: createLimiter(Ratelimit.slidingWindow(10, '1 m'), 'ratelimit:write'),
+  login: createLimiter(Ratelimit.slidingWindow(5, '15 m'), 'ratelimit:login'),
+  ip: createLimiter(Ratelimit.slidingWindow(120, '1 m'), 'ratelimit:ip'),
+  search: createLimiter(Ratelimit.slidingWindow(30, '1 m'), 'ratelimit:search'),
+  upload: createLimiter(Ratelimit.slidingWindow(5, '5 m'), 'ratelimit:upload'),
+}
+
+function rateLimitUnavailable() {
+  return {
+    success: false,
+    limit: 0,
+    reset: Date.now() + 60_000,
+    remaining: 0,
+    headers: {
+      'X-RateLimit-Limit': '0',
+      'X-RateLimit-Remaining': '0',
+      'X-RateLimit-Reset': String(Date.now() + 60_000),
+    },
+  }
+}
+
+function rateLimitPassThrough() {
+  return {
+    success: true,
+    limit: 60,
+    reset: Date.now() + 60_000,
+    remaining: 60,
+    headers: {
+      'X-RateLimit-Limit': '60',
+      'X-RateLimit-Remaining': '60',
+      'X-RateLimit-Reset': String(Date.now() + 60_000),
+    },
+  }
+}
+
 export async function checkRateLimit(
   identifier: string,
   type: keyof typeof rateLimiters = 'api'
 ) {
-  const { success, limit, reset, remaining } = await rateLimiters[type].limit(identifier)
-  
-  return {
-    success,
-    limit,
-    reset,
-    remaining,
-    headers: {
-      'X-RateLimit-Limit': limit.toString(),
-      'X-RateLimit-Remaining': remaining.toString(),
-      'X-RateLimit-Reset': reset.toString(),
-    },
+  const limiter = rateLimiters[type]
+
+  if (!limiter) {
+    if (process.env.NODE_ENV === 'production') {
+      return rateLimitUnavailable()
+    }
+    return rateLimitPassThrough()
+  }
+
+  try {
+    const { success, limit, reset, remaining } = await limiter.limit(identifier)
+
+    return {
+      success,
+      limit,
+      reset,
+      remaining,
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString(),
+      },
+    }
+  } catch (error) {
+    console.error('Rate limit check failed:', error)
+    if (process.env.NODE_ENV === 'production') {
+      return rateLimitUnavailable()
+    }
+    return rateLimitPassThrough()
   }
 }

@@ -1,9 +1,9 @@
 // Admin API route for exporting user data
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
+import { requireAdminUserId } from '@/lib/supabase-auth'
 import { logger } from '@/lib/logger'
-import { safeEq, hasProperty } from '@/lib/supabase-helpers'
+import { safeEq } from '@/lib/supabase-helpers'
 import { strictRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -17,35 +17,24 @@ export async function GET(req: NextRequest) {
     // Authenticate admin
     let adminUserId: string
     try {
-      adminUserId = await getAuthUserId()
+      adminUserId = await requireAdminUserId()
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
       return NextResponse.json(
-        { error: 'Unauthorized. Please sign in.' },
-        { status: 401 }
+        {
+          error:
+            message === 'Forbidden'
+              ? 'Forbidden. Admin access required.'
+              : 'Unauthorized. Please sign in.',
+        },
+        { status: message === 'Forbidden' ? 403 : 401 }
       )
     }
 
-    // Strict rate limit check (admin: 10/min)
     const rateLimitResponse = await strictRateLimit(req, adminUserId)
     if (rateLimitResponse) return rateLimitResponse
-    
+
     const adminClient = createAdminClient()
-
-    // Check if user is admin
-    const { data: adminProfile } = await safeEq(
-      adminClient
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      adminUserId
-    ).maybeSingle()
-
-    if (!(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
-      return NextResponse.json(
-        { error: 'Forbidden. Admin access required.' },
-        { status: 403 }
-      )
-    }
 
     // Get query parameters for filtering
     const { searchParams } = new URL(req.url)

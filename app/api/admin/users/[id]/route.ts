@@ -1,7 +1,7 @@
 // Admin API route for managing individual users
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
-import { getAuthUserId } from '@/lib/supabase-auth'
+import { requireAdminUserId } from '@/lib/supabase-auth'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import {
@@ -19,6 +19,15 @@ import type { UserStats } from '@/types'
 import { strictRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
+
+async function requireAdminForRequest(req: NextRequest) {
+  const adminUserId = await requireAdminUserId()
+  const rateLimitResponse = await strictRateLimit(req, adminUserId)
+  if (rateLimitResponse) {
+    return { error: rateLimitResponse } as const
+  }
+  return { adminUserId, adminClient: createAdminClient() } as const
+}
 
 // Schema for user update
 const UserUpdateSchema = z.object({
@@ -49,36 +58,16 @@ export const GET = withErrorHandling(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
-  // Authenticate admin
   let adminUserId: string
+  let adminClient: ReturnType<typeof createAdminClient>
   try {
-    adminUserId = await getAuthUserId()
-  } catch (authError) {
-    logger.error('Authentication error in admin user GET', authError)
-    return errorResponse(
-      'Authentication failed',
-      'UNAUTHORIZED',
-      authError instanceof Error ? authError.message : 'Unauthorized',
-      401
-    )
+    const admin = await requireAdminForRequest(req)
+    if ('error' in admin) return admin.error
+    adminUserId = admin.adminUserId
+    adminClient = admin.adminClient
+  } catch {
+    return forbiddenResponse('Admin access required')
   }
-
-    // Strict rate limit check (admin: 10/min)
-    const rateLimitResponse = await strictRateLimit(req, adminUserId)
-    if (rateLimitResponse) return rateLimitResponse
-    
-    const adminClient = createAdminClient()
-
-    // Check if user is admin
-    const { data: adminProfile, error: adminCheckError } = await adminClient
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', adminUserId)
-      .maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
-      return forbiddenResponse('Admin access required')
-    }
 
     const { id: userId } = await params
     
@@ -226,26 +215,19 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Authenticate admin
-    const adminUserId = await getAuthUserId()
-    const adminClient = createAdminClient()
-
-    // Check if user is admin
-    const { data: adminProfile, error: adminCheckError } = await safeEq(
-      adminClient
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      adminUserId
-    ).maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
+    let adminUserId: string
+    let adminClient: ReturnType<typeof createAdminClient>
+    try {
+      const admin = await requireAdminForRequest(req)
+      if ('error' in admin) return admin.error
+      adminUserId = admin.adminUserId
+      adminClient = admin.adminClient
+    } catch {
       return forbiddenResponse('Admin access required')
     }
 
     const { id: userId } = await params
 
-    // Parse and validate request body
     const body = await safeJsonParse<unknown>(req)
     if (!body) {
       return errorResponse('Invalid request body', 'PARSE_ERROR', 'Failed to parse JSON request body')
@@ -378,24 +360,18 @@ export async function PATCH(
  * Delete user account (admin only)
  */
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Authenticate admin
-    const adminUserId = await getAuthUserId()
-    const adminClient = createAdminClient()
-
-    // Check if user is admin
-    const { data: adminProfile, error: adminCheckError } = await safeEq(
-      adminClient
-        .from('profiles')
-        .select('is_admin'),
-      'id',
-      adminUserId
-    ).maybeSingle()
-
-    if (adminCheckError || !(hasProperty(adminProfile, 'is_admin') && adminProfile.is_admin)) {
+    let adminUserId: string
+    let adminClient: ReturnType<typeof createAdminClient>
+    try {
+      const admin = await requireAdminForRequest(req)
+      if ('error' in admin) return admin.error
+      adminUserId = admin.adminUserId
+      adminClient = admin.adminClient
+    } catch {
       return forbiddenResponse('Admin access required')
     }
 

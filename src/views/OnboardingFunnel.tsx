@@ -10,6 +10,7 @@ import { Loader2, Store, Users, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { getProfile } from '@/lib/api'
 import { isAdminEmail } from '@/lib/admin'
+import { isOnboardingComplete } from '@/lib/profile-utils'
 
 type OnboardingStep = 'choose-role' | 'vendor' | 'customer'
 
@@ -47,8 +48,7 @@ export default function OnboardingFunnel() {
           return
         }
         
-        // If profile is complete, redirect to appropriate dashboard
-        if (profile && (profile.username || profile.display_name)) {
+        if (profile && isOnboardingComplete(profile)) {
           if (profile.is_vendor) {
             router.push('/vendor/dashboard')
           } else {
@@ -56,7 +56,7 @@ export default function OnboardingFunnel() {
           }
           return
         }
-        // Profile exists but incomplete, continue with onboarding
+        // Profile missing or onboarding not finished — stay in funnel
         setLoading(false)
       } catch (error) {
         // Profile doesn't exist yet - check email for admin status
@@ -75,7 +75,7 @@ export default function OnboardingFunnel() {
     }
 
     checkProfile()
-  }, [user, isLoaded, router])
+  }, [user?.id, user?.email, isLoaded, router])
 
   const handleRoleSelection = (role: 'vendor' | 'customer') => {
     setSelectedRole(role)

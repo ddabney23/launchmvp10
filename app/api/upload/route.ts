@@ -11,6 +11,7 @@ import {
   withErrorHandling,
 } from '@/lib/api-response'
 import { rateLimit } from '@/lib/rate-limit'
+import { validateUploadFile } from '@/lib/upload-validation'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -21,10 +22,10 @@ export const runtime = 'nodejs'
  * Uses service role key to bypass RLS policies
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  console.log('[UPLOAD] Request received:', {
+  logger.info('[UPLOAD] Request received', {
     method: req.method,
     url: req.url,
-    headers: Object.fromEntries(req.headers.entries()),
+    contentType: req.headers.get('content-type'),
   })
 
   let userId: string
@@ -57,6 +58,11 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const allowedBuckets = ['vendor-assets', 'vendor-docs', 'listings', 'avatars', 'posts', 'stories', 'store-banners']
   if (!allowedBuckets.includes(bucket)) {
     return errorResponse('Invalid bucket name', 'INVALID_BUCKET')
+  }
+
+  const fileValidation = validateUploadFile(bucket, file)
+  if (!fileValidation.ok) {
+    return errorResponse(fileValidation.message, 'INVALID_FILE_TYPE')
   }
 
   // Validate file size (50MB limit for stories, 10MB for others)

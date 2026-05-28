@@ -3,17 +3,13 @@ import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { checkRateLimit } from './lib/rate-limit'
 
-const PUBLIC_PATHS = [
+const PUBLIC_PAGE_PATHS = [
   /^\/auth(\/.*)?$/,
-  /^\/auth\/callback$/,
   /^\/login(\/.*)?$/,
   /^\/register(\/.*)?$/,
-  /^\/api\/webhooks(\/.*)?$/,
-  /^\/api\/health(\/.*)?$/,
-  /^\/api\/test-auth(\/.*)?$/,
 ]
 
-const PROTECTED_PATHS = [
+const PROTECTED_PAGE_PATHS = [
   /^\/home(\/.*)?$/,
   /^\/feed(\/.*)?$/,
   /^\/profile(\/.*)?$/,
@@ -33,25 +29,33 @@ const PROTECTED_PATHS = [
   /^\/search(\/.*)?$/,
   /^\/rewards(\/.*)?$/,
   /^\/news(\/.*)?$/,
-  /^\/api\/admin(\/.*)?$/,
-  /^\/api\/posts(\/.*)?$/,
-  /^\/api\/stories(\/.*)?$/,
-  /^\/api\/listings(\/.*)?$/,
 ]
 
 function matchesPath(pathname: string, patterns: RegExp[]) {
   return patterns.some((p) => p.test(pathname))
 }
 
-function isPublicRoute(pathname: string) {
-  if (pathname === '/api/listings' || pathname.startsWith('/api/listings/')) {
-    return true
-  }
-  return matchesPath(pathname, PUBLIC_PATHS)
+function isPublicApiRoute(pathname: string, method: string): boolean {
+  if (pathname.startsWith('/api/webhooks/')) return true
+  if (pathname.startsWith('/api/auth')) return true
+  if (pathname === '/auth/callback') return true
+  if (pathname === '/api/listings' && method === 'GET') return true
+  // Route handler enforces x-internal-api-secret
+  if (pathname === '/api/gamification/update' && method === 'POST') return true
+  return false
 }
 
-function isProtectedRoute(pathname: string) {
-  return matchesPath(pathname, PROTECTED_PATHS)
+function requiresApiAuth(pathname: string, method: string): boolean {
+  if (!pathname.startsWith('/api')) return false
+  return !isPublicApiRoute(pathname, method)
+}
+
+function isProtectedPage(pathname: string): boolean {
+  return matchesPath(pathname, PROTECTED_PAGE_PATHS)
+}
+
+function isPublicPage(pathname: string): boolean {
+  return matchesPath(pathname, PUBLIC_PAGE_PATHS)
 }
 
 function isWriteOperation(pathname: string): boolean {
@@ -62,6 +66,18 @@ function isWriteOperation(pathname: string): boolean {
       pathname.includes('/update') ||
       pathname.includes('/delete'))
   )
+}
+
+function getApiCorsOrigin(): string {
+  const appUrl = process.env['NEXT_PUBLIC_APP_URL']
+  if (process.env.NODE_ENV === 'production') {
+    if (!appUrl) {
+      console.error('NEXT_PUBLIC_APP_URL must be set in production for CORS')
+      return ''
+    }
+    return appUrl
+  }
+  return appUrl || 'http://localhost:3000'
 }
 
 function applySecurityHeaders(response: NextResponse, request: NextRequest) {
@@ -99,16 +115,16 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
   }
 
   if (request.nextUrl.pathname.startsWith('/api')) {
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
-    response.headers.set(
-      'Access-Control-Allow-Origin',
-      process.env['NEXT_PUBLIC_APP_URL'] || '*'
-    )
-    response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
-    response.headers.set(
-      'Access-Control-Allow-Headers',
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-    )
+    const corsOrigin = getApiCorsOrigin()
+    if (corsOrigin) {
+      response.headers.set('Access-Control-Allow-Credentials', 'true')
+      response.headers.set('Access-Control-Allow-Origin', corsOrigin)
+      response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
+      response.headers.set(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-internal-api-secret'
+      )
+    }
   }
 
   return response
@@ -124,15 +140,8 @@ export default async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
   const isApiRoute = pathname.startsWith('/api')
-  const isUploadRoute = pathname === '/api/upload'
-  const isListingsGet = pathname === '/api/listings' && request.method === 'GET'
-  const isListingsPost = pathname === '/api/listings' && request.method === 'POST'
 
-  if (isUploadRoute) {
-    return response
-  }
-
-  if (isApiRoute && !isUploadRoute) {
+  if (isApiRoute) {
     try {
       const ip =
         request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
@@ -174,31 +183,32 @@ export default async function proxy(request: NextRequest) {
       }
     } catch (error) {
       console.error('Rate limiting error:', error)
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Service temporarily unavailable', code: 'RATE_LIMIT_UNAVAILABLE' },
+          { status: 503 }
+        )
+      }
     }
   }
 
-  if (isListingsPost) {
-    return response
+  if (requiresApiAuth(pathname, request.method) && !user) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Authentication failed',
+        message: 'Please sign in to continue',
+        code: 'UNAUTHORIZED',
+      },
+      { status: 401 }
+    )
   }
 
   if (
-    !isPublicRoute(pathname) &&
-    !isListingsGet &&
-    isProtectedRoute(pathname) &&
+    !isPublicPage(pathname) &&
+    isProtectedPage(pathname) &&
     !user
   ) {
-    if (isApiRoute) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Authentication failed',
-          message: 'Please sign in to continue',
-          code: 'UNAUTHORIZED',
-        },
-        { status: 401 }
-      )
-    }
-
     const signInUrl = new URL('/auth', request.url)
     signInUrl.searchParams.set('redirect_url', request.url)
     return NextResponse.redirect(signInUrl)

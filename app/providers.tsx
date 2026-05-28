@@ -6,6 +6,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { CartProvider } from '@/contexts/CartContext'
 import { ThemeProvider } from '@/contexts/ThemeProvider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { SocialProvider } from '@/contexts/SocialContext'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useState } from 'react'
@@ -32,15 +33,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ErrorBoundary>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <SocialProvider>
-            <CartProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                {children}
-              </TooltipProvider>
-            </CartProvider>
-          </SocialProvider>
+          <AuthProvider>
+            <SocialProvider>
+              <CartProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  {children}
+                </TooltipProvider>
+              </CartProvider>
+            </SocialProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ErrorBoundary>

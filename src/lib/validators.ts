@@ -12,6 +12,8 @@ export const ProfileSchema = z.object({
   is_admin: z.boolean().default(false).optional(),
   credits: z.number().int().min(0).default(0),
   points: z.number().int().min(0).default(0),
+  onboarding_completed: z.boolean().optional(),
+  email: z.string().email().optional(),
   created_at: z.string().datetime().optional(),
   updated_at: z.string().datetime().optional(),
 });

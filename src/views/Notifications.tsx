@@ -10,8 +10,9 @@ import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } 
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeSubscription } from "@/lib/realtime";
 import type { Notification } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 import { AdsWidget } from "@/components/feed/widgets/AdsWidget";
@@ -46,30 +47,21 @@ export default function Notifications() {
     },
   });
 
-  // Subscribe to real-time notifications
-  useEffect(() => {
+  const onNotificationsChange = useCallback(() => {
     if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`notifications:${user.id}:page`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
+    queryClient.invalidateQueries({ queryKey: ["notifications", user.id, "all"] });
   }, [user?.id, queryClient]);
+
+  useRealtimeSubscription(supabase, {
+    table: "notifications",
+    event: "*",
+    filter: user?.id ? `user_id=eq.${user.id}` : undefined,
+    channelName: user?.id ? `notifications:${user.id}:page` : undefined,
+    enabled: !!user?.id,
+    debounceMs: 300,
+    callback: onNotificationsChange,
+  });
 
   const getNotificationLink = (notification: Notification): string => {
     const data = notification.data as any;

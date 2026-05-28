@@ -29,11 +29,12 @@ export function StoriesCarousel({ onCreateStory }: StoriesCarouselProps) {
 
   // Real-time subscription for stories
   useEffect(() => {
-    if (!user) return
+    const userId = user?.id
+    if (!userId) return
 
     // Subscribe to new stories
     const storiesChannel = supabase
-      .channel('stories-realtime', {
+      .channel(`stories-realtime:${userId}`, {
         config: { private: true },
       })
       .on(
@@ -77,7 +78,7 @@ export function StoriesCarousel({ onCreateStory }: StoriesCarouselProps) {
 
     // Subscribe to story views (to update view status)
     const viewsChannel = supabase
-      .channel('story-views-realtime', {
+      .channel(`story-views-realtime:${userId}`, {
         config: { private: true },
       })
       .on(
@@ -106,7 +107,7 @@ export function StoriesCarousel({ onCreateStory }: StoriesCarouselProps) {
       supabase.removeChannel(storiesChannel)
       supabase.removeChannel(viewsChannel)
     }
-  }, [user, queryClient])
+  }, [user?.id, queryClient])
 
   if (isLoading) {
     return (

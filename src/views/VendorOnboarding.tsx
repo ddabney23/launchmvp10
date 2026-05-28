@@ -136,21 +136,22 @@ export default function VendorOnboarding() {
   });
 
   // CLERK MIGRATION: Use Clerk user hook
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refetch } = useAuth();
   const isLoaded = !authLoading;
+  const authUserId = user?.id;
 
   useEffect(() => {
     if (!isLoaded) return;
     
-    if (!user) {
+    if (!authUserId) {
       router.push("/auth");
       return;
     }
     
-    setUserId(user.id);
+    setUserId(authUserId);
     
     // Load saved draft from localStorage
-    const savedDraft = localStorage.getItem(`vendor_onboarding_draft_${user.id}`);
+    const savedDraft = localStorage.getItem(`vendor_onboarding_draft_${authUserId}`);
     if (savedDraft) {
       try {
         const draft = JSON.parse(savedDraft);
@@ -169,7 +170,7 @@ export default function VendorOnboarding() {
     }
     
     setLoading(false);
-  }, [user, isLoaded, router]);
+  }, [authUserId, isLoaded, router, businessForm, profileForm, productForm, subscriptionForm, payoutForm]);
 
   // Auto-save draft to localStorage
   useEffect(() => {
@@ -753,6 +754,7 @@ export default function VendorOnboarding() {
         }
         
         await updateProfile(userId, profileUpdate);
+        await refetch();
         console.log('[VENDOR ONBOARDING] Profile updated successfully');
       } catch (profileError) {
         console.error('[VENDOR ONBOARDING] Profile update error:', profileError);

@@ -13,9 +13,12 @@ export function getCorsHeaders(origin?: string | null): Record<string, string> {
   
   // In development, allow all origins
   // In production, check against allowed list
-  const allowOrigin = isDevelopment 
-    ? (origin || '*')
-    : (origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || '*')
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const allowOrigin = isDevelopment
+    ? origin || appUrl || 'http://localhost:3000'
+    : origin && allowedOrigins.includes(origin)
+      ? origin
+      : appUrl || allowedOrigins[0] || ''
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,

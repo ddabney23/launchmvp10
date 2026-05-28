@@ -257,9 +257,11 @@ export default function Feed() {
 
   // Real-time subscription for new posts
   useEffect(() => {
+    if (!user?.id) return;
+
     let isMounted = true;
     const channel = supabase
-      .channel("posts:feed")
+      .channel(`posts:feed:${user.id}`)
       .on(
         "postgres_changes",
         {
@@ -307,7 +309,7 @@ export default function Feed() {
         logger.error('Error removing realtime channel', error);
       }
     };
-  }, [queryClient, toast]);
+  }, [user?.id, queryClient, toast]);
 
   if (authLoading || isLoading) {
     return (

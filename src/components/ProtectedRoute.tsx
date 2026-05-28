@@ -39,7 +39,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
         }
       }
     }
-  }, [user, profile, loading, requireAdmin, router, pathname])
+  }, [user?.id, user?.email, profile?.id, profile?.is_admin, loading, requireAdmin, router, pathname])
 
   // Show loading state
   if (loading) {
