@@ -39,7 +39,11 @@ function isPublicApiRoute(pathname: string, method: string): boolean {
   if (pathname.startsWith('/api/webhooks/')) return true
   if (pathname.startsWith('/api/auth')) return true
   if (pathname === '/auth/callback') return true
+  if (pathname === '/api/health' && method === 'GET') return true
+  if (pathname === '/api/health/cache' && method === 'GET') return true
   if (pathname === '/api/listings' && method === 'GET') return true
+  if (pathname === '/api/ads' && method === 'GET') return true
+  if (pathname === '/api/leaderboard' && method === 'GET') return true
   // Route handler enforces x-internal-api-secret
   if (pathname === '/api/gamification/update' && method === 'POST') return true
   return false

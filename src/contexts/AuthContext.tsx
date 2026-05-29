@@ -32,6 +32,8 @@ type AuthContextValue = {
   isAuthenticated: boolean
   getProfileUuid: () => Promise<string | null>
   refetch: () => Promise<void>
+  setProfile: (profile: Profile | null) => void
+  mergeProfile: (partial: Partial<Profile>) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -112,6 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (authUser) await loadProfile(authUser)
   }, [authUser, loadProfile])
 
+  const setProfileState = useCallback((next: Profile | null) => {
+    setProfile(next)
+  }, [])
+
+  const mergeProfile = useCallback((partial: Partial<Profile>) => {
+    setProfile((prev) => (prev ? { ...prev, ...partial } : null))
+  }, [])
+
   const value = useMemo(
     (): AuthContextValue => ({
       user,
@@ -122,8 +132,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!authUser,
       getProfileUuid,
       refetch,
+      setProfile: setProfileState,
+      mergeProfile,
     }),
-    [user, authUser, profile, loading, signOut, getProfileUuid, refetch]
+    [user, authUser, profile, loading, signOut, getProfileUuid, refetch, setProfileState, mergeProfile]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

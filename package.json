@@ -17,6 +17,7 @@
     "test:jest": "jest",
     "test:jest:watch": "jest --watch",
     "test:api": "npx tsx scripts/test-api-routes.ts",
+    "test:api:smoke": "npx tsx scripts/test-api-routes.ts --smoke",
     "test:api:win": "powershell -ExecutionPolicy Bypass -File scripts/test-api-routes.ps1",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -37,6 +38,7 @@
     "migrate": "powershell -ExecutionPolicy Bypass -File scripts/run-migrations.ps1",
     "migrate:unix": "bash scripts/run-migrations.sh",
     "supabase:push": "node scripts/supabase-push.mjs",
+    "supabase:migrations:bundle": "node scripts/build-apply-pending-migrations.mjs",
     "supabase:migration:list": "supabase migration list",
     "supabase:link": "supabase link --project-ref ofzehffrqzvxlnbaxxby",
     "postinstall": "prisma generate",
@@ -46,6 +48,7 @@
     "setup:buckets": "node scripts/setup-storage-buckets.js",
     "check:vendor-table": "node scripts/check-vendor-table.js",
     "check:profile-onboarding": "node scripts/check-profile-onboarding.js",
+    "seed:posts": "node scripts/seed-sample-posts.js",
     "test:vendor-api": "node scripts/test-vendor-api.js",
     "docs": "npx @scalar/cli serve openapi.yaml --port 5050",
     "docs:validate": "npx @scalar/cli validate openapi.yaml"

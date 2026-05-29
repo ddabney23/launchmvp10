@@ -170,6 +170,49 @@ export function internalErrorResponse(
 }
 
 // ============================================================================
+// CLIENT RESPONSE HELPERS
+// ============================================================================
+
+type ApiPayload = Record<string, unknown>
+
+/**
+ * Normalize mixed API response shapes from route handlers.
+ */
+export function unwrapApiData<T>(result: unknown): T {
+  if (result === null || result === undefined) {
+    throw new Error('Empty API response')
+  }
+
+  if (typeof result !== 'object') {
+    return result as T
+  }
+
+  const obj = result as ApiPayload
+
+  if (obj.success === false) {
+    throw new Error(String(obj.error || 'API request failed'))
+  }
+
+  if ('data' in obj && obj.data !== undefined) {
+    return obj.data as T
+  }
+
+  if ('post' in obj && obj.post !== undefined) {
+    return obj.post as T
+  }
+
+  if ('profile' in obj && obj.profile !== undefined) {
+    return obj.profile as T
+  }
+
+  if ('listing' in obj && obj.listing !== undefined) {
+    return obj.listing as T
+  }
+
+  return result as T
+}
+
+// ============================================================================
 // VALIDATION HELPERS
 // ============================================================================
 

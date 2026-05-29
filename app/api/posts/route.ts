@@ -5,11 +5,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient, createAdminClient } from '@/integrations/supabase/server'
+import { createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { logger } from '@/lib/logger'
 import { validateRequest, validateSearchParams, getPostsSchema, createPostSchema, ValidationError } from '@/lib/validation'
 import { rateLimit } from '@/lib/rate-limit'
+import { createdResponse } from '@/lib/api-response'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,17 +24,15 @@ export async function GET(req: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createServerClient()
+    const supabase = createAdminClient()
     const { searchParams } = new URL(req.url)
-    
-    // Validate query parameters
-    const { limit, offset, user_id: userId, type } = validateSearchParams(getPostsSchema, searchParams)
-    
-    // Build query - use simpler structure that matches actual schema
-    // Note: Foreign key name might vary, so we'll try without explicit name first
+
+    const { limit, offset, user_id: userId } = validateSearchParams(getPostsSchema, searchParams)
+
     let query = supabase
       .from('posts')
-      .select(`
+      .select(
+        `
         *,
         author:profiles(
           id,
@@ -42,22 +41,17 @@ export async function GET(req: NextRequest) {
           avatar_url,
           vendor_verified
         )
-      `, { count: 'exact' })
+      `,
+        { count: 'exact' }
+      )
       .order('created_at', { ascending: false })
-    
-    // Apply filters - userId is a profile UUID from query params
+
     if (userId) {
-      query = query.eq('author', userId) // Column is 'author', not 'user_id'
+      query = query.eq('author', userId)
+    } else {
+      query = query.eq('visibility', 'public')
     }
-    
-    // Note: content_type field may not exist in posts table
-    // If type filter is needed, it should be added to the schema first
-    // For now, we'll skip this filter to avoid errors
-    // if (type) {
-    //   query = query.eq('content_type', type)
-    // }
-    
-    // Apply pagination
+
     query = query.range(offset, offset + limit - 1)
     
     const { data: posts, error, count } = await query
@@ -230,10 +224,7 @@ export async function POST(req: NextRequest) {
       // Continue anyway - post was created successfully
     }
     
-    return NextResponse.json({
-      data: post,  // Frontend expects { data: post }
-      message: 'Post created successfully',
-    }, { status: 201 })
+    return createdResponse(post, 'Post created successfully')
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Internal server error'

@@ -14,12 +14,15 @@ import {
 } from '@/lib/api-response'
 import Stripe from 'stripe'
 import { calculateApplicationFee } from '@/lib/subscription-utils'
+import { getStripeSecretKey, stripeConfigErrorMessage } from '@/lib/stripe-config'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
+function getStripeClient(): Stripe | null {
+  const key = getStripeSecretKey()
+  if (!key) return null
+  return new Stripe(key, { apiVersion: '2025-10-29.clover' })
+}
 
 interface OrderItem {
   listing_id: string
@@ -38,12 +41,12 @@ interface ShippingInfo {
 }
 
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  // Check if Stripe is configured
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return internalErrorResponse('Payment system not configured')
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse(stripeConfigErrorMessage())
   }
 
-  // Authenticate user with Clerk
+  // Authenticate user
   let userId: string
   try {
     userId = await getAuthUserId()

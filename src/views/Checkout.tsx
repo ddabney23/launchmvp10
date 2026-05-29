@@ -17,6 +17,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createPaymentIntent, getProfile } from "@/lib/api";
+import {
+  getStripePublishableKey,
+  isStripeConfigured,
+  stripeConfigErrorMessage,
+} from "@/lib/stripe-config";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const checkoutSchema = z.object({
   email: z.string().email(),
@@ -154,7 +160,7 @@ export default function Checkout() {
     },
     onSuccess: async (data) => {
       // Check if Stripe is configured
-      const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
+      const stripeKey = getStripePublishableKey();
       
       if (data.isMultiVendor && data.orders.length > 1) {
         // Multi-vendor order
@@ -229,6 +235,15 @@ export default function Checkout() {
       return;
     }
 
+    if (!isStripeConfigured()) {
+      toast({
+        title: "Payments not configured",
+        description: stripeConfigErrorMessage(),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setProcessing(true);
     createOrderMutation.mutate(data);
   };
@@ -278,6 +293,13 @@ export default function Checkout() {
               Checkout
             </h1>
           </div>
+
+          {!isStripeConfigured() && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>Payments not configured</AlertTitle>
+              <AlertDescription>{stripeConfigErrorMessage()}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="grid md:grid-cols-3 gap-6">
             {/* Checkout Form */}
@@ -392,7 +414,11 @@ export default function Checkout() {
                     <Button
                       type="submit"
                       className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
-                      disabled={processing || createOrderMutation.isPending}
+                      disabled={
+                        processing ||
+                        createOrderMutation.isPending ||
+                        !isStripeConfigured()
+                      }
                     >
                       {(processing || createOrderMutation.isPending) ? (
                         <>

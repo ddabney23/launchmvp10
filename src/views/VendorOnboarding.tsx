@@ -17,6 +17,7 @@ import { Loader2, Upload, X, CheckCircle2, ArrowLeft, ArrowRight, Building2, Ima
 import { SUBSCRIPTION_TIERS } from "@/lib/subscription-tiers";
 // CLERK MIGRATION: Updated imports
 import { updateProfile, uploadFile, getProfile, startConnectOnboarding, getConnectStatus } from "@/lib/api";
+import { isOnboardingComplete } from "@/lib/profile-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
@@ -136,7 +137,7 @@ export default function VendorOnboarding() {
   });
 
   // CLERK MIGRATION: Use Clerk user hook
-  const { user, loading: authLoading, refetch } = useAuth();
+  const { user, loading: authLoading, refetch, setProfile } = useAuth();
   const isLoaded = !authLoading;
   const authUserId = user?.id;
 
@@ -741,31 +742,39 @@ export default function VendorOnboarding() {
 
       // Step 3: Update profile with vendor info (banner, logo, bio) and mark onboarding complete
       // Note: The API route already sets is_vendor=true, but we update other fields here
-      try {
-        console.log('[VENDOR ONBOARDING] Updating profile with vendor details...');
-        const profileUpdate: any = {
-          bio: profileData.description || undefined,
-          onboarding_completed: true, // Mark onboarding as done
-        };
-        
-        // Only update avatar if we have a logo URL
-        if (logoUrl && logoUrl.startsWith('http')) {
-          profileUpdate.avatar_url = logoUrl;
-        }
-        
-        await updateProfile(userId, profileUpdate);
-        await refetch();
-        console.log('[VENDOR ONBOARDING] Profile updated successfully');
-      } catch (profileError) {
-        console.error('[VENDOR ONBOARDING] Profile update error:', profileError);
-        // Don't fail the whole process - application was already submitted
-        // Just log and continue
-        toast({
-          title: "Warning",
-          description: "Application submitted, but profile update had issues. You can update your profile later.",
-          variant: "default",
-        });
+      console.log('[VENDOR ONBOARDING] Updating profile with vendor details...');
+      const profileUpdate: Record<string, unknown> = {
+        bio: profileData.description || undefined,
+        onboarding_completed: true,
+      };
+
+      if (logoUrl && logoUrl.startsWith('http')) {
+        profileUpdate.avatar_url = logoUrl;
       }
+
+      let vendorProfile = await updateProfile(userId, profileUpdate);
+      setProfile(vendorProfile);
+
+      try {
+        await refetch();
+        vendorProfile = await getProfile(userId);
+        setProfile(vendorProfile);
+      } catch (refreshError) {
+        console.warn('[VENDOR ONBOARDING] Profile refresh after update:', refreshError);
+      }
+
+      if (!isOnboardingComplete(vendorProfile)) {
+        const errorMsg =
+          'Application was submitted but onboarding could not be marked complete. Please try again or contact support.';
+        toast({
+          title: 'Profile update required',
+          description: errorMsg,
+          variant: 'destructive',
+        });
+        throw new Error(errorMsg);
+      }
+
+      console.log('[VENDOR ONBOARDING] Profile updated successfully');
 
       // Step 4: Create subscription
       const subscriptionData = subscriptionForm.getValues();

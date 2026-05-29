@@ -203,7 +203,6 @@ export default function Onboarding() {
         display_name: data.display_name || data.username || "User",
         bio: data.bio || null,
         avatar_url: avatarUrl || null,
-        is_vendor: data.is_vendor || false,
         onboarding_completed: true, // Mark onboarding as done
       };
 
@@ -537,15 +536,14 @@ export default function Onboarding() {
                         }
                       }
 
+                      await refetch();
+
                       toast({
                         title: "Welcome!",
                         description: "You can complete your profile later in settings.",
                       });
 
-                      // Small delay to ensure profile is saved
-                      setTimeout(() => {
-                        router.push("/home");
-                      }, 100);
+                      router.push("/home");
                     } catch (error: unknown) {
                       const errorMessage = error instanceof Error ? error.message : 'Failed to skip onboarding. Please try completing the form instead.'
                       logger.error("Skip onboarding error", error, { userId });

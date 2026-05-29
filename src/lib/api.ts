@@ -4,7 +4,7 @@ import { ApiError } from "./types";
 import { mockApi, shouldUseMockApi } from "./api-mock";
 import { sanitizeString } from "./sanitize";
 import { logger } from "./logger";
-import { createMinimalProfileFallback } from "./profile-utils";
+import { unwrapApiData } from "./api-response";
 import type {
   Profile,
   ProfileUpdate,
@@ -126,105 +126,103 @@ function handleError(error: unknown): never {
 }
 
 // Profile API
+
+function parseProfileFromApiResponse(result: {
+  success?: boolean
+  data?: Profile
+  profile?: Profile
+}): Profile {
+  const profile = result.data ?? result.profile
+  if (!profile) {
+    throw new ApiError(
+      'Invalid profile response from server',
+      'INVALID_RESPONSE',
+      500
+    )
+  }
+  return profile as Profile
+}
+
+async function getSessionUserId(): Promise<string | null> {
+  if (typeof window === 'undefined') return null
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    return session?.user?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+/** Fetch the authenticated user's profile via API (bypasses RLS / fallback issues). */
+export async function getMyProfile(): Promise<Profile | null> {
+  if (shouldUseMockApi()) {
+    const sessionUserId = await getSessionUserId()
+    if (!sessionUserId) return null
+    return mockApi.getProfile(sessionUserId)
+  }
+
+  const response = await fetch(resolveApiUrl('/api/profile/me'), {
+    credentials: 'include',
+  })
+
+  if (response.status === 404) {
+    return null
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Failed to fetch profile' }))
+    throw new ApiError(
+      errorData.error || 'Failed to fetch profile',
+      errorData.code || 'PROFILE_FETCH_FAILED',
+      response.status
+    )
+  }
+
+  const result = await response.json()
+  return parseProfileFromApiResponse(result)
+}
+
 export async function getProfile(userId: string): Promise<Profile> {
-  // Use mock API in test mode or if Supabase fails
   if (shouldUseMockApi()) {
     try {
-      return await mockApi.getProfile(userId);
-    } catch (error) {
-      // If mock also fails, return basic mock
-      return mockApi.getProfile(userId);
+      return await mockApi.getProfile(userId)
+    } catch {
+      return mockApi.getProfile(userId)
     }
   }
 
-  try {
-    // Check if userId is a UUID (profile ID) or Clerk ID (starts with "user_")
-    let data, error;
-    try {
-      const result = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-      data = result.data;
-      error = result.error;
-    } catch (fetchError) {
-      // Handle network errors (Failed to fetch)
-      if (fetchError instanceof TypeError && fetchError.message.includes('fetch')) {
-        logger.warn("Network error fetching profile, returning minimal profile", { userId, error: fetchError });
-        return createMinimalProfileFallback(userId);
-      }
-      throw fetchError;
+  const sessionUserId = await getSessionUserId()
+  if (sessionUserId && sessionUserId === userId) {
+    const ownProfile = await getMyProfile()
+    if (ownProfile) {
+      return ownProfile
     }
+    throw new ApiError('Profile not found', 'NOT_FOUND', 404)
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle()
 
     if (error) {
-      // Handle PGRST116 - relation does not exist (schema cache issue)
-      if (error.code === "PGRST116" || 
-          error.message?.includes("Could not find the table") || 
-          error.message?.includes("schema cache") ||
-          (error.message?.includes("relation") && error.message?.includes("does not exist"))) {
-        logger.warn("Schema cache error - table not found, attempting to create profile", error);
-        
-        // Try to create the profile if it doesn't exist (common after Clerk user creation)
-        // Note: Profile creation should be handled by Clerk webhook, but we provide fallback
-        try {
-          const { data: newProfile, error: createError } = await supabase
-            .from("profiles")
-            .insert({
-              id: userId,
-              username: `user_${userId.substring(0, 8)}`,
-              display_name: "User",
-              email: "",
-              created_at: new Date().toISOString(),
-            })
-            .select()
-            .maybeSingle();
-          
-          if (!createError && newProfile) {
-            logger.info("Created new profile for user", { userId });
-            return newProfile as Profile;
-          }
-        } catch (createError) {
-          logger.error("Failed to create profile", createError);
-        }
-        
-        // Return minimal profile as fallback
-        logger.warn("Returning minimal profile as fallback due to schema cache error");
-        return createMinimalProfileFallback(userId);
-      }
-      
-      // Handle 403 permission denied - might be RLS issue
-      if (error.code === "42501" || error.message?.includes("permission denied") || error.message?.includes("row-level security")) {
-        // CLERK MIGRATION: Return minimal profile for RLS issues
-        // User email would come from Clerk, but we'll use a generic fallback
-        logger.warn("RLS permission denied, returning minimal profile");
-        return createMinimalProfileFallback(userId);
-      }
-      
-      // In test mode, fall back to mock instead of throwing
-      if (shouldUseMockApi()) {
-        return await mockApi.getProfile(userId);
-      }
-      
-      handleError(error);
+      handleError(error)
     }
-    
-    return data as Profile;
+
+    if (!data) {
+      throw new ApiError('Profile not found', 'NOT_FOUND', 404)
+    }
+
+    return data as Profile
   } catch (error: unknown) {
-    // If Supabase call fails and we're in test mode, use mock
-    const status = error && typeof error === "object" && "status" in error 
-      ? (error as { status: number }).status 
-      : undefined;
-    
-    if (shouldUseMockApi() || status === 401 || status === 403) {
-      // CLERK MIGRATION: Return minimal profile for auth errors
-      // In Clerk, we don't have direct access to user email here
-      // The profile should be created via webhook or onboarding
-      logger.warn("Error fetching profile, returning minimal profile");
-      return createMinimalProfileFallback(userId);
+    if (error instanceof ApiError) {
+      throw error
     }
-    
-    throw error;
+    throw error
   }
 }
 
@@ -276,7 +274,7 @@ export async function updateProfile(userId: string, updates: ProfileUpdate): Pro
     }
 
     const result = await response.json();
-    return result.profile as Profile;
+    return parseProfileFromApiResponse(result);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -339,14 +337,14 @@ export async function createPost(post: PostCreate & { mentions?: string[] }): Pr
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Failed to create post' }));
       throw new ApiError(
-        errorData.message || 'Failed to create post',
+        errorData.message || errorData.error || 'Failed to create post',
         errorData.code || 'POST_CREATE_FAILED',
         response.status
       );
     }
 
     const result = await response.json();
-    return result.data as Post;
+    return unwrapApiData<Post>(result);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     
@@ -1803,19 +1801,27 @@ export async function createPaymentIntent(
     }
 
     const result = await response.json();
-    
-    // If single order, return in old format for backward compatibility
-    if (result.data.orders.length === 1) {
-      const order = result.data.orders[0];
+    const payload = result.data ?? result;
+    const orders = payload?.orders ?? [];
+
+    if (!orders.length) {
+      throw new ApiError(
+        payload?.error || result.error || 'No orders were created',
+        payload?.code || result.code || 'ORDER_CREATION_FAILED',
+        response.status
+      );
+    }
+
+    if (orders.length === 1) {
+      const order = orders[0];
       return {
         order_id: order.order_id,
         client_secret: order.client_secret,
         stripe_payment_intent: order.stripe_payment_intent,
       };
     }
-    
-    // Multi-vendor: return full result
-    return result.data;
+
+    return payload;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -2126,7 +2132,7 @@ export async function updateStoreProfile(
     }
 
     const result = await response.json();
-    return result.profile as Profile;
+    return parseProfileFromApiResponse(result);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -2988,18 +2994,29 @@ export async function getPersonalizedFeed(userId: string, page: number = 0, page
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
     if (error) {
-      if (shouldUseMockApi() || error.status === 401) {
+      logger.warn('Personalized feed query failed, falling back to public feed', error);
+      return getFeedPosts(page, pageSize);
+    }
+
+    const posts = (data || []) as Post[];
+    if (posts.length === 0) {
+      return getFeedPosts(page, pageSize);
+    }
+    return posts;
+  } catch (error: unknown) {
+    logger.warn('Personalized feed error, falling back to public feed', error);
+    try {
+      return await getFeedPosts(page, pageSize);
+    } catch {
+      const errorStatus =
+        error && typeof error === 'object' && 'status' in error
+          ? (error.status as number)
+          : undefined;
+      if (shouldUseMockApi() || errorStatus === 401) {
         return await mockApi.getPersonalizedFeed(userId, page, pageSize);
       }
-      handleError(error);
+      throw error;
     }
-    return (data || []) as Post[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401) {
-      return await mockApi.getPersonalizedFeed(userId, page, pageSize);
-    }
-    throw error;
   }
 }
 

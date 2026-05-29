@@ -28,8 +28,8 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   if (rateLimitResponse) return rateLimitResponse
 
   if (!WEBHOOK_SECRET) {
-    logger.error('SHIPPO_WEBHOOK_SECRET is not configured')
-    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+    logger.warn('SHIPPO_WEBHOOK_SECRET is not configured — rejecting webhook')
+    return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 })
   }
 
   const rawBody = await req.text()

@@ -41,7 +41,11 @@ const createWrapper = () => {
 describe('Home Page', () => {
   it('should render welcome message for authenticated user', async () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: '00000000-0000-0000-0000-000000000001', email: 'test@example.com' },
+      user: {
+        id: '00000000-0000-0000-0000-000000000001',
+        email: 'test@example.com',
+        emailVerified: true,
+      },
       profile: { display_name: 'Test User', username: 'testuser' } as never,
       loading: false,
       signOut: vi.fn(),
@@ -49,6 +53,8 @@ describe('Home Page', () => {
       isAuthenticated: true,
       getProfileUuid: vi.fn(),
       refetch: vi.fn(),
+      setProfile: vi.fn(),
+      mergeProfile: vi.fn(),
     })
 
     render(<Home />, { wrapper: createWrapper() })
@@ -68,6 +74,8 @@ describe('Home Page', () => {
       isAuthenticated: false,
       getProfileUuid: vi.fn(),
       refetch: vi.fn(),
+      setProfile: vi.fn(),
+      mergeProfile: vi.fn(),
     })
 
     const { container } = render(<Home />, { wrapper: createWrapper() })

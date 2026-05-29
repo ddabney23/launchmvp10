@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/integrations/supabase/server'
+import { createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { logger } from '@/lib/logger'
 import { rateLimit } from '@/lib/rate-limit'
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     const rateLimitResponse = await rateLimit(req, { userId })
     if (rateLimitResponse) return rateLimitResponse
     
-    const supabase = await createServerClient()
+    const supabase = createAdminClient()
     const { searchParams } = new URL(req.url)
     
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)

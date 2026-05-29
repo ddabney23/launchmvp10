@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Loader2, Store, Users, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { getProfile } from '@/lib/api'
+import { getMyProfile } from '@/lib/api'
 import { isAdminEmail } from '@/lib/admin'
 import { isOnboardingComplete } from '@/lib/profile-utils'
 
@@ -16,7 +16,7 @@ type OnboardingStep = 'choose-role' | 'vendor' | 'customer'
 
 export default function OnboardingFunnel() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, refetch } = useAuth()
   const isLoaded = !authLoading
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -31,51 +31,44 @@ export default function OnboardingFunnel() {
       return
     }
 
-    // Check if profile already exists and is complete
     const checkProfile = async () => {
+      const email = user.email
+      const isEmailAdmin = isAdminEmail(email)
+
       try {
-        // First check email for admin status (works even if profile doesn't exist yet)
-        const email = user.email
-        const isEmailAdmin = isAdminEmail(email)
-        
-        const profile = await getProfile(user.id)
-        
-        // Check if user is admin - skip onboarding and go to admin dashboard
-        const isAdmin = profile?.is_admin || isEmailAdmin
-        
-        if (isAdmin) {
-          router.push('/admin')
-          return
-        }
-        
-        if (profile && isOnboardingComplete(profile)) {
-          if (profile.is_vendor) {
-            router.push('/vendor/dashboard')
-          } else {
-            router.push('/home')
-          }
-          return
-        }
-        // Profile missing or onboarding not finished — stay in funnel
-        setLoading(false)
+        await refetch()
       } catch (error) {
-        // Profile doesn't exist yet - check email for admin status
-        const email = user.email
-        const isEmailAdmin = isAdminEmail(email)
-        
-        if (isEmailAdmin) {
-          router.push('/admin')
-          return
-        }
-        
-        // Profile doesn't exist and not admin, continue with onboarding
-        console.log('Profile check failed, continuing onboarding:', error)
-        setLoading(false)
+        console.log('Profile refetch failed, continuing onboarding:', error)
       }
+
+      let currentProfile = null
+      try {
+        currentProfile = await getMyProfile()
+      } catch (error) {
+        console.log('Profile load failed, continuing onboarding:', error)
+      }
+
+      const isAdmin = currentProfile?.is_admin || isEmailAdmin
+
+      if (isAdmin) {
+        router.push('/admin')
+        return
+      }
+
+      if (currentProfile && isOnboardingComplete(currentProfile)) {
+        if (currentProfile.is_vendor) {
+          router.push('/vendor/dashboard')
+        } else {
+          router.push('/home')
+        }
+        return
+      }
+
+      setLoading(false)
     }
 
-    checkProfile()
-  }, [user?.id, user?.email, isLoaded, router])
+    void checkProfile()
+  }, [user?.id, user?.email, isLoaded, router, refetch])
 
   const handleRoleSelection = (role: 'vendor' | 'customer') => {
     setSelectedRole(role)

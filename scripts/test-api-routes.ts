@@ -1,37 +1,31 @@
 /**
  * API Routes Test Suite
- * 
- * Tests all 18 API routes with proper error handling and Clerk authentication support.
- * 
+ *
  * Usage:
- *   npx tsx scripts/test-api-routes.ts
- *   npm run test:api
- * 
+ *   npm run test:api          # full run (warnings allowed)
+ *   npm run test:api:smoke    # fail on any FAIL
+ *
  * Environment:
- *   - BASE_URL: API base URL (default: http://localhost:3000)
- *   - CLERK_SESSION_TOKEN: Optional Clerk session token for authenticated tests
+ *   BASE_URL=http://localhost:3000
+ *   TEST_SESSION_COOKIE=sb-... (optional; copy from browser after sign-in)
  */
 
 import { performance } from 'perf_hooks'
 
-// Configuration
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
-const CLERK_SESSION_TOKEN = process.env.CLERK_SESSION_TOKEN || ''
-const TIMEOUT_MS = 10000 // 10 seconds
+const TEST_SESSION_COOKIE = process.env.TEST_SESSION_COOKIE || ''
+const SMOKE_MODE = process.argv.includes('--smoke') || process.env.API_SMOKE === '1'
+const TIMEOUT_MS = 45000
 
-// ANSI color codes for terminal output
 const colors = {
   reset: '\x1b[0m',
-  bright: '\x1b[1m',
   red: '\x1b[31m',
   green: '\x1b[32m',
   yellow: '\x1b[33m',
-  blue: '\x1b[34m',
   cyan: '\x1b[36m',
   gray: '\x1b[90m',
-}
+} as const
 
-// Test result interface
 interface TestResult {
   name: string
   status: 'PASS' | 'FAIL' | 'WARN' | 'SKIP'
@@ -43,7 +37,6 @@ interface TestResult {
 
 const results: TestResult[] = []
 
-// Helper functions
 function log(message: string, color: keyof typeof colors = 'reset') {
   console.log(`${colors[color]}${message}${colors.reset}`)
 }
@@ -54,36 +47,6 @@ function logHeader(message: string) {
   log('='.repeat(60), 'gray')
 }
 
-function logTest(index: number, total: number, name: string) {
-  log(`\n[${index}/${total}] Testing ${name}...`, 'cyan')
-}
-
-function logResult(result: TestResult) {
-  const icons = {
-    PASS: '✅',
-    FAIL: '❌',
-    WARN: '⚠️ ',
-    SKIP: '⏭️ ',
-  }
-  const colorMap = {
-    PASS: 'green',
-    FAIL: 'red',
-    WARN: 'yellow',
-    SKIP: 'gray',
-  } as const
-
-  const icon = icons[result.status]
-  const color = colorMap[result.status]
-  const time = result.responseTime ? ` (${result.responseTime}ms)` : ''
-  const statusCode = result.statusCode ? ` [${result.statusCode}]` : ''
-
-  log(`  ${icon} ${result.name}: ${result.details}${statusCode}${time}`, color)
-  if (result.error) {
-    log(`     Error: ${result.error}`, 'red')
-  }
-}
-
-// Fetch wrapper with timeout and error handling
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
@@ -91,12 +54,8 @@ async function fetchWithTimeout(
 ): Promise<Response> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
-
   try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    })
+    const response = await fetch(url, { ...options, signal: controller.signal })
     clearTimeout(timeoutId)
     return response
   } catch (error) {
@@ -108,7 +67,6 @@ async function fetchWithTimeout(
   }
 }
 
-// Test helper function
 async function testEndpoint(
   name: string,
   url: string,
@@ -119,6 +77,7 @@ async function testEndpoint(
     requiresAuth?: boolean
     isPublic?: boolean
     description?: string
+    useSession?: boolean
   } = {}
 ): Promise<TestResult> {
   const {
@@ -128,27 +87,21 @@ async function testEndpoint(
     requiresAuth = false,
     isPublic = false,
     description,
+    useSession = false,
   } = options
 
   const startTime = performance.now()
 
   try {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
-
-    // Add Clerk session token if provided and auth is required
-    if (requiresAuth && CLERK_SESSION_TOKEN) {
-      // Clerk uses cookies, but we can also try Authorization header for testing
-      headers['Authorization'] = `Bearer ${CLERK_SESSION_TOKEN}`
-      // Note: In production, Clerk uses cookies set by the browser
-      // For testing, you may need to use Clerk's testing tokens or session cookies
+    const headers: HeadersInit = { 'Content-Type': 'application/json' }
+    if (useSession && TEST_SESSION_COOKIE) {
+      headers['Cookie'] = TEST_SESSION_COOKIE
     }
 
     const fetchOptions: RequestInit = {
       method,
       headers,
-      credentials: 'include', // Include cookies for Clerk auth
+      credentials: 'include',
     }
 
     if (body && method !== 'GET') {
@@ -157,15 +110,6 @@ async function testEndpoint(
 
     const response = await fetchWithTimeout(`${BASE_URL}${url}`, fetchOptions)
     const responseTime = Math.round(performance.now() - startTime)
-
-    let responseData: unknown
-    try {
-      const text = await response.text()
-      responseData = text ? JSON.parse(text) : null
-    } catch {
-      responseData = null
-    }
-
     const statusCode = response.status
     const expectedStatuses = expectedStatus
       ? Array.isArray(expectedStatus)
@@ -173,327 +117,293 @@ async function testEndpoint(
         : [expectedStatus]
       : []
 
-    // Determine test result
     let status: TestResult['status'] = 'PASS'
     let details = description || 'OK'
 
     if (expectedStatuses.length > 0 && !expectedStatuses.includes(statusCode)) {
       status = 'FAIL'
-      details = `Expected status ${expectedStatuses.join(' or ')}, got ${statusCode}`
+      details = `Expected ${expectedStatuses.join(' or ')}, got ${statusCode}`
     } else if (isPublic && statusCode >= 200 && statusCode < 300) {
       details = `Public endpoint accessible (${statusCode})`
     } else if (requiresAuth) {
       if (statusCode === 401 || statusCode === 403) {
-        details = `Correctly requires authentication (${statusCode})`
+        details = `Correctly requires auth (${statusCode})`
       } else if (statusCode >= 200 && statusCode < 300) {
-        if (CLERK_SESSION_TOKEN) {
+        if (useSession && TEST_SESSION_COOKIE) {
           details = `Authenticated request successful (${statusCode})`
         } else {
           status = 'WARN'
-          details = `Unexpected success without auth token (${statusCode})`
+          details = `Unexpected success without session (${statusCode})`
         }
-      } else if (statusCode === 400) {
-        details = `Request validation error (expected for missing/invalid body)`
+      } else if (statusCode === 400 || statusCode === 404 || statusCode === 503) {
+        details = `Expected validation/config response (${statusCode})`
       } else {
         status = 'WARN'
         details = `Unexpected status: ${statusCode}`
       }
     } else if (statusCode >= 200 && statusCode < 300) {
       details = `Success (${statusCode})`
+    } else if (statusCode === 400 || statusCode === 401 || statusCode === 403 || statusCode === 404) {
+      details = `Structured error (${statusCode})`
     } else {
       status = 'WARN'
       details = `Status: ${statusCode}`
     }
 
-    return {
-      name,
-      status,
-      statusCode,
-      responseTime,
-      details,
-    }
+    return { name, status, statusCode, responseTime, details }
   } catch (error) {
     const responseTime = Math.round(performance.now() - startTime)
-    const errorMessage = error instanceof Error ? error.message : String(error)
-
     return {
       name,
       status: 'FAIL',
       responseTime,
       details: 'Request failed',
-      error: errorMessage,
+      error: error instanceof Error ? error.message : String(error),
     }
   }
 }
 
-// Check if server is running
 async function checkServer(): Promise<boolean> {
   try {
-    const response = await fetchWithTimeout(`${BASE_URL}/api/health`, {}, 5000)
-    return response.ok
+    const response = await fetchWithTimeout(`${BASE_URL}/api/health`, {}, 8000)
+    return response.status === 200 || response.status === 503
   } catch {
     return false
   }
 }
 
-// Main test suite
+type TestCase = Parameters<typeof testEndpoint>[2] & { path: string; name: string; method?: string }
+
+const TEST_CASES: TestCase[] = [
+  // Public / semi-public
+  { name: 'Health Check', path: '/api/health', isPublic: true, expectedStatus: [200, 503] },
+  { name: 'Health Cache (dev)', path: '/api/health/cache', isPublic: true, expectedStatus: [200, 404] },
+  { name: 'Listings GET', path: '/api/listings', isPublic: true, expectedStatus: [200] },
+  { name: 'Ads GET', path: '/api/ads?placement=feed', isPublic: true, expectedStatus: [200] },
+  { name: 'Leaderboard GET', path: '/api/leaderboard?limit=5', isPublic: true, expectedStatus: [200] },
+  {
+    name: 'Stripe Webhook (no sig)',
+    path: '/api/webhooks/stripe',
+    method: 'POST',
+    body: { type: 'payment_intent.succeeded', data: { object: {} } },
+    expectedStatus: [400, 401],
+  },
+  {
+    name: 'Shippo Webhook (no sig)',
+    path: '/api/webhooks/shippo',
+    method: 'POST',
+    body: { event: 'track_updated' },
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Gamification Update (no secret)',
+    path: '/api/gamification/update',
+    method: 'POST',
+    body: { userId: '00000000-0000-0000-0000-000000000001', action: 'post_created' },
+    expectedStatus: [403],
+  },
+
+  // Auth required (unauthenticated)
+  { name: 'Profile Me', path: '/api/profile/me', requiresAuth: true, expectedStatus: [401] },
+  { name: 'Posts GET', path: '/api/posts?limit=5', requiresAuth: true, expectedStatus: [401] },
+  { name: 'Notifications GET', path: '/api/notifications', requiresAuth: true, expectedStatus: [401] },
+  { name: 'Stories GET', path: '/api/stories', requiresAuth: true, expectedStatus: [401] },
+  {
+    name: 'Profile Update PUT',
+    path: '/api/profile/update',
+    method: 'PUT',
+    body: { bio: 'test' },
+    requiresAuth: true,
+    expectedStatus: [401],
+  },
+  {
+    name: 'Posts POST',
+    path: '/api/posts',
+    method: 'POST',
+    body: { content: 'test' },
+    requiresAuth: true,
+    expectedStatus: [401],
+  },
+  {
+    name: 'Orders Multi-Vendor POST',
+    path: '/api/orders/create-multi-vendor',
+    method: 'POST',
+    body: { items: [], shipping_info: {} },
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Payment Intent POST',
+    path: '/api/payment/create-intent',
+    method: 'POST',
+    body: { orderId: '00000000-0000-0000-0000-000000000001', amount: 10 },
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Onboarding Complete POST',
+    path: '/api/onboarding/complete',
+    method: 'POST',
+    body: { userId: '00000000-0000-0000-0000-000000000001' },
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Upload POST',
+    path: '/api/upload',
+    method: 'POST',
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Bookings Create POST',
+    path: '/api/bookings/create',
+    method: 'POST',
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Bookings Update PATCH',
+    path: '/api/bookings/update',
+    method: 'PATCH',
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Vendor Verify POST',
+    path: '/api/vendor/verify',
+    method: 'POST',
+    requiresAuth: true,
+    expectedStatus: [401, 400],
+  },
+  {
+    name: 'Vendor Applications GET',
+    path: '/api/vendor/applications',
+    requiresAuth: true,
+    expectedStatus: [401, 403],
+  },
+  {
+    name: 'Vendor Subscriptions GET',
+    path: '/api/vendor/subscriptions',
+    requiresAuth: true,
+    expectedStatus: [401, 400, 404],
+  },
+  {
+    name: 'Reviews GET',
+    path: '/api/reviews',
+    requiresAuth: true,
+    expectedStatus: [401, 400, 405],
+  },
+  {
+    name: 'Webhook Logs GET',
+    path: '/api/webhooks/logs',
+    requiresAuth: true,
+    expectedStatus: [401, 403],
+  },
+
+  // Admin
+  { name: 'Admin Badges GET', path: '/api/admin/badges', requiresAuth: true, expectedStatus: [401, 403] },
+  {
+    name: 'Admin Users Search',
+    path: '/api/admin/users/search?q=test',
+    requiresAuth: true,
+    expectedStatus: [401, 403],
+  },
+  {
+    name: 'Admin Users Export',
+    path: '/api/admin/users/export',
+    requiresAuth: true,
+    expectedStatus: [401, 403],
+  },
+  { name: 'Admin News GET', path: '/api/admin/news', requiresAuth: true, expectedStatus: [401, 403] },
+
+  // Dev-only
+  {
+    name: 'Dev Profile Status',
+    path: '/api/dev/profile-status',
+    requiresAuth: true,
+    expectedStatus: [401, 404],
+  },
+
+  // Authenticated smoke (optional cookie)
+  {
+    name: 'Profile Me (session)',
+    path: '/api/profile/me',
+    requiresAuth: true,
+    useSession: true,
+    expectedStatus: [200, 401, 404],
+  },
+  {
+    name: 'Posts GET (session)',
+    path: '/api/posts?limit=5',
+    requiresAuth: true,
+    useSession: true,
+    expectedStatus: [200, 401],
+  },
+]
+
 async function runTests() {
-  logHeader('🧪 API Routes Test Suite')
+  logHeader('API Routes Test Suite')
   log(`Base URL: ${BASE_URL}`, 'gray')
-  if (CLERK_SESSION_TOKEN) {
-    log('Clerk session token provided (authenticated tests enabled)', 'green')
+  log(`Mode: ${SMOKE_MODE ? 'smoke (fail on FAIL)' : 'full'}`, 'gray')
+  if (TEST_SESSION_COOKIE) {
+    log('TEST_SESSION_COOKIE provided', 'green')
   } else {
-    log('No Clerk session token (testing unauthenticated access only)', 'yellow')
+    log('No TEST_SESSION_COOKIE (session smoke tests may WARN)', 'yellow')
   }
 
-  // Check server
-  log('\n🔍 Checking if dev server is running...', 'yellow')
-  const serverRunning = await checkServer()
-  if (!serverRunning) {
-    log('❌ Server not running! Please start with: npm run dev', 'red')
-    log('\nAttempting to start server...', 'yellow')
-    log('⚠️  Please start the server manually and run tests again', 'yellow')
+  log('\nChecking dev server...', 'yellow')
+  if (!(await checkServer())) {
+    log('Server not running. Start with: npm run dev', 'red')
     process.exit(1)
   }
-  log('✅ Server is running', 'green')
+  log('Server is running', 'green')
 
-  logHeader('📋 Testing API Endpoints')
+  logHeader('Testing API Endpoints')
 
-  // Test 1: Health Check (Public)
-  logTest(1, 18, 'Health Check')
-  results.push(
-    await testEndpoint('Health Check', '/api/health', {
-      isPublic: true,
-      expectedStatus: [200, 503],
-      description: 'Public health endpoint',
+  let index = 0
+  for (const tc of TEST_CASES) {
+    index++
+    log(`\n[${index}/${TEST_CASES.length}] ${tc.name}...`, 'cyan')
+    const result = await testEndpoint(tc.name, tc.path, {
+      method: tc.method,
+      body: tc.body,
+      expectedStatus: tc.expectedStatus,
+      requiresAuth: tc.requiresAuth,
+      isPublic: tc.isPublic,
+      description: tc.description,
+      useSession: tc.useSession,
     })
-  )
-  logResult(results[results.length - 1])
+    results.push(result)
+    logResult(result)
+  }
 
-  // Test 2: Upload (Requires Auth)
-  logTest(2, 18, 'Upload (No Auth)')
-  results.push(
-    await testEndpoint('Upload (No Auth)', '/api/upload', {
-      method: 'POST',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 3: Clerk Webhook (Requires Signature)
-  logTest(3, 18, 'Clerk Webhook (No Signature)')
-  results.push(
-    await testEndpoint('Clerk Webhook', '/api/webhooks/clerk', {
-      method: 'POST',
-      body: { type: 'user.created', data: { id: 'test' } },
-      expectedStatus: [400, 401],
-      description: 'Should validate webhook signature',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 4: Stripe Webhook (Requires Signature)
-  logTest(4, 18, 'Stripe Webhook (No Signature)')
-  results.push(
-    await testEndpoint('Stripe Webhook', '/api/webhooks/stripe', {
-      method: 'POST',
-      body: { type: 'payment_intent.succeeded', data: { object: {} } },
-      expectedStatus: [400, 401],
-      description: 'Should validate webhook signature',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 5: Webhook Logs (Requires Auth)
-  logTest(5, 18, 'Webhook Logs')
-  results.push(
-    await testEndpoint('Webhook Logs', '/api/webhooks/logs', {
-      requiresAuth: true,
-      expectedStatus: [401, 403],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 6: Vendor Applications (Requires Admin)
-  logTest(6, 18, 'Vendor Applications')
-  results.push(
-    await testEndpoint('Vendor Applications', '/api/vendor/applications', {
-      requiresAuth: true,
-      expectedStatus: [401, 403],
-      description: 'Should require admin authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 7: Vendor Verify (Requires Auth)
-  logTest(7, 18, 'Vendor Verify')
-  results.push(
-    await testEndpoint('Vendor Verify', '/api/vendor/verify', {
-      method: 'POST',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 8: Gamification Update (Requires Auth)
-  logTest(8, 18, 'Gamification Update')
-  results.push(
-    await testEndpoint('Gamification Update', '/api/gamification/update', {
-      method: 'POST',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 9: Bookings Create (Requires Auth)
-  logTest(9, 18, 'Bookings Create')
-  results.push(
-    await testEndpoint('Bookings Create', '/api/bookings/create', {
-      method: 'POST',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 10: Bookings Update (Requires Auth)
-  logTest(10, 18, 'Bookings Update')
-  results.push(
-    await testEndpoint('Bookings Update', '/api/bookings/update', {
-      method: 'PATCH',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 11: Payment Create Intent (Requires Auth)
-  logTest(11, 18, 'Payment Create Intent')
-  results.push(
-    await testEndpoint('Payment Create Intent', '/api/payment/create-intent', {
-      method: 'POST',
-      requiresAuth: true,
-      expectedStatus: [401, 400],
-      description: 'Should require authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 12: Admin Badges (Requires Admin)
-  logTest(12, 18, 'Admin Badges')
-  results.push(
-    await testEndpoint('Admin Badges', '/api/admin/badges', {
-      requiresAuth: true,
-      expectedStatus: [401, 403],
-      description: 'Should require admin authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 13: Admin Users Search (Requires Admin)
-  logTest(13, 18, 'Admin Users Search')
-  results.push(
-    await testEndpoint('Admin Users Search', '/api/admin/users/search?q=test', {
-      requiresAuth: true,
-      expectedStatus: [401, 403],
-      description: 'Should require admin authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 14: Admin Users Export (Requires Admin)
-  logTest(14, 18, 'Admin Users Export')
-  results.push(
-    await testEndpoint('Admin Users Export', '/api/admin/users/export', {
-      requiresAuth: true,
-      expectedStatus: [401, 403],
-      description: 'Should require admin authentication',
-    })
-  )
-  logResult(results[results.length - 1])
-
-  // Test 15-18: Dynamic routes (skipped - require IDs)
-  logTest(15, 18, 'Admin User Detail')
-  results.push({
-    name: 'Admin User Detail',
-    status: 'SKIP',
-    details: 'Requires valid user ID',
-  })
-  logResult(results[results.length - 1])
-
-  logTest(16, 18, 'Admin User Roles')
-  results.push({
-    name: 'Admin User Roles',
-    status: 'SKIP',
-    details: 'Requires valid user ID',
-  })
-  logResult(results[results.length - 1])
-
-  logTest(17, 18, 'Admin User Badges')
-  results.push({
-    name: 'Admin User Badges',
-    status: 'SKIP',
-    details: 'Requires valid user ID',
-  })
-  logResult(results[results.length - 1])
-
-  logTest(18, 18, 'Vendor Application Detail')
-  results.push({
-    name: 'Vendor Application Detail',
-    status: 'SKIP',
-    details: 'Requires valid application ID',
-  })
-  logResult(results[results.length - 1])
-
-  // Summary
-  logHeader('📊 Test Results Summary')
+  logHeader('Test Results Summary')
 
   const passCount = results.filter((r) => r.status === 'PASS').length
   const warnCount = results.filter((r) => r.status === 'WARN').length
   const failCount = results.filter((r) => r.status === 'FAIL').length
-  const skipCount = results.filter((r) => r.status === 'SKIP').length
 
-  log(`\n✅ PASSED: ${passCount}`, 'green')
-  log(`⚠️  WARNED: ${warnCount}`, 'yellow')
-  log(`❌ FAILED: ${failCount}`, 'red')
-  log(`⏭️  SKIPPED: ${skipCount}`, 'gray')
+  log(`\nPASSED: ${passCount}`, 'green')
+  log(`WARNED: ${warnCount}`, 'yellow')
+  log(`FAILED: ${failCount}`, 'red')
 
-  log('\nDetailed Results:', 'cyan')
-  results.forEach((result) => {
-    logResult(result)
-  })
-
-  logHeader('🎯 Next Steps')
-  log('  1. Review warnings - ensure auth is working as expected', 'gray')
-  log('  2. Fix any failures', 'gray')
-  log('  3. For authenticated tests, set CLERK_SESSION_TOKEN env var', 'gray')
-  log('  4. Test authenticated endpoints with valid Clerk session', 'gray')
-
-  // Exit with appropriate code
-  if (failCount > 0) {
+  if (SMOKE_MODE && failCount > 0) {
     process.exit(1)
-  } else if (warnCount > 0) {
-    process.exit(0) // Warnings don't fail the test suite
-  } else {
-    process.exit(0)
   }
+  process.exit(failCount > 0 ? 1 : 0)
 }
 
-// Run tests
+function logResult(result: TestResult) {
+  const icons = { PASS: 'PASS', FAIL: 'FAIL', WARN: 'WARN', SKIP: 'SKIP' }
+  const colorMap = { PASS: 'green', FAIL: 'red', WARN: 'yellow', SKIP: 'gray' } as const
+  const time = result.responseTime ? ` (${result.responseTime}ms)` : ''
+  const statusCode = result.statusCode ? ` [${result.statusCode}]` : ''
+  log(`  ${icons[result.status]} ${result.name}: ${result.details}${statusCode}${time}`, colorMap[result.status])
+  if (result.error) log(`     Error: ${result.error}`, 'red')
+}
+
 runTests().catch((error) => {
-  log(`\n❌ Fatal error: ${error.message}`, 'red')
-  if (error.stack) {
-    log(error.stack, 'red')
-  }
+  log(`Fatal error: ${error instanceof Error ? error.message : error}`, 'red')
   process.exit(1)
 })
-

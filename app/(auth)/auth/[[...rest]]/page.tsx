@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { SupabaseAuthForm } from '@/components/auth/SupabaseAuthForm'
 import { isAdminEmail } from '@/lib/admin'
 import { getProfile } from '@/lib/api'
+import { getPostAuthRedirectPath } from '@/lib/auth-redirect'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -22,25 +23,18 @@ export default function AuthPage() {
     const checkTimeout = window.setTimeout(() => setChecking(false), 8000)
 
     const redirectIfSignedIn = async (userId: string, email?: string | null) => {
+      const isEmailAdmin = isAdminEmail(email ?? undefined)
+      let profile = null
       try {
-        const isEmailAdmin = isAdminEmail(email ?? undefined)
-        try {
-          const profile = await getProfile(userId)
-          if (profile?.is_admin || isEmailAdmin) {
-            router.push('/admin')
-            return
-          }
-        } catch {
-          if (isEmailAdmin) {
-            router.push('/admin')
-            return
-          }
-        }
-        const redirect = searchParams.get('redirect_url') || '/onboarding'
-        router.push(redirect)
+        profile = await getProfile(userId)
       } catch {
-        router.push(searchParams.get('redirect_url') || '/onboarding')
+        // no profile row yet
       }
+      const path = getPostAuthRedirectPath(profile, {
+        redirectUrl: searchParams.get('redirect_url'),
+        isEmailAdmin,
+      })
+      router.push(path)
     }
 
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {

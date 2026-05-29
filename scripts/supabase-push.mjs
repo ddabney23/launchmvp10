@@ -1,6 +1,6 @@
 /**
  * Push supabase/migrations to linked remote project.
- * Loads .env.local, uses direct DB host (db.<ref>.supabase.co), repairs orphan remote versions.
+ * Loads .env.local, tries direct DB host then pooler fallback.
  */
 import { execSync, spawnSync } from 'child_process'
 import fs from 'fs'
@@ -28,7 +28,7 @@ function run(cmd, opts = {}) {
   })
   if (r.stdout) log(r.stdout.trimEnd())
   if (r.stderr) log(r.stderr.trimEnd())
-  return r.status ?? 1
+  return { status: r.status ?? 1, stdout: r.stdout || '', stderr: r.stderr || '' }
 }
 
 function getProjectRef() {
@@ -48,6 +48,32 @@ function getDbPassword() {
   } catch {
     return ''
   }
+}
+
+function getSupabaseRegion() {
+  if (process.env.SUPABASE_REGION) return process.env.SUPABASE_REGION
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const m = url.match(/aws-0-([a-z0-9-]+)\.pooler\.supabase\.com/)
+  if (m) return m[1]
+  return process.env.SUPABASE_DEFAULT_REGION || 'us-east-2'
+}
+
+function buildDbUrls(ref, password) {
+  const encoded = encodeURIComponent(password)
+  return [
+    {
+      label: 'direct',
+      url: `postgresql://postgres:${encoded}@db.${ref}.supabase.co:5432/postgres`,
+    },
+    {
+      label: 'pooler-transaction',
+      url: `postgresql://postgres.${ref}:${encoded}@aws-0-${getSupabaseRegion()}.pooler.supabase.com:6543/postgres`,
+    },
+    {
+      label: 'pooler-session',
+      url: `postgresql://postgres.${ref}:${encoded}@aws-0-${getSupabaseRegion()}.pooler.supabase.com:5432/postgres`,
+    },
+  ]
 }
 
 function getLocalVersions() {
@@ -85,6 +111,18 @@ function getRemoteOnlyVersions() {
   return [...new Set(remoteOnly)]
 }
 
+function tryDbPush(dbUrl, label, includeAll = false) {
+  log(`Attempting db push via ${label}${includeAll ? ' --include-all' : ''}...`)
+  const escaped = dbUrl.replace(/"/g, '\\"')
+  const includeAllFlag = includeAll ? '--include-all' : ''
+  return run(`npx supabase db push ${includeAllFlag} --db-url "${escaped}"`)
+}
+
+function shouldRetryIncludeAll(result) {
+  const output = `${result.stdout}\n${result.stderr}`.toLowerCase()
+  return output.includes('--include-all flag') || output.includes('found local migration files to be inserted before the last migration')
+}
+
 fs.writeFileSync(logPath, '')
 dotenv.config({ path: path.join(root, '.env.local') })
 dotenv.config({ path: path.join(root, '.env') })
@@ -101,14 +139,12 @@ if (!password) {
   process.exit(1)
 }
 
-const dbUrl = `postgresql://postgres:${encodeURIComponent(password)}@db.${ref}.supabase.co:5432/postgres`
-
 log(`Project ref: ${ref}`)
-run(`npx supabase --version`)
+run('npx supabase --version')
 
 const pwdEscaped = password.replace(/"/g, '\\"')
 const linkStatus = run(`npx supabase link --project-ref ${ref} --password "${pwdEscaped}"`)
-if (linkStatus !== 0) {
+if (linkStatus.status !== 0) {
   log('WARN: link returned non-zero (may already be linked); continuing with db push')
 }
 
@@ -123,17 +159,41 @@ if (remoteOnly.length > 0) {
   log(`Repairing ${remoteOnly.length} remote-only migration version(s)...`)
   const batch = remoteOnly.join(' ')
   const repairStatus = run(`npx supabase migration repair --status reverted ${batch}`)
-  if (repairStatus !== 0) {
+  if (repairStatus.status !== 0) {
     log('ERROR: migration repair failed')
-    process.exit(repairStatus)
+    process.exit(repairStatus.status)
   }
 }
 
-const pushStatus = run(`npx supabase db push --db-url "${dbUrl}"`)
-if (pushStatus !== 0) {
-  log('ERROR: db push failed')
-  process.exit(pushStatus)
+const dbUrls = buildDbUrls(ref, password)
+let pushStatus = 1
+for (const { label, url } of dbUrls) {
+  let result = tryDbPush(url, label)
+  pushStatus = result.status
+  if (pushStatus === 0) {
+    log(`SUCCESS: migrations pushed via ${label}`)
+    process.exit(0)
+  }
+
+  if (shouldRetryIncludeAll(result)) {
+    log(`INFO: db push requires --include-all due to local migration order mismatch; retrying via ${label}`)
+    result = tryDbPush(url, label, true)
+    pushStatus = result.status
+    if (pushStatus === 0) {
+      log(`SUCCESS: migrations pushed via ${label} --include-all`)
+      process.exit(0)
+    }
+    log(`WARN: db push --include-all failed via ${label}`)
+    continue
+  }
+
+  log(`WARN: db push failed via ${label}`)
 }
 
-log('SUCCESS: migrations pushed')
-process.exit(0)
+log('ERROR: db push failed on all connection methods (direct + pooler)')
+log('')
+log('Fallback: open Supabase Dashboard → SQL Editor and run:')
+log('  scripts/apply-pending-migrations.sql')
+log('Regenerate bundle: node scripts/build-apply-pending-migrations.mjs')
+log('Verify: npm run supabase:migration:list')
+process.exit(pushStatus)

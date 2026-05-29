@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, X, CheckCircle2, ArrowLeft, ArrowRight, Sparkles, Heart, Users, Gift } from "lucide-react";
 import { updateProfile, uploadFile, getProfile } from "@/lib/api";
+import { isOnboardingComplete } from "@/lib/profile-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +76,7 @@ export default function CustomerOnboarding() {
   });
 
   // CLERK MIGRATION: Use Clerk user hook
-  const { user, loading: authLoading, refetch } = useAuth();
+  const { user, loading: authLoading, refetch, setProfile } = useAuth();
   const isLoaded = !authLoading;
   const authUserId = user?.id;
 
@@ -163,6 +164,7 @@ export default function CustomerOnboarding() {
     if (!userId) return;
 
     setSubmitting(true);
+    let updatedProfile: Awaited<ReturnType<typeof updateProfile>> | null = null;
     try {
       let avatarUrl = profileForm.getValues().avatar_url;
 
@@ -182,12 +184,13 @@ export default function CustomerOnboarding() {
       try {
         const profileData = {
           avatar_url: avatarUrl || null,
-          bio: profileForm.getValues().bio || null,
-          onboarding_completed: true, // Mark onboarding as done
+          bio: profileForm.getValues().bio || undefined,
+          onboarding_completed: true,
         };
         
         console.log("Updating profile with:", profileData);
-        await updateProfile(userId, profileData);
+        updatedProfile = await updateProfile(userId, profileData);
+        setProfile(updatedProfile);
         console.log("Profile updated successfully");
       } catch (profileError) {
         console.error("Profile update error details:", profileError);
@@ -222,6 +225,24 @@ export default function CustomerOnboarding() {
         await refetch();
       } catch (refreshError) {
         console.warn("Failed to refresh auth profile after onboarding:", refreshError);
+      }
+
+      let profileToCheck = updatedProfile;
+      try {
+        profileToCheck = await getProfile(userId);
+        setProfile(profileToCheck);
+      } catch {
+        // use updatedProfile from PUT response
+      }
+
+      if (!isOnboardingComplete(profileToCheck)) {
+        toast({
+          title: "Profile sync issue",
+          description:
+            "Onboarding was saved but the app has not refreshed yet. Try signing out and back in, or check GET /api/dev/profile-status in development.",
+          variant: "destructive",
+        });
+        return;
       }
 
       toast({
