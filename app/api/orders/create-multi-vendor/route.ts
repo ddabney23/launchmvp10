@@ -91,7 +91,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     // Get listing to find vendor
     const { data: listing, error: listingError } = await adminClient
       .from('listings')
-      .select('id, vendor, price, stock, title')
+      .select('id, vendor, price, stock, quantity, title')
       .eq('id', item.listing_id)
       .maybeSingle()
 
@@ -104,8 +104,14 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       return errorResponse(`Listing ${item.listing_id} has no vendor`, 'INVALID_LISTING', 400)
     }
 
-    // Validate stock
-    if (!listing.stock || listing.stock < item.quantity) {
+    const availableStock =
+      typeof listing.stock === 'number'
+        ? listing.stock
+        : typeof listing.quantity === 'number'
+          ? listing.quantity
+          : 0
+
+    if (availableStock < item.quantity) {
       return errorResponse(`Insufficient stock for ${listing.title}`, 'INSUFFICIENT_STOCK', 400)
     }
 
@@ -185,11 +191,12 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       // Get vendor's Stripe Connect account if available
       const { data: vendorProfile } = await adminClient
         .from('vendor_profiles')
-        .select('stripe_connect_account_id')
+        .select('payout_account_id, stripe_connect_account_id')
         .eq('id', vendorId)
         .maybeSingle()
 
-      const connectAccountId = vendorProfile?.stripe_connect_account_id
+      const connectAccountId =
+        vendorProfile?.payout_account_id || vendorProfile?.stripe_connect_account_id
 
       // Calculate application fee
       let applicationFeeAmount = 0

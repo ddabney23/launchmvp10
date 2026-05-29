@@ -42,7 +42,12 @@ function isPublicApiRoute(pathname: string, method: string): boolean {
   if (pathname === '/api/health' && method === 'GET') return true
   if (pathname === '/api/health/cache' && method === 'GET') return true
   if (pathname === '/api/listings' && method === 'GET') return true
+  if (/^\/api\/listings\/[^/]+\/availability$/.test(pathname) && method === 'GET') return true
   if (pathname === '/api/ads' && method === 'GET') return true
+  if (pathname === '/api/news' && method === 'GET') return true
+  if (/^\/api\/news\/[^/]+$/.test(pathname) && method === 'GET') return true
+  if (pathname === '/api/posts/view' && method === 'POST') return true
+  if (pathname === '/api/posts/share' && method === 'POST') return true
   if (pathname === '/api/leaderboard' && method === 'GET') return true
   // Route handler enforces x-internal-api-secret
   if (pathname === '/api/gamification/update' && method === 'POST') return true

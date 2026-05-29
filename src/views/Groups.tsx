@@ -23,6 +23,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GroupCreateSchema } from "@/lib/validators";
 import type { GroupCreate } from "@/lib/types";
+import { PageShell } from "@/components/PageShell";
 
 interface GroupsProps {
   groupId?: string;
@@ -201,8 +202,7 @@ export default function Groups({ groupId }: GroupsProps) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <main className="container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-8">
-          <div className="max-w-4xl mx-auto">
+        <PageShell narrow>
             <Button
               variant="ghost"
               onClick={() => {
@@ -217,7 +217,7 @@ export default function Groups({ groupId }: GroupsProps) {
 
             {/* Group Header */}
             <Card className="mb-6">
-              <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-t-lg">
+              <div className="relative h-48 bg-linear-to-br from-primary/20 to-secondary/20 rounded-t-lg">
                 {groupData.cover_image_url && (
                   <img
                     src={groupData.cover_image_url}
@@ -322,11 +322,11 @@ export default function Groups({ groupId }: GroupsProps) {
                           >
                             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 font-bold text-lg">
                               {index === 0 ? (
-                                <Crown className="h-5 w-5 text-yellow-500" />
+                                <Crown className="h-5 w-5 text-warning" />
                               ) : index === 1 ? (
-                                <Trophy className="h-5 w-5 text-gray-400" />
+                                <Trophy className="h-5 w-5 text-muted-foreground" />
                               ) : index === 2 ? (
-                                <Trophy className="h-5 w-5 text-orange-400" />
+                                <Trophy className="h-5 w-5 text-warning/70" />
                               ) : (
                                 index + 1
                               )}
@@ -357,8 +357,7 @@ export default function Groups({ groupId }: GroupsProps) {
                 </Card>
               </TabsContent>
             </Tabs>
-          </div>
-        </main>
+        </PageShell>
       </div>
     );
   }
@@ -366,10 +365,10 @@ export default function Groups({ groupId }: GroupsProps) {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-8">
+      <PageShell>
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
               Groups
             </h1>
             <p className="text-muted-foreground">Join communities and connect with like-minded people</p>
@@ -549,7 +548,7 @@ export default function Groups({ groupId }: GroupsProps) {
             )}
           </CardContent>
         </Card>
-      </main>
+      </PageShell>
     </div>
   );
 }

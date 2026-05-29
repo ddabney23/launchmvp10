@@ -702,26 +702,13 @@ export async function getFollowing(userId: string): Promise<Profile[]> {
     return await mockApi.getFollowing(userId);
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("follows")
-      .select("following, profiles!follows_following_fkey(*)")
-      .eq("follower", userId);
+  const { data, error } = await supabase
+    .from("follows")
+    .select("following, profiles!follows_following_fkey(*)")
+    .eq("follower", userId);
 
-    if (error) {
-      if (shouldUseMockApi() || error.status === 401) {
-        return await mockApi.getFollowing(userId);
-      }
-      handleError(error);
-    }
-    return (data || []).map((item: { profiles: Profile }) => item.profiles) as Profile[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401) {
-      return await mockApi.getFollowing(userId);
-    }
-    throw error;
-  }
+  if (error) handleError(error);
+  return (data || []).map((item: { profiles: Profile }) => item.profiles) as Profile[];
 }
 
 // Comments API
@@ -1557,16 +1544,17 @@ export async function sendMessage(message: MessageCreate): Promise<Message> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new ApiError("Not authenticated", "UNAUTHENTICATED", 401);
 
-  // Sanitize message content to prevent XSS attacks
-  const sanitizedMessage = {
-    ...message,
-    content: message.content ? sanitizeString(message.content) : "",
-    sender: user.id,
-  };
+  const bodyText = message.body ? sanitizeString(message.body) : "";
 
   const { data, error } = await supabase
     .from("messages")
-    .insert(sanitizedMessage)
+    .insert({
+      channel_id: message.channel_id,
+      body: bodyText,
+      attachments: message.attachments ?? [],
+      read: message.read ?? false,
+      sender: user.id,
+    })
     .select()
     .single();
 
@@ -2375,6 +2363,19 @@ export async function createVendorRefund(
 
 // News API
 export async function getNews(page: number = 0, pageSize: number = 20): Promise<News[]> {
+  try {
+    const response = await fetch(
+      resolveApiUrl(`/api/news?page=${page}&pageSize=${pageSize}`),
+      { credentials: "include" }
+    );
+    if (response.ok) {
+      const result = await response.json();
+      return (result.data?.news ?? result.news ?? result.data ?? []) as News[];
+    }
+  } catch {
+    // fall through to Supabase
+  }
+
   const { data, error } = await supabase
     .from("news")
     .select("*")
@@ -2388,6 +2389,22 @@ export async function getNews(page: number = 0, pageSize: number = 20): Promise<
 }
 
 export async function getNewsItem(newsId: string): Promise<News> {
+  try {
+    const response = await fetch(resolveApiUrl(`/api/news/${newsId}`), {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const result = await response.json();
+      const item = (result.data?.news ?? result.data ?? result.news) as News | undefined;
+      if (item) return item;
+    }
+    if (response.status === 404) {
+      throw new ApiError("News article not found", "NOT_FOUND", 404);
+    }
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+  }
+
   const { data, error } = await supabase
     .from("news")
     .select("*")
@@ -2396,24 +2413,22 @@ export async function getNewsItem(newsId: string): Promise<News> {
     .single();
 
   if (error) {
-    // If news item not found, throw a more specific error
     if (error.code === "PGRST116") {
       throw new ApiError("News article not found", "NOT_FOUND", 404);
     }
     handleError(error);
   }
-  
+
   if (!data) {
     throw new ApiError("News article not found", "NOT_FOUND", 404);
   }
-  
-  // Increment view count (don't fail if RPC doesn't exist)
+
   try {
     await supabase.rpc("increment_news_view_count", { news_id: newsId });
   } catch {
     // RPC might not exist, ignore
   }
-  
+
   return data as News;
 }
 
@@ -2649,32 +2664,41 @@ export async function getUserBadges(userId: string): Promise<(Badge & { awarded_
     return badges.map(b => ({ ...b, awarded_at: new Date().toISOString() }));
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("user_badges")
-      .select(`
-        awarded_at,
-        badge:badges(*)
-      `)
-      .eq("user_id", userId)
-      .order("awarded_at", { ascending: false });
+  const { data: profileBadges, error: profileError } = await supabase
+    .from("profile_badges")
+    .select(`
+      awarded_at,
+      badge:badges(*)
+    `)
+    .eq("profile_id", userId)
+    .order("awarded_at", { ascending: false });
 
-    if (error) {
-      if (shouldUseMockApi() || error.status === 401) {
-        const badges = await mockApi.getUserBadges(userId);
-        return badges.map(b => ({ ...b, awarded_at: new Date().toISOString() }));
-      }
-      handleError(error);
-    }
-    return (data || []).map((item: { badge: Badge; awarded_at: string }) => ({ ...item.badge, awarded_at: item.awarded_at })) as (Badge & { awarded_at?: string })[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401) {
-      const badges = await mockApi.getUserBadges(userId);
-      return badges.map(b => ({ ...b, awarded_at: new Date().toISOString() }));
-    }
-    throw error;
+  if (!profileError && profileBadges && profileBadges.length > 0) {
+    return profileBadges.map((item: { badge: Badge; awarded_at: string }) => ({
+      ...item.badge,
+      awarded_at: item.awarded_at,
+    })) as (Badge & { awarded_at?: string })[];
   }
+
+  const { data, error } = await supabase
+    .from("user_badges")
+    .select(`
+      awarded_at,
+      badge:badges(*)
+    `)
+    .eq("user_id", userId)
+    .order("awarded_at", { ascending: false });
+
+  if (error) {
+    if (profileError && profileError.code !== "PGRST116") {
+      handleError(profileError);
+    }
+    handleError(error);
+  }
+  return (data || []).map((item: { badge: Badge; awarded_at: string }) => ({
+    ...item.badge,
+    awarded_at: item.awarded_at,
+  })) as (Badge & { awarded_at?: string })[];
 }
 
 export async function getAllBadges(): Promise<Badge[]> {
@@ -2697,42 +2721,64 @@ export async function getLeaderboard(period: "daily" | "weekly" | "monthly" | "a
     }));
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select(`
-        *,
-        profile:profiles(*)
-      `)
-      .eq("period", period)
-      .order("rank", { ascending: true })
-      .limit(limit);
+  const periodParam =
+    period === "all_time" ? "all-time" : period === "daily" ? "weekly" : period;
 
-    if (error) {
-      // Leaderboard table might not exist (404), return empty array in test mode
-      if (shouldUseMockApi() || error.status === 401 || error.status === 404) {
-        const leaderboard = await mockApi.getLeaderboard(period, limit);
-        return leaderboard.map((item, index) => ({
-          ...item,
-          profile: undefined,
-          rank: index + 1,
-        }));
-      }
-      handleError(error);
+  try {
+    const response = await fetch(
+      resolveApiUrl(`/api/leaderboard?period=${periodParam}&limit=${limit}`),
+      { credentials: "include" }
+    );
+
+    if (response.ok) {
+      const result = await response.json();
+      const entries = result.leaderboard || [];
+      return entries.map(
+        (entry: {
+          rank: number;
+          userId: string;
+          username: string;
+          fullName?: string;
+          avatarUrl?: string;
+          points: number;
+          level?: number;
+        }) => ({
+          user_id: entry.userId,
+          rank: entry.rank,
+          points: entry.points,
+          period,
+          profile: {
+            id: entry.userId,
+            username: entry.username,
+            display_name: entry.fullName ?? null,
+            avatar_url: entry.avatarUrl ?? null,
+            points: entry.points,
+            level: entry.level ?? 1,
+          } as Profile,
+        })
+      ) as (Leaderboard & { profile?: Profile })[];
     }
-    return (data || []) as (Leaderboard & { profile?: Profile })[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401 || errorStatus === 404) {
-      const leaderboard = await mockApi.getLeaderboard(period, limit);
-      return leaderboard.map((item, index) => ({
-        ...item,
-        profile: undefined,
-        rank: index + 1,
-      }));
-    }
-    throw error;
+  } catch {
+    // fall through to direct query
   }
+
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select(`
+      *,
+      profile:profiles(*)
+    `)
+    .eq("period", period)
+    .order("rank", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    if (error.status === 404 || error.code === "PGRST116") {
+      return [];
+    }
+    handleError(error);
+  }
+  return (data || []) as (Leaderboard & { profile?: Profile })[];
 }
 
 export async function getGroupLeaderboard(groupId: string, limit: number = 50): Promise<Array<{ user_id: string; points: number; profile?: Profile }>> {
@@ -3008,11 +3054,7 @@ export async function getPersonalizedFeed(userId: string, page: number = 0, page
     try {
       return await getFeedPosts(page, pageSize);
     } catch {
-      const errorStatus =
-        error && typeof error === 'object' && 'status' in error
-          ? (error.status as number)
-          : undefined;
-      if (shouldUseMockApi() || errorStatus === 401) {
+      if (shouldUseMockApi()) {
         return await mockApi.getPersonalizedFeed(userId, page, pageSize);
       }
       throw error;
@@ -3025,9 +3067,7 @@ export async function getRecommendedListings(userId: string, limit: number = 6):
     return await mockApi.getRecommendedListings(userId, limit);
   }
 
-  try {
-    // Get user's past orders
-    const { data: orders } = await supabase
+  const { data: orders } = await supabase
       .from("orders")
       .select("id")
       .eq("buyer", userId)
@@ -3066,20 +3106,8 @@ export async function getRecommendedListings(userId: string, limit: number = 6):
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    if (error) {
-      if (shouldUseMockApi() || error.status === 401) {
-        return await mockApi.getRecommendedListings(userId, limit);
-      }
-      handleError(error);
-    }
+    if (error) handleError(error);
     return (data || []) as Listing[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401) {
-      return await mockApi.getRecommendedListings(userId, limit);
-    }
-    throw error;
-  }
 }
 
 export async function getRecommendedVendors(userId: string, limit: number = 6): Promise<Profile[]> {
@@ -3087,17 +3115,14 @@ export async function getRecommendedVendors(userId: string, limit: number = 6): 
     return await mockApi.getRecommendedVendors(userId, limit);
   }
 
-  try {
-    // Get user's past orders
-    const { data: orders } = await supabase
-      .from("orders")
-      .select("id")
-      .eq("buyer", userId)
-      .limit(10);
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("buyer", userId)
+    .limit(10);
 
   const orderIds = orders?.map((o) => o.id) || [];
-  
-  // Get vendors from past orders
+
   const vendorIds = new Set<string>();
   if (orderIds.length > 0) {
     const { data: orderItems } = await supabase
@@ -3114,44 +3139,30 @@ export async function getRecommendedVendors(userId: string, limit: number = 6): 
     });
   }
 
-    // Get verified vendors, prioritizing those user has purchased from
-    if (vendorIds.size > 0) {
-      const { data: recommended } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("is_vendor", true)
-        .eq("vendor_verified", true)
-        .in("id", Array.from(vendorIds))
-        .limit(limit);
-
-      if (recommended && recommended.length > 0) {
-        return recommended as Profile[];
-      }
-    }
-
-    // Fallback to top vendors
-    const { data, error } = await supabase
+  if (vendorIds.size > 0) {
+    const { data: recommended } = await supabase
       .from("profiles")
       .select("*")
       .eq("is_vendor", true)
       .eq("vendor_verified", true)
-      .order("points", { ascending: false })
+      .in("id", Array.from(vendorIds))
       .limit(limit);
 
-    if (error) {
-      if (shouldUseMockApi() || error.status === 401) {
-        return await mockApi.getRecommendedVendors(userId, limit);
-      }
-      handleError(error);
+    if (recommended && recommended.length > 0) {
+      return recommended as Profile[];
     }
-    return (data || []) as Profile[];
-  } catch (error: unknown) {
-    const errorStatus = error && typeof error === 'object' && 'status' in error ? (error.status as number) : undefined
-    if (shouldUseMockApi() || errorStatus === 401) {
-      return await mockApi.getRecommendedVendors(userId, limit);
-    }
-    throw error;
   }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("is_vendor", true)
+    .eq("vendor_verified", true)
+    .order("points", { ascending: false })
+    .limit(limit);
+
+  if (error) handleError(error);
+  return (data || []) as Profile[];
 }
 
 // Admin API Functions

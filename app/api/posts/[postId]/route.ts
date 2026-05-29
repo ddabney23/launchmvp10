@@ -12,6 +12,48 @@ import { logger } from '@/lib/logger'
 export const dynamic = 'force-dynamic'
 
 /**
+ * GET /api/posts/[postId]
+ * Fetch a single post with author profile
+ */
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ postId: string }> }
+) {
+  try {
+    const { postId } = await params
+    const supabase = createAdminClient()
+
+    const { data: post, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        author:profiles!posts_author_fkey(
+          id,
+          username,
+          display_name,
+          avatar_url
+        )
+      `)
+      .eq('id', postId)
+      .maybeSingle()
+
+    if (error) {
+      logger.error('Failed to fetch post', error, { postId })
+      return NextResponse.json({ error: 'Failed to fetch post' }, { status: 500 })
+    }
+
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ data: post })
+  } catch (error) {
+    logger.error('Get post error', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/**
  * PATCH /api/posts/[postId]
  * Update post content and/or visibility
  */

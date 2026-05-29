@@ -14,6 +14,8 @@ import { getUserBadges, getAllBadges, getLeaderboard, getUserPointsHistory } fro
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { PageShell } from "@/components/PageShell";
+import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 
 interface RewardItemProps {
   id: string;
@@ -142,6 +144,20 @@ export default function Rewards() {
     enabled: !!user?.id,
   });
 
+  useRealtimeInvalidate(
+    `leaderboard:rewards:${selectedPeriod}`,
+    'leaderboard',
+    [['leaderboard'], ['userBadges']],
+    { enabled: !!user }
+  );
+
+  useRealtimeInvalidate(
+    `user-badges:rewards:${user?.id ?? 'anon'}`,
+    'user_badges',
+    [['userBadges']],
+    { enabled: !!user?.id, filter: user?.id ? `user_id=eq.${user.id}` : undefined }
+  );
+
   const badges = userBadges || [];
   const allBadgesList = allBadges || [];
   const leaderboard = leaderboardData || [];
@@ -176,9 +192,9 @@ export default function Rewards() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-8">
+      <PageShell>
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
             Rewards & Gamification
           </h1>
           <p className="text-muted-foreground">Track your progress and unlock achievements</p>
@@ -223,7 +239,7 @@ export default function Rewards() {
                     <div>
                       <p className="text-sm text-muted-foreground">Badges Earned</p>
                       <p className="text-3xl font-bold flex items-center gap-2">
-                        <Star className="h-6 w-6 text-yellow-500" />
+                        <Star className="h-6 w-6 text-warning" />
                         {badges.length}
                       </p>
                     </div>
@@ -452,7 +468,7 @@ export default function Rewards() {
                 <CardDescription>Use your credits for discounts and perks</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center py-4 border rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10">
+                <div className="text-center py-4 border rounded-lg bg-linear-to-br from-primary/10 to-secondary/10">
                   <p className="text-3xl font-bold text-secondary">{profile?.credits || 0}</p>
                   <p className="text-sm text-muted-foreground">Available Credits</p>
                 </div>
@@ -541,7 +557,7 @@ export default function Rewards() {
             )}
           </div>
         </div>
-      </main>
+      </PageShell>
     </div>
   );
 }

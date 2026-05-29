@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/integrations/supabase/server'
+import { createAdminClient, createServerClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { logger } from '@/lib/logger'
 import { sanitizeString } from '@/lib/sanitize'
@@ -19,6 +19,50 @@ if (!CommentCreateSchema) {
 export const dynamic = 'force-dynamic'
 
 /**
+ * GET /api/posts/[postId]/comments
+ * List comments for a post
+ */
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ postId: string }> }
+) {
+  try {
+    const { postId } = await params
+    const supabase = await createServerClient()
+
+    const { data: comments, error } = await supabase
+      .from('comments')
+      .select(`
+        *,
+        author:profiles!comments_author_fkey(
+          id,
+          username,
+          display_name,
+          avatar_url
+        )
+      `)
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      logger.error('Failed to fetch comments', error, { postId })
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch comments', code: 'COMMENTS_FETCH_ERROR' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true, data: comments || [] })
+  } catch (error) {
+    logger.error('Get comments error', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error', code: 'INTERNAL_ERROR' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
  * POST /api/posts/[postId]/comments
  * Create a new comment on a post (requires authentication)
  */
@@ -26,26 +70,15 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ postId: string }> }
 ) {
-  console.log('=== COMMENT API ROUTE START ===')
-  console.log('Request URL:', req.url)
-  console.log('Request method:', req.method)
-  
   try {
     // Authenticate user
     let userId: string
     try {
-      console.log('Attempting to get Clerk user ID...')
       userId = await getAuthUserId()
-      console.log('Comment API - Authenticated user', { userId: userId.substring(0, 10) + '...' })
       logger.info('Comment API - Authenticated user', { userId: userId.substring(0, 10) + '...' })
     } catch (authError) {
       const errorMessage = authError instanceof Error ? authError.message : 'Authentication failed'
-      console.error('Comment API - Authentication failed', { 
-        error: errorMessage,
-        errorType: authError?.constructor?.name,
-        stack: authError instanceof Error ? authError.stack : undefined
-      })
-      logger.error('Comment API - Authentication failed', { 
+      logger.error('Comment API - Authentication failed', {
         error: errorMessage,
         errorType: authError?.constructor?.name,
         stack: authError instanceof Error ? authError.stack : undefined
@@ -58,7 +91,6 @@ export async function POST(
         code: 'UNAUTHORIZED',
         details: errorMessage
       }
-      console.log('Returning error response:', errorResponse)
       return NextResponse.json(
         errorResponse,
         { 
@@ -74,10 +106,7 @@ export async function POST(
     const rateLimitResponse = await rateLimit(req, { userId })
     if (rateLimitResponse) return rateLimitResponse
 
-    console.log('Getting postId from params...')
-    const { postId } = await params // Next.js 15: params is now a Promise
-    console.log('PostId:', postId)
-    
+    const { postId } = await params
     if (!postId) {
       return NextResponse.json(
         { error: 'Post ID is required' },
@@ -85,13 +114,11 @@ export async function POST(
       )
     }
 
-    console.log('Parsing request body...')
-    let body: any
+    let body: Record<string, unknown>
     try {
       body = await req.json()
-      console.log('Request body:', body)
     } catch (parseError) {
-      console.error('Failed to parse request body:', parseError)
+      logger.warn('Failed to parse comment request body', parseError)
       return NextResponse.json(
         { error: 'Invalid request body' },
         { status: 400 }
@@ -132,7 +159,6 @@ export async function POST(
       .single()
 
     if (profileError || !profile) {
-      console.error('Profile not found:', profileError)
       logger.error('Profile not found for user', profileError, { userId })
       return NextResponse.json(
         { 
@@ -192,7 +218,6 @@ export async function POST(
       .single()
 
     if (commentError) {
-      console.error('Failed to create comment:', commentError)
       logger.error('Failed to create comment', commentError, {
         userId,
         profileId: profile.id,
@@ -337,8 +362,7 @@ export async function POST(
         }
       )
     } catch (jsonError) {
-      // If even JSON response fails, return plain text
-      console.error('Failed to create JSON error response:', jsonError)
+      logger.error('Failed to create JSON error response', jsonError)
       return new NextResponse(
         JSON.stringify({
           success: false,

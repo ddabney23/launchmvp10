@@ -115,12 +115,15 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     // Get vendor profile with Connect account
     const { data: vendorProfile } = await adminClient
       .from('vendor_profiles')
-      .select('payout_account_id, transaction_fee_percent')
+      .select('payout_account_id, stripe_connect_account_id, transaction_fee_percent')
       .eq('id', order.vendor)
       .maybeSingle()
 
-    if (vendorProfile?.payout_account_id) {
-      connectAccountId = vendorProfile.payout_account_id
+    const vendorConnectId =
+      vendorProfile?.payout_account_id || vendorProfile?.stripe_connect_account_id
+
+    if (vendorConnectId) {
+      connectAccountId = vendorConnectId
 
       // Calculate application fee based on vendor's transaction fee
       const feePercent = Number(vendorProfile.transaction_fee_percent) || 2.0

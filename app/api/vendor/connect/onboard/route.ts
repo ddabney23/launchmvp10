@@ -190,6 +190,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
         .from('vendor_profiles')
         .update({
           payout_account_id: accountId,
+          stripe_connect_account_id: accountId,
           stripe_onboard_status: 'pending',
         })
         .eq('id', profile.id)
@@ -212,6 +213,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       .from('vendor_profiles')
       .update({
         payout_account_id: accountId,
+        stripe_connect_account_id: accountId,
         stripe_onboard_status: 'pending',
       })
       .eq('id', profile.id)

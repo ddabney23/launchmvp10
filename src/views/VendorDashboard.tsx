@@ -36,6 +36,7 @@ import { RefundManagement } from "@/components/vendor/RefundManagement";
 import { VendorOrderManagement } from "@/components/vendor/VendorOrderManagement";
 import { VendorAnalytics } from "@/components/vendor/VendorAnalytics";
 import { ShippingLabelManager } from "@/components/vendor/ShippingLabelManager";
+import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 
 interface VendorDashboardProps {
   vendorId?: string;
@@ -167,10 +168,40 @@ export default function VendorDashboard({ vendorId: vendorIdProp }: VendorDashbo
     queryKey: ["bookings", "vendor", vendorId],
     queryFn: () => {
       if (!vendorId) throw new Error("Vendor ID required");
-      return getUserBookings(vendorId);
+      return getUserBookings(undefined, 50, 'vendor');
     },
     enabled: !!vendorId && isOwner,
   });
+
+  useRealtimeInvalidate(
+    `orders:vendor:${vendorId ?? 'none'}`,
+    'orders',
+    [['orders']],
+    {
+      enabled: !!vendorId && isOwner,
+      filter: vendorId ? `vendor=eq.${vendorId}` : undefined,
+    }
+  );
+
+  useRealtimeInvalidate(
+    `bookings:vendor:${vendorId ?? 'none'}`,
+    'bookings',
+    [['bookings']],
+    {
+      enabled: !!vendorId && isOwner,
+      filter: vendorId ? `vendor=eq.${vendorId}` : undefined,
+    }
+  );
+
+  useRealtimeInvalidate(
+    `listings:vendor:${vendorId ?? 'none'}`,
+    'listings',
+    [['listings']],
+    {
+      enabled: !!vendorId && isOwner,
+      filter: vendorId ? `vendor=eq.${vendorId}` : undefined,
+    }
+  );
 
   const { data: coupons, isLoading: couponsLoading } = useQuery({
     queryKey: ["coupons", vendorId],

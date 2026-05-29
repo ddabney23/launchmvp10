@@ -11,8 +11,9 @@ import {
 } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/integrations/supabase/client'
 import { getProfile } from '@/lib/api'
+import { logger } from '@/lib/logger'
 import type { Profile } from '@/lib/types'
 
 export type AuthUser = {
@@ -56,16 +57,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const nextUser = session?.user ?? null
-      setAuthUser(nextUser)
-      if (nextUser) {
-        loadProfile(nextUser).finally(() => setLoading(false))
-      } else {
-        setProfile(null)
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        const nextUser = session?.user ?? null
+        setAuthUser(nextUser)
+        if (nextUser) {
+          loadProfile(nextUser).finally(() => setLoading(false))
+        } else {
+          setProfile(null)
+          setLoading(false)
+        }
+      })
+      .catch((error) => {
+        logger.warn('Failed to load auth session (non-critical)', {
+          error: error instanceof Error ? error.message : String(error),
+        })
         setLoading(false)
-      }
-    })
+      })
 
     const {
       data: { subscription },

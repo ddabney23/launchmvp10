@@ -23,6 +23,7 @@ import {
   stripeConfigErrorMessage,
 } from "@/lib/stripe-config";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { StripePaymentForm } from "@/components/StripePaymentForm";
 
 const checkoutSchema = z.object({
   email: z.string().email(),
@@ -43,6 +44,8 @@ export default function Checkout() {
   const { user, profile } = useAuth();
   const { items, getTotal, clearCart } = useCart();
   const [processing, setProcessing] = useState(false);
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
 
   const form = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
@@ -159,57 +162,64 @@ export default function Checkout() {
       }
     },
     onSuccess: async (data) => {
-      // Check if Stripe is configured
       const stripeKey = getStripePublishableKey();
-      
+
       if (data.isMultiVendor && data.orders.length > 1) {
-        // Multi-vendor order
         toast({
           title: "Orders Created",
-          description: `${data.orders.length} orders created (one per vendor). Payment intents ready.`,
+          description: `${data.orders.length} orders created. Complete payment on the Orders page.`,
         });
-        
-        // Store all payment intents
-        sessionStorage.setItem("payment_intents", JSON.stringify(
-          data.orders.map((order: any) => ({
-            order_id: order.order_id,
-            client_secret: order.client_secret,
-            stripe_payment_intent: order.stripe_payment_intent || order.payment_intent_id,
-          }))
-        ));
-        
-        setTimeout(() => {
-          clearCart();
-          router.push(`/orders`);
-        }, 2000);
-      } else if (data.orders.length > 0) {
-        // Single vendor order
-        const order = data.orders[0];
-        if (stripeKey && order.client_secret) {
-          toast({
-            title: "Order Created",
-            description: `Order #${order.order_id} created. Payment intent ready. Redirecting to payment...`,
-          });
-          
-          sessionStorage.setItem("payment_intent", JSON.stringify({
-            order_id: order.order_id,
-            client_secret: order.client_secret,
-            stripe_payment_intent: order.stripe_payment_intent || order.payment_intent_id,
-          }));
-          
-          setTimeout(() => {
-            clearCart();
-            router.push(`/orders`);
-          }, 2000);
-        } else {
-          toast({
-            title: "Order Created",
-            description: `Order #${order.order_id} created successfully. Payment processing will be handled separately.`,
-          });
-          clearCart();
-          router.push(`/orders`);
-        }
+        sessionStorage.setItem(
+          "payment_intents",
+          JSON.stringify(
+            data.orders.map((order: { order_id: string; client_secret?: string; stripe_payment_intent?: string }) => ({
+              order_id: order.order_id,
+              client_secret: order.client_secret,
+              stripe_payment_intent: order.stripe_payment_intent,
+            }))
+          )
+        );
+        clearCart();
+        setProcessing(false);
+        router.push("/orders");
+        return;
       }
+
+      if (data.orders.length > 0) {
+        const order = data.orders[0] as {
+          order_id: string;
+          client_secret?: string;
+          stripe_payment_intent?: string;
+        };
+
+        if (stripeKey && order.client_secret) {
+          setPendingOrderId(order.order_id);
+          setPaymentClientSecret(order.client_secret);
+          sessionStorage.setItem(
+            "payment_intent",
+            JSON.stringify({
+              order_id: order.order_id,
+              client_secret: order.client_secret,
+              stripe_payment_intent: order.stripe_payment_intent,
+            })
+          );
+          toast({
+            title: "Order Created",
+            description: "Complete payment below to confirm your order.",
+          });
+          clearCart();
+          setProcessing(false);
+          return;
+        }
+
+        toast({
+          title: "Order Created",
+          description: `Order #${order.order_id} created. Payment will be handled separately.`,
+        });
+        clearCart();
+        router.push("/orders");
+      }
+      setProcessing(false);
     },
     onError: (error: unknown) => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to process order'
@@ -394,23 +404,45 @@ export default function Checkout() {
                       )}
                     </div>
 
-                    {/* Payment Section - Placeholder for Stripe */}
                     <Separator />
                     <div>
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <CreditCard className="h-5 w-5" />
                         Payment
                       </h3>
-                      <Card className="bg-muted">
-                        <CardContent className="p-4">
-                          <p className="text-sm text-muted-foreground">
-                            Payment processing will be handled securely via Stripe.
-                            You will be redirected to complete payment.
-                          </p>
-                        </CardContent>
-                      </Card>
+                      {paymentClientSecret ? (
+                        <StripePaymentForm
+                          clientSecret={paymentClientSecret}
+                          returnUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/orders?paid=${pendingOrderId ?? ""}`}
+                          submitLabel="Complete payment"
+                          onSuccess={() => {
+                            sessionStorage.removeItem("payment_intent");
+                            toast({
+                              title: "Payment successful",
+                              description: "Your order has been paid.",
+                            });
+                            router.push("/orders");
+                          }}
+                          onError={(message) => {
+                            toast({
+                              title: "Payment failed",
+                              description: message,
+                              variant: "destructive",
+                            });
+                          }}
+                        />
+                      ) : (
+                        <Card className="bg-muted">
+                          <CardContent className="p-4">
+                            <p className="text-sm text-muted-foreground">
+                              Secure payment via Stripe. Place your order to continue to payment.
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
 
+                    {!paymentClientSecret && (
                     <Button
                       type="submit"
                       className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
@@ -432,6 +464,7 @@ export default function Checkout() {
                         </>
                       )}
                     </Button>
+                    )}
                   </form>
                 </CardContent>
               </Card>

@@ -45,8 +45,9 @@ export const Navigation = () => {
   const navItems = [
     { path: "/home", icon: Home, label: "Home", showBadge: false },
     { path: "/feed", icon: Rss, label: "Feed", showBadge: false },
-    { path: "/marketplace", icon: ShoppingBag, label: "Marketplace", showBadge: false },
-    { path: "/groups", icon: Users, label: "Groups", showBadge: false },
+    { path: "/marketplace", icon: ShoppingBag, label: "Shop", showBadge: false },
+    { path: "/news", icon: Newspaper, label: "News", showBadge: false },
+    { path: "/rewards", icon: Gift, label: "Rewards", showBadge: false },
     { path: "/cart", icon: ShoppingCart, label: "Cart", showBadge: true },
   ];
 
@@ -108,7 +109,7 @@ export const Navigation = () => {
               <Link href={profilePath} className="hidden md:block" aria-label="Your profile">
                 <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground">
                     {profile.username?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -120,7 +121,7 @@ export const Navigation = () => {
               <Link href={profilePath} aria-label="Your profile">
                 <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white text-xs">
+                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground text-xs">
                     {profile.username?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -152,7 +153,7 @@ export const Navigation = () => {
                       >
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={profile.avatar_url ?? undefined} />
-                          <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                          <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground">
                             {profile.username?.[0]?.toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>

@@ -293,7 +293,7 @@ export default function Home() {
                 <CardContent className="pt-6">
                       <p className="text-sm text-muted-foreground">Badges</p>
                       <p className="text-2xl font-bold flex items-center gap-1">
-                        <Star className="h-5 w-5 text-yellow-500" />
+                        <Star className="h-5 w-5 text-warning" />
                         {badges.length}
                       </p>
                 </CardContent>
@@ -499,7 +499,7 @@ export default function Home() {
                             <CardContent className="pt-6 flex flex-col items-center text-center">
                               <Avatar className="h-16 w-16 mb-3">
                                 <AvatarImage src={vendor.avatar_url} />
-                                <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                                <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground">
                                   {vendor.username?.[0]?.toUpperCase() || "V"}
                                 </AvatarFallback>
                               </Avatar>

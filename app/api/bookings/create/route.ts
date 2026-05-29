@@ -1,6 +1,6 @@
 // CLERK MIGRATION: Updated to use Clerk authentication
 import { NextRequest } from 'next/server'
-import { createClientFromRequest } from '@/integrations/supabase/server'
+import { createClientFromRequest, createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { BookingCreateSchema } from '@/lib/validations/schemas'
 import { logger } from '@/lib/logger'

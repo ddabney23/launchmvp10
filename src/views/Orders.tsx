@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/Navigation";
@@ -10,11 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Package, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserOrders } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
-import type { Order } from "@/lib/types";
 import { SkeletonCard } from "@/components/Skeleton";
+import { StripePaymentForm } from "@/components/StripePaymentForm";
+import { isStripeConfigured } from "@/lib/stripe-config";
+import { useToast } from "@/hooks/use-toast";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
@@ -25,10 +27,60 @@ const statusColors: Record<string, string> = {
   canceled: "bg-red-500/10 text-red-600 border-red-500/20",
 };
 
+interface PendingPayment {
+  order_id: string;
+  client_secret: string;
+  stripe_payment_intent?: string;
+}
+
+function readPendingPayments(): PendingPayment[] {
+  if (typeof window === "undefined") return [];
+  const items: PendingPayment[] = [];
+
+  const single = sessionStorage.getItem("payment_intent");
+  if (single) {
+    try {
+      const parsed = JSON.parse(single) as PendingPayment;
+      if (parsed.client_secret) items.push(parsed);
+    } catch {
+      sessionStorage.removeItem("payment_intent");
+    }
+  }
+
+  const multi = sessionStorage.getItem("payment_intents");
+  if (multi) {
+    try {
+      const parsed = JSON.parse(multi) as PendingPayment[];
+      for (const p of parsed) {
+        if (p.client_secret && !items.some((i) => i.order_id === p.order_id)) {
+          items.push(p);
+        }
+      }
+    } catch {
+      sessionStorage.removeItem("payment_intents");
+    }
+  }
+
+  return items;
+}
+
 export default function Orders() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
+  const [activePaymentOrderId, setActivePaymentOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingPayments(readPendingPayments());
+  }, []);
+
+  const activePayment = useMemo(
+    () => pendingPayments.find((p) => p.order_id === activePaymentOrderId) ?? null,
+    [pendingPayments, activePaymentOrderId]
+  );
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["userOrders", user?.id],
@@ -40,6 +92,38 @@ export default function Orders() {
     if (statusFilter === "all") return true;
     return order.status === statusFilter;
   }) || [];
+
+  const clearPaymentForOrder = (orderId: string) => {
+    setPendingPayments((prev) => prev.filter((p) => p.order_id !== orderId));
+    setActivePaymentOrderId(null);
+
+    const single = sessionStorage.getItem("payment_intent");
+    if (single) {
+      try {
+        const parsed = JSON.parse(single) as PendingPayment;
+        if (parsed.order_id === orderId) sessionStorage.removeItem("payment_intent");
+      } catch {
+        sessionStorage.removeItem("payment_intent");
+      }
+    }
+
+    const multi = sessionStorage.getItem("payment_intents");
+    if (multi) {
+      try {
+        const parsed = JSON.parse(multi) as PendingPayment[];
+        const next = parsed.filter((p) => p.order_id !== orderId);
+        if (next.length === 0) {
+          sessionStorage.removeItem("payment_intents");
+        } else {
+          sessionStorage.setItem("payment_intents", JSON.stringify(next));
+        }
+      } catch {
+        sessionStorage.removeItem("payment_intents");
+      }
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["userOrders"] });
+  };
 
   if (!user) {
     return (
@@ -83,6 +167,64 @@ export default function Orders() {
             </Select>
           </div>
 
+          {pendingPayments.length > 0 && isStripeConfigured() && (
+            <Card className="mb-6 border-primary/30">
+              <CardHeader>
+                <CardTitle className="text-lg">Complete payment</CardTitle>
+                <CardDescription>
+                  {pendingPayments.length === 1
+                    ? "You have an unpaid order."
+                    : `You have ${pendingPayments.length} orders awaiting payment.`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {pendingPayments.length > 1 && !activePayment && (
+                  <div className="flex flex-wrap gap-2">
+                    {pendingPayments.map((p) => (
+                      <Button
+                        key={p.order_id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActivePaymentOrderId(p.order_id)}
+                      >
+                        Pay order #{p.order_id.slice(0, 8)}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {(activePayment || (pendingPayments.length === 1 && pendingPayments[0])) && (
+                  <StripePaymentForm
+                    clientSecret={(activePayment ?? pendingPayments[0]).client_secret}
+                    returnUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/orders`}
+                    submitLabel="Pay order"
+                    onSuccess={() => {
+                      const paidId = (activePayment ?? pendingPayments[0]).order_id;
+                      clearPaymentForOrder(paidId);
+                      toast({
+                        title: "Payment successful",
+                        description: "Your order has been paid.",
+                      });
+                    }}
+                    onError={(message) => {
+                      toast({
+                        title: "Payment failed",
+                        description: message,
+                        variant: "destructive",
+                      });
+                    }}
+                  />
+                )}
+
+                {activePayment && pendingPayments.length > 1 && (
+                  <Button variant="ghost" size="sm" onClick={() => setActivePaymentOrderId(null)}>
+                    Choose a different order
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {isLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -106,46 +248,62 @@ export default function Orders() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {filteredOrders.map((order) => (
-                <Card key={order.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-                          <Badge
-                            variant="outline"
-                            className={statusColors[order.status] || "bg-gray-500/10 text-gray-600"}
-                          >
-                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                          </Badge>
+              {filteredOrders.map((order) => {
+                const needsPayment = pendingPayments.some((p) => p.order_id === order.id);
+                return (
+                  <Card key={order.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
+                            <Badge
+                              variant="outline"
+                              className={statusColors[order.status] || "bg-gray-500/10 text-gray-600"}
+                            >
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </Badge>
+                            {needsPayment && (
+                              <Badge variant="secondary">Payment required</Badge>
+                            )}
+                          </div>
+                          <CardDescription>
+                            {formatDistanceToNow(new Date(order.created_at || ""), { addSuffix: true })}
+                          </CardDescription>
                         </div>
-                        <CardDescription>
-                          {formatDistanceToNow(new Date(order.created_at || ""), { addSuffix: true })}
-                        </CardDescription>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {order.currency === "USD" ? "$" : order.currency}{" "}
+                            {Number(order.total).toFixed(2)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">
-                          {order.currency === "USD" ? "$" : order.currency}{" "}
-                          {order.total.toFixed(2)}
-                        </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {order.buyer === user.id ? "Purchase" : "Sale"}
+                        </div>
+                        <div className="flex gap-2">
+                          {needsPayment && isStripeConfigured() && (
+                            <Button
+                              size="sm"
+                              onClick={() => setActivePaymentOrderId(order.id)}
+                            >
+                              Pay now
+                            </Button>
+                          )}
+                          <Button variant="outline" asChild>
+                            <Link href={`/order/${order.id}`}>
+                              View Details <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-muted-foreground">
-                        {order.buyer === user.id ? "Purchase" : "Sale"}
-                      </div>
-                      <Button variant="outline" asChild>
-                        <Link href={`/order/${order.id}`}>
-                          View Details <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
@@ -153,4 +311,3 @@ export default function Orders() {
     </div>
   );
 }
-

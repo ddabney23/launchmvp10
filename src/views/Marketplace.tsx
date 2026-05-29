@@ -20,6 +20,7 @@ import { AdsWidget } from "@/components/feed/widgets/AdsWidget";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 
 export default function Marketplace() {
   const { user } = useAuth();
@@ -45,6 +46,8 @@ export default function Marketplace() {
     hasNextPage: hasMoreSearchListings,
     isLoading: searchListingsLoading,
   } = useSearchListings(searchQuery);
+
+  useRealtimeInvalidate('listings:marketplace', 'listings', [['listings'], ['recommendedListings']]);
 
   // Get featured vendors
   const { data: featuredVendors } = useQuery({
@@ -186,7 +189,7 @@ export default function Marketplace() {
                     >
                       <Avatar className="h-16 w-16">
                         <AvatarImage src={vendor.avatar_url || undefined} />
-                        <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white font-bold text-xl">
+                        <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-primary-foreground font-bold text-xl">
                           {vendor.username?.[0]?.toUpperCase() || "V"}
                         </AvatarFallback>
                       </Avatar>
@@ -206,7 +209,7 @@ export default function Marketplace() {
                           </div>
                           {stats.rating > 0 && (
                             <div className="flex items-center justify-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                              <Star className="h-3 w-3 fill-warning text-warning" />
                               <span>{stats.rating.toFixed(1)}</span>
                             </div>
                           )}

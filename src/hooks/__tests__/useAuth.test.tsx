@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useAuth } from '../useAuth'
-import { createClient } from '@/lib/supabase/client'
+import type { ReactNode } from 'react'
+import { AuthProvider, useAuth } from '../useAuth'
+import { createClient } from '@/integrations/supabase/client'
 import { getProfile } from '@/lib/api'
 
-vi.mock('@/lib/supabase/client')
+vi.mock('@/integrations/supabase/client')
 vi.mock('@/lib/api', () => ({
   getProfile: vi.fn(),
+}))
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
 }))
 
 vi.mock('next/navigation', () => ({
@@ -18,6 +26,10 @@ vi.mock('next/navigation', () => ({
 }))
 
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+function wrapper({ children }: { children: ReactNode }) {
+  return <AuthProvider>{children}</AuthProvider>
+}
 
 describe('useAuth', () => {
   beforeEach(() => {
@@ -56,7 +68,7 @@ describe('useAuth', () => {
       },
     } as ReturnType<typeof createClient>)
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
     expect(result.current.loading).toBe(true)
   })
 
@@ -69,7 +81,7 @@ describe('useAuth', () => {
 
     vi.mocked(getProfile).mockResolvedValue(mockProfile as Awaited<ReturnType<typeof getProfile>>)
 
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -82,7 +94,7 @@ describe('useAuth', () => {
   })
 
   it('should handle sign out', async () => {
-    const { result } = renderHook(() => useAuth())
+    const { result } = renderHook(() => useAuth(), { wrapper })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -90,5 +102,26 @@ describe('useAuth', () => {
 
     expect(result.current.signOut).toBeDefined()
     expect(typeof result.current.signOut).toBe('function')
+  })
+
+  it('should recover when getSession fails', async () => {
+    vi.mocked(createClient).mockReturnValue({
+      auth: {
+        getSession: vi.fn().mockRejectedValue(new Error('Failed to fetch')),
+        onAuthStateChange: vi.fn(() => ({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        })),
+        signOut: vi.fn(),
+      },
+    } as ReturnType<typeof createClient>)
+
+    const { result } = renderHook(() => useAuth(), { wrapper })
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    expect(result.current.user).toBeNull()
+    expect(result.current.isAuthenticated).toBe(false)
   })
 })

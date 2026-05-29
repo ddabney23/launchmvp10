@@ -1,6 +1,5 @@
-import { createClient as createBrowserSupabaseClient } from '@/lib/supabase/client'
-import type { Database } from './types'
+import { createClient } from '@/lib/supabase/client'
 
-export const supabase = createBrowserSupabaseClient()
+export const supabase = createClient()
 
-export { createBrowserSupabaseClient as createClient }
+export { createClient }

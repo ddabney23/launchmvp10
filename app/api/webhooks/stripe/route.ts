@@ -503,7 +503,7 @@ async function handleAccountUpdated(account: Stripe.Account) {
     .update({
       stripe_onboard_status: onboardStatus,
     })
-    .eq('payout_account_id', account.id)
+    .or(`payout_account_id.eq.${account.id},stripe_connect_account_id.eq.${account.id}`)
 
   if (updateError) {
     logger.error('Failed to update vendor profile on account update', updateError, { accountId: account.id, vendorId })
@@ -523,10 +523,11 @@ async function handleTransferCreated(transfer: Stripe.Transfer) {
   const supabaseAdmin = createAdminClient()
 
   // Get vendor profile
+  const destination = transfer.destination as string
   const { data: vendorProfile } = await supabaseAdmin
     .from('vendor_profiles')
     .select('id')
-    .eq('payout_account_id', transfer.destination as string)
+    .or(`payout_account_id.eq.${destination},stripe_connect_account_id.eq.${destination}`)
     .maybeSingle()
 
   if (vendorProfile) {

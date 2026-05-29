@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserId } from '@/lib/supabase-auth';
-import { createServerClient } from '@/integrations/supabase/server';
+import { createAdminClient } from '@/integrations/supabase/server';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -11,7 +11,7 @@ const CancelOrderSchema = z.object({
 
 /**
  * POST /api/orders/[orderId]/cancel
- * Cancel an order and initiate refund
+ * Cancel an order and restore listing stock from order_items
  */
 export async function POST(
   request: NextRequest,
@@ -19,11 +19,9 @@ export async function POST(
 ) {
   try {
     const userId = await getAuthUserId();
-    const supabase = await createServerClient();
-
+    const adminClient = createAdminClient();
     const { orderId } = await context.params;
 
-    // Parse and validate request body
     const body = await request.json();
     const validation = CancelOrderSchema.safeParse(body);
 
@@ -36,44 +34,27 @@ export async function POST(
 
     const { reason, refundAmount } = validation.data;
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userId)
-      .single();
-
-    if (profileError || !profile) {
-      logger.error('Failed to fetch user profile:', profileError);
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      );
-    }
-
-    // Fetch order details
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await adminClient
       .from('orders')
       .select(`
         *,
-        listing:listings(id, title, vendor_id, stock_quantity),
-        buyer:profiles!orders_buyer_id_fkey(id, email, username),
-        vendor:profiles!orders_vendor_id_fkey(id, email, username)
+        order_items(
+          id,
+          listing_id,
+          quantity,
+          listing:listings(id, title, quantity, stock)
+        )
       `)
       .eq('id', orderId)
       .single();
 
     if (orderError || !order) {
       logger.error('Order not found:', orderError);
-      return NextResponse.json(
-        { error: 'Order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    // Verify user has permission to cancel (buyer or vendor)
-    const isBuyer = order.buyer_id === profile.id;
-    const isVendor = order.vendor_id === profile.id;
+    const isBuyer = order.buyer === userId;
+    const isVendor = order.vendor === userId;
 
     if (!isBuyer && !isVendor) {
       return NextResponse.json(
@@ -82,153 +63,141 @@ export async function POST(
       );
     }
 
-    // Check if order can be cancelled
-    const cancellableStatuses = ['pending', 'confirmed', 'processing'];
+    const cancellableStatuses = ['pending', 'paid'];
     if (!cancellableStatuses.includes(order.status)) {
       return NextResponse.json(
-        { 
+        {
           error: 'Order cannot be cancelled',
-          message: `Orders with status "${order.status}" cannot be cancelled`
+          message: `Orders with status "${order.status}" cannot be cancelled`,
         },
         { status: 400 }
       );
     }
 
-    // Calculate refund amount
-    const calculatedRefundAmount = refundAmount || order.total_amount;
+    const orderTotal = Number(order.total) || 0;
+    const calculatedRefundAmount = refundAmount ?? orderTotal;
 
-    // Update order status
-    const { error: updateError } = await supabase
+    const existingMetadata =
+      typeof order.metadata === 'object' && order.metadata !== null
+        ? (order.metadata as Record<string, unknown>)
+        : {};
+
+    const { error: updateError } = await adminClient
       .from('orders')
       .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-        cancellation_reason: reason,
-        cancelled_by: profile.id,
-        refund_amount: calculatedRefundAmount,
+        status: 'canceled',
+        metadata: {
+          ...existingMetadata,
+          cancellation_reason: reason,
+          cancelled_by: userId,
+          cancelled_at: new Date().toISOString(),
+          refund_amount: calculatedRefundAmount,
+        },
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId);
 
     if (updateError) {
       logger.error('Failed to update order:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to cancel order' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to cancel order' }, { status: 500 });
     }
 
-    // Restore stock quantity if listing exists
-    if (order.listing && order.quantity) {
-      const { error: stockError } = await supabase
+    const orderItems = Array.isArray(order.order_items) ? order.order_items : [];
+    for (const item of orderItems) {
+      const listing = item.listing as { id: string; quantity?: number; stock?: number } | null;
+      if (!listing?.id || !item.quantity) continue;
+
+      const currentStock =
+        typeof listing.stock === 'number'
+          ? listing.stock
+          : typeof listing.quantity === 'number'
+            ? listing.quantity
+            : 0;
+
+      const updates: { stock?: number; quantity?: number } = {};
+      if (typeof listing.stock === 'number') {
+        updates.stock = currentStock + item.quantity;
+      } else {
+        updates.quantity = currentStock + item.quantity;
+      }
+
+      const { error: stockError } = await adminClient
         .from('listings')
-        .update({
-          stock_quantity: (order.listing.stock_quantity || 0) + order.quantity,
-        })
-        .eq('id', order.listing_id);
+        .update(updates)
+        .eq('id', listing.id);
 
       if (stockError) {
-        logger.warn('Failed to restore stock:', stockError);
+        logger.warn('Failed to restore stock:', stockError, { listingId: listing.id });
       }
     }
 
-    // Initiate refund if payment was made
-    if (order.payment_intent_id && calculatedRefundAmount > 0) {
+    if (order.stripe_payment_intent && calculatedRefundAmount > 0) {
       try {
-        // Call Stripe refund API
-        const refundResponse = await fetch('/api/vendor/refund', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId,
-            paymentIntentId: order.payment_intent_id,
-            amount: calculatedRefundAmount,
-            reason,
-          }),
-        });
+        const refundResponse = await fetch(
+          new URL('/api/vendor/refund', request.url).toString(),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId,
+              paymentIntentId: order.stripe_payment_intent,
+              amount: calculatedRefundAmount,
+              reason,
+            }),
+          }
+        );
 
         if (!refundResponse.ok) {
-          logger.error('Refund initiation failed');
-          // Don't fail the cancellation, just log it
-          await supabase
-            .from('orders')
-            .update({ refund_status: 'failed' })
-            .eq('id', orderId);
-        } else {
-          await supabase
-            .from('orders')
-            .update({ refund_status: 'initiated' })
-            .eq('id', orderId);
+          logger.error('Refund initiation failed', { orderId });
         }
       } catch (refundError) {
         logger.error('Refund error:', refundError);
-        await supabase
-          .from('orders')
-          .update({ refund_status: 'failed' })
-          .eq('id', orderId);
       }
     }
 
-    // Send notifications to buyer and vendor
-    const notifications = [];
+    const notifications: Array<{
+      user_id: string;
+      type: string;
+      data: Record<string, unknown>;
+    }> = [];
 
-    // Notify buyer
-    if (order.buyer_id !== profile.id) {
+    if (order.buyer && order.buyer !== userId) {
       notifications.push({
-        user_id: order.buyer_id,
+        user_id: order.buyer,
         type: 'order_cancelled',
-        title: 'Order Cancelled',
-        message: `Your order #${order.id.slice(0, 8)} has been cancelled${isVendor ? ' by the vendor' : ''}.`,
-        data: { orderId, reason },
-        created_at: new Date().toISOString(),
+        data: { orderId, reason, title: 'Order Cancelled' },
       });
     }
 
-    // Notify vendor
-    if (order.vendor_id !== profile.id) {
+    if (order.vendor && order.vendor !== userId) {
       notifications.push({
-        user_id: order.vendor_id,
+        user_id: order.vendor,
         type: 'order_cancelled',
-        title: 'Order Cancelled',
-        message: `Order #${order.id.slice(0, 8)} has been cancelled${isBuyer ? ' by the buyer' : ''}.`,
-        data: { orderId, reason },
-        created_at: new Date().toISOString(),
+        data: { orderId, reason, title: 'Order Cancelled' },
       });
     }
 
     if (notifications.length > 0) {
-      await supabase
-        .from('notifications')
-        .insert(notifications)
-        .catch((err) => logger.warn('Failed to send notifications:', err));
+      const { error: notifError } = await adminClient.from('notifications').insert(notifications);
+      if (notifError) {
+        logger.warn('Failed to send notifications:', notifError);
+      }
     }
 
-    // TODO: Send email notifications
-
-    logger.info('Order cancelled successfully:', {
-      orderId,
-      cancelledBy: profile.id,
-      refundAmount: calculatedRefundAmount,
-    });
+    logger.info('Order cancelled successfully:', { orderId, cancelledBy: userId });
 
     return NextResponse.json({
       success: true,
       message: 'Order cancelled successfully',
       order: {
         id: orderId,
-        status: 'cancelled',
+        status: 'canceled',
         refundAmount: calculatedRefundAmount,
-        refundStatus: order.payment_intent_id ? 'initiated' : 'not_applicable',
+        refundStatus: order.stripe_payment_intent ? 'initiated' : 'not_applicable',
       },
     });
   } catch (error) {
     logger.error('Order cancellation error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
-
-

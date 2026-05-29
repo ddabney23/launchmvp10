@@ -16,6 +16,8 @@ import { SkeletonCard } from "@/components/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import type { News } from "@/lib/types";
 import { AdsWidget } from "@/components/feed/widgets/AdsWidget";
+import { PageShell } from "@/components/PageShell";
+import { useRealtimeInvalidate } from "@/hooks/useRealtimeInvalidate";
 
 interface NewsProps {
   newsId?: string;
@@ -45,17 +47,19 @@ export default function News({ newsId }: NewsProps) {
 
   const isLoading = id ? itemLoading : newsLoading;
 
+  useRealtimeInvalidate('news:page', 'news', [['news']], { enabled: !id });
+
   // Single news item view
   if (id) {
     if (isLoading) {
       return (
         <div className="min-h-screen bg-background">
           <Navigation />
-          <main className="container mx-auto px-4 pt-24 pb-16">
-            <div className="max-w-4xl mx-auto space-y-6">
+          <PageShell narrow>
+            <div className="space-y-6">
               <SkeletonCard />
             </div>
-          </main>
+          </PageShell>
         </div>
       );
     }
@@ -64,15 +68,15 @@ export default function News({ newsId }: NewsProps) {
       return (
         <div className="min-h-screen bg-background">
           <Navigation />
-          <main className="container mx-auto px-4 pt-24 pb-16">
-            <div className="max-w-4xl mx-auto text-center py-12">
+          <PageShell narrow>
+            <div className="text-center py-12">
               <h1 className="text-2xl font-bold mb-4">News Article Not Found</h1>
               <p className="text-muted-foreground mb-6">
                 The news article you're looking for doesn't exist or has been removed.
               </p>
               <Button onClick={() => router.push("/news")}>Back to News</Button>
             </div>
-          </main>
+          </PageShell>
         </div>
       );
     }
@@ -80,8 +84,7 @@ export default function News({ newsId }: NewsProps) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <main className="container mx-auto px-4 pt-24 pb-16">
-          <div className="max-w-4xl mx-auto">
+        <PageShell narrow>
             <Button
               variant="ghost"
               onClick={() => router.push("/news")}
@@ -91,7 +94,7 @@ export default function News({ newsId }: NewsProps) {
               Back to News
             </Button>
 
-            <Card className="border-2">
+            <Card>
               {newsItem.image_url && (
                 <div className="relative h-96 w-full overflow-hidden rounded-t-lg">
                   <OptimizedImage
@@ -118,8 +121,10 @@ export default function News({ newsId }: NewsProps) {
                   )}
                 </div>
                 <CardTitle className="text-3xl md:text-4xl">{newsItem.title}</CardTitle>
-                {newsItem.summary && (
-                  <CardDescription className="text-lg">{newsItem.summary}</CardDescription>
+                {(newsItem.excerpt || newsItem.summary) && (
+                  <CardDescription className="text-lg">
+                    {newsItem.excerpt || newsItem.summary}
+                  </CardDescription>
                 )}
               </CardHeader>
               <CardContent>
@@ -130,8 +135,7 @@ export default function News({ newsId }: NewsProps) {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </main>
+        </PageShell>
       </div>
     );
   }
@@ -140,10 +144,9 @@ export default function News({ newsId }: NewsProps) {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <main className="container mx-auto px-4 pt-24 pb-16">
-        <div className="max-w-6xl mx-auto">
+      <PageShell>
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
               News & Updates
             </h1>
             <p className="text-muted-foreground">
@@ -236,8 +239,7 @@ export default function News({ newsId }: NewsProps) {
               </CardContent>
             </Card>
           )}
-        </div>
-      </main>
+      </PageShell>
     </div>
   );
 }
