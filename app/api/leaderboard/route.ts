@@ -4,6 +4,8 @@ import { getAuthUser } from '@/lib/supabase-auth';
 import { getCache, setCache } from '@/lib/cache';
 import { logger } from '@/lib/logger';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/leaderboard
  * Get top users by points with optional time period filtering
@@ -11,8 +13,13 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerClient();
-    const authUser = await getAuthUser();
-    const userId = authUser?.id;
+    let userId: string | undefined;
+    try {
+      const authUser = await getAuthUser();
+      userId = authUser?.id;
+    } catch {
+      userId = undefined;
+    }
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;

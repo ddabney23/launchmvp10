@@ -3,14 +3,14 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
-  cacheDir: 'C:/Users/Optimix/AppData/Local/optimix-vite-cache',
+  cacheDir: '.vitest-cache',
   plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     testTimeout: 10000, // 10 second timeout for integration tests
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/**/*.{test,spec}.{ts,tsx}'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

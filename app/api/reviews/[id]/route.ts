@@ -5,6 +5,8 @@ import { logger } from '@/lib/logger';
 import { z } from 'zod';
 import { sanitizeString } from '@/lib/sanitize';
 
+export const dynamic = 'force-dynamic';
+
 const UpdateReviewSchema = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   title: z.string().min(3).max(100).optional(),
@@ -32,7 +34,7 @@ export async function PATCH(
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       );
     }

@@ -1,19 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { SupabaseAuthForm } from '@/components/auth/SupabaseAuthForm'
-import { isAdminEmail } from '@/lib/admin'
 import { getProfile } from '@/lib/api'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
-export const dynamic = 'force-dynamic'
+interface AuthPageClientProps {
+  mode: 'sign-in' | 'sign-up'
+}
 
-export default function AuthPage() {
+export function AuthPageClient({ mode }: AuthPageClientProps) {
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [checking, setChecking] = useState(true)
 
@@ -21,23 +21,16 @@ export default function AuthPage() {
     const supabase = createClient()
     const checkTimeout = window.setTimeout(() => setChecking(false), 8000)
 
-    const redirectIfSignedIn = async (userId: string, email?: string | null) => {
+    const redirectIfSignedIn = async (userId: string) => {
       try {
-        const isEmailAdmin = isAdminEmail(email ?? undefined)
         try {
           const profile = await getProfile(userId)
-          if (profile?.is_admin || isEmailAdmin) {
+          if (profile?.is_admin) {
             router.push('/admin')
             return
           }
-        } catch {
-          if (isEmailAdmin) {
-            router.push('/admin')
-            return
-          }
-        }
-        const redirect = searchParams.get('redirect_url') || '/onboarding'
-        router.push(redirect)
+        } catch {}
+        router.push(searchParams.get('redirect_url') || '/onboarding')
       } catch {
         router.push(searchParams.get('redirect_url') || '/onboarding')
       }
@@ -45,7 +38,7 @@ export default function AuthPage() {
 
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (session?.user) {
-        void redirectIfSignedIn(session.user.id, session.user.email)
+        void redirectIfSignedIn(session.user.id)
       } else {
         setChecking(false)
       }
@@ -55,7 +48,7 @@ export default function AuthPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       if (session?.user) {
-        void redirectIfSignedIn(session.user.id, session.user.email)
+        void redirectIfSignedIn(session.user.id)
       } else {
         setChecking(false)
       }
@@ -75,11 +68,9 @@ export default function AuthPage() {
     )
   }
 
-  const isSignUp = pathname?.includes('/sign-up')
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
-      <SupabaseAuthForm mode={isSignUp ? 'sign-up' : 'sign-in'} />
+      <SupabaseAuthForm mode={mode} />
     </div>
   )
 }

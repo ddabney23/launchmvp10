@@ -9,7 +9,6 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
-import { isAdminEmail } from '@/lib/admin'
 import { useEffect } from 'react'
 
 interface ProtectedRouteProps {
@@ -32,8 +31,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
       // Check admin requirement
       if (requireAdmin) {
-        const isAdmin = profile?.is_admin || isAdminEmail(user.email)
-        if (!isAdmin) {
+        if (!profile?.is_admin) {
           router.push('/home')
           return
         }
@@ -56,8 +54,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (requireAdmin) {
-    const isAdmin = profile?.is_admin || isAdminEmail(user.email)
-    if (!isAdmin) {
+    if (!profile?.is_admin) {
       return null
     }
   }

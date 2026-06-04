@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Loader2, Store, Users, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { getProfile } from '@/lib/api'
-import { isAdminEmail } from '@/lib/admin'
 
 type OnboardingStep = 'choose-role' | 'vendor' | 'customer'
 
@@ -33,16 +32,10 @@ export default function OnboardingFunnel() {
     // Check if profile already exists and is complete
     const checkProfile = async () => {
       try {
-        // First check email for admin status (works even if profile doesn't exist yet)
-        const email = user.email
-        const isEmailAdmin = isAdminEmail(email)
-        
         const profile = await getProfile(user.id)
         
         // Check if user is admin - skip onboarding and go to admin dashboard
-        const isAdmin = profile?.is_admin || isEmailAdmin
-        
-        if (isAdmin) {
+        if (profile?.is_admin) {
           router.push('/admin')
           return
         }
@@ -59,15 +52,6 @@ export default function OnboardingFunnel() {
         // Profile exists but incomplete, continue with onboarding
         setLoading(false)
       } catch (error) {
-        // Profile doesn't exist yet - check email for admin status
-        const email = user.email
-        const isEmailAdmin = isAdminEmail(email)
-        
-        if (isEmailAdmin) {
-          router.push('/admin')
-          return
-        }
-        
         // Profile doesn't exist and not admin, continue with onboarding
         console.log('Profile check failed, continuing onboarding:', error)
         setLoading(false)

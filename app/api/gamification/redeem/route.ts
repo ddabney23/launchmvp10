@@ -4,6 +4,8 @@ import { createServerClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const RedeemSchema = z.object({
   rewardId: z.string().uuid(),
   credits: z.number().int().positive(),
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       )
     }

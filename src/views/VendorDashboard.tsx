@@ -44,7 +44,8 @@ interface VendorDashboardProps {
 export default function VendorDashboard({ vendorId: vendorIdProp }: VendorDashboardProps) {
   const router = useRouter();
   // Use vendorId prop if provided, otherwise try to get from URL (for backward compatibility)
-  const id = vendorIdProp || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : undefined);
+  const pathVendorId = typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : undefined;
+  const id = vendorIdProp || (pathVendorId === 'dashboard' ? undefined : pathVendorId);
   const { toast } = useToast();
   const { user, profile: currentProfile } = useAuth();
   const queryClient = useQueryClient();

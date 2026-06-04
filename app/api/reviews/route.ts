@@ -5,6 +5,8 @@ import { logger } from '@/lib/logger';
 import { z } from 'zod';
 import { sanitizeString } from '@/lib/sanitize';
 
+export const dynamic = 'force-dynamic';
+
 const CreateReviewSchema = z.object({
   listingId: z.string().uuid(),
   orderId: z.string().uuid().optional(),
@@ -29,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       );
     }

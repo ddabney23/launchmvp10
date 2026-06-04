@@ -1,33 +1,13 @@
 /**
- * Admin utility functions
- * Checks if a user is an admin based on email address
+ * Client-side admin helpers are intentionally conservative.
+ *
+ * Admin authorization must come from server-owned profile data (`profiles.is_admin`),
+ * not from email patterns or public environment variables that can drift from the
+ * database policy enforced by API routes.
  */
-
-/**
- * Check if an email address belongs to an admin
- * @param email - The email address to check
- * @returns true if the email is an admin email
- */
-export function isAdminEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  
-  // Specific admin email
-  if (email.toLowerCase() === "ddabney23@gmail.com") {
-    return true;
-  }
-  
-  // Pattern-based admin check (for development/testing)
-  if (email.includes("@admin") || email.includes("admin@")) {
-    return true;
-  }
-  
-  return false;
+export function isAdminEmail(_email: string | null | undefined): boolean {
+  return false
 }
 
-/**
- * Get admin emails list (for reference)
- */
-export const ADMIN_EMAILS = [
-  "ddabney23@gmail.com",
-] as const;
+export const ADMIN_EMAILS = [] as const
 

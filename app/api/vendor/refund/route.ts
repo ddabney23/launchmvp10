@@ -13,16 +13,13 @@ import {
   safeJsonParse,
   withErrorHandling,
 } from '@/lib/api-response'
-import Stripe from 'stripe'
+import { getStripeClient } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
-
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  if (!process.env.STRIPE_SECRET_KEY) {
+  const stripe = getStripeClient()
+  if (!stripe) {
     return internalErrorResponse('Payment system not configured')
   }
 
@@ -86,12 +83,16 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   // Create refund
   const refundAmount = amount ? Math.round(amount * 100) : undefined // Convert to cents if partial
+  const refundReason =
+    reason === 'duplicate' || reason === 'fraudulent' || reason === 'requested_by_customer'
+      ? reason
+      : undefined
 
   try {
     const refund = await stripe.refunds.create({
       charge: paymentIntent.latest_charge,
       amount: refundAmount,
-      reason: reason ? (reason as any) : undefined,
+      reason: refundReason,
       metadata: {
         order_id: order_id,
         vendor_id: profile.id,

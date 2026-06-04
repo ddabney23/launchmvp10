@@ -108,7 +108,7 @@ export async function PATCH(
 
     const validation = ListingUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return validationErrorResponse(validation.error.issues)
+      return validationErrorResponse(validation.error)
     }
 
     const updates = { ...validation.data } as Record<string, any>

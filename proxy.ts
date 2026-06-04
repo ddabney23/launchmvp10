@@ -10,7 +10,6 @@ const PUBLIC_PATHS = [
   /^\/register(\/.*)?$/,
   /^\/api\/webhooks(\/.*)?$/,
   /^\/api\/health(\/.*)?$/,
-  /^\/api\/test-auth(\/.*)?$/,
 ]
 
 const PROTECTED_PATHS = [
@@ -22,6 +21,7 @@ const PROTECTED_PATHS = [
   /^\/cart(\/.*)?$/,
   /^\/checkout(\/.*)?$/,
   /^\/orders(\/.*)?$/,
+  /^\/order(\/.*)?$/,
   /^\/messages(\/.*)?$/,
   /^\/notifications(\/.*)?$/,
   /^\/groups(\/.*)?$/,
@@ -102,7 +102,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
     response.headers.set('Access-Control-Allow-Credentials', 'true')
     response.headers.set(
       'Access-Control-Allow-Origin',
-      process.env['NEXT_PUBLIC_APP_URL'] || '*'
+      process.env['NEXT_PUBLIC_APP_URL'] || request.nextUrl.origin
     )
     response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
     response.headers.set(
@@ -116,7 +116,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
 
 export default async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
-  let response = applySecurityHeaders(supabaseResponse, request)
+  const response = applySecurityHeaders(supabaseResponse, request)
 
   if (request.method === 'OPTIONS' && request.nextUrl.pathname.startsWith('/api')) {
     return new NextResponse(null, { status: 200, headers: response.headers })
@@ -124,15 +124,10 @@ export default async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
   const isApiRoute = pathname.startsWith('/api')
-  const isUploadRoute = pathname === '/api/upload'
   const isListingsGet = pathname === '/api/listings' && request.method === 'GET'
   const isListingsPost = pathname === '/api/listings' && request.method === 'POST'
 
-  if (isUploadRoute) {
-    return response
-  }
-
-  if (isApiRoute && !isUploadRoute) {
+  if (isApiRoute) {
     try {
       const ip =
         request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??

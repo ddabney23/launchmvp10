@@ -108,13 +108,13 @@ export async function POST(
     })
 
     if (!validationResult.success) {
-      console.error('Validation failed:', validationResult.error.errors)
+      console.error('Validation failed:', validationResult.error.issues)
       return NextResponse.json(
         {
           success: false,
           error: 'Validation failed',
           code: 'VALIDATION_ERROR',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       )

@@ -76,7 +76,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
     const validationResult = StoryLikeSchema.safeParse(body)
     if (!validationResult.success) {
-      return validationErrorResponse(validationResult.error.errors)
+      return validationErrorResponse(validationResult.error)
     }
 
     const { story_id } = validationResult.data

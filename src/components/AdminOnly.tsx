@@ -6,7 +6,6 @@
  */
 
 import { useAuth } from "@/hooks/useAuth";
-import { isAdminEmail } from "@/lib/admin";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield } from "lucide-react";
 
@@ -16,8 +15,8 @@ interface AdminOnlyProps {
 }
 
 export function AdminOnly({ children, fallback }: AdminOnlyProps) {
-  const { user, profile } = useAuth();
-  const isAdmin = profile?.is_admin || isAdminEmail(user?.email);
+  const { profile } = useAuth();
+  const isAdmin = profile?.is_admin;
 
   if (!isAdmin) {
     return (

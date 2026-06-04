@@ -15,18 +15,23 @@ import { rateLimit } from '@/lib/rate-limit'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+const ALLOWED_BUCKETS = ['vendor-assets', 'vendor-docs', 'listings', 'avatars', 'posts', 'stories', 'store-banners'] as const
+const ALLOWED_MIME_TYPES: Record<(typeof ALLOWED_BUCKETS)[number], readonly string[]> = {
+  'vendor-assets': ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+  'vendor-docs': ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+  listings: ['image/jpeg', 'image/png', 'image/webp'],
+  avatars: ['image/jpeg', 'image/png', 'image/webp'],
+  posts: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'],
+  stories: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'],
+  'store-banners': ['image/jpeg', 'image/png', 'image/webp'],
+}
+
 /**
  * POST /api/upload
  * Upload a file to Supabase Storage
  * Uses service role key to bypass RLS policies
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  console.log('[UPLOAD] Request received:', {
-    method: req.method,
-    url: req.url,
-    headers: Object.fromEntries(req.headers.entries()),
-  })
-
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -43,20 +48,23 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   const adminClient = createAdminClient()
 
-    // Parse form data
-    const formData = await req.formData()
-    const file = formData.get('file') as File
-    const bucket = formData.get('bucket') as string
-    const path = formData.get('path') as string
+  const formData = await req.formData()
+  const file = formData.get('file')
+  const bucket = formData.get('bucket')
+  const path = formData.get('path')
 
-  if (!file || !bucket || !path) {
+  if (!(file instanceof File) || typeof bucket !== 'string' || typeof path !== 'string') {
     return errorResponse('Missing required fields: file, bucket, or path', 'MISSING_FIELDS')
   }
 
   // Validate bucket name (security: only allow specific buckets)
-  const allowedBuckets = ['vendor-assets', 'vendor-docs', 'listings', 'avatars', 'posts', 'stories', 'store-banners']
-  if (!allowedBuckets.includes(bucket)) {
+  if (!ALLOWED_BUCKETS.includes(bucket as (typeof ALLOWED_BUCKETS)[number])) {
     return errorResponse('Invalid bucket name', 'INVALID_BUCKET')
+  }
+
+  const safeBucket = bucket as (typeof ALLOWED_BUCKETS)[number]
+  if (!ALLOWED_MIME_TYPES[safeBucket].includes(file.type)) {
+    return errorResponse('File type is not allowed for this upload destination', 'INVALID_FILE_TYPE')
   }
 
   // Validate file size (50MB limit for stories, 10MB for others)
@@ -76,6 +84,10 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Extract filename and extension from path
   const pathSegments = path.split('/')
   const filename = pathSegments[pathSegments.length - 1]
+  if (!filename || pathSegments.some((segment) => segment === '..')) {
+    return errorResponse('Invalid upload path', 'INVALID_PATH')
+  }
+
   const filenameParts = filename.split('.')
   const hasExtension = filenameParts.length > 1
   
@@ -107,7 +119,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Upload file using admin client (bypasses RLS)
   // Use upsert: true to allow overwriting if somehow the same unique path exists
   const { data, error } = await adminClient.storage
-    .from(bucket)
+    .from(safeBucket)
     .upload(userPath, uint8Array, {
       contentType: file.type,
       cacheControl: '3600',

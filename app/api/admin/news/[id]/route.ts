@@ -55,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const validation = NewsUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return validationErrorResponse(validation.error.issues)
+      return validationErrorResponse(validation.error)
     }
 
     const updates = validation.data

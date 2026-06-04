@@ -4,6 +4,8 @@ import { createServerClient } from '@/integrations/supabase/server';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const CancelOrderSchema = z.object({
   reason: z.string().min(10).max(500),
   refundAmount: z.number().optional(),
@@ -29,7 +31,7 @@ export async function POST(
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       );
     }

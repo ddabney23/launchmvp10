@@ -198,7 +198,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
     const validationResult = StoryCreateSchema.safeParse(body)
     if (!validationResult.success) {
-      return validationErrorResponse(validationResult.error.errors)
+      return validationErrorResponse(validationResult.error)
     }
 
     const storyData = validationResult.data

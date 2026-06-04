@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     const validation = NewsCreateSchema.safeParse(body)
     if (!validation.success) {
-      return validationErrorResponse(validation.error.issues)
+      return validationErrorResponse(validation.error)
     }
 
     const newsData = validation.data

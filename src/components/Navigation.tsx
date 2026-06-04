@@ -12,7 +12,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
-import { isAdminEmail } from "@/lib/admin";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
@@ -186,7 +185,7 @@ export const Navigation = () => {
                       </Button>
                     </Link>
 
-                    {profile && (profile.is_admin || isAdminEmail(user?.email)) && (
+                    {profile?.is_admin && (
                       <Link href="/admin" onClick={handleNavClick}>
                         <Button variant={isActive("/admin") ? "default" : "ghost"} className="w-full justify-start gap-3">
                           <Shield className="h-5 w-5" />
