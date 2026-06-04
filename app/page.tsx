@@ -1,5 +1,6 @@
 import Index from '@/views/Index'
-import { createClient } from '@/integrations/supabase/client'
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/integrations/supabase/types'
 
 // Fetch news on the server side
 async function getLatestNews() {
@@ -11,7 +12,12 @@ async function getLatestNews() {
       return []
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
     
     const { data, error } = await supabase
       .from('news')
