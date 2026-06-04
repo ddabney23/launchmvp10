@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
+import { verifyShippoSignature } from '@/lib/shippo-webhook'
 import {
   successResponse,
   errorResponse,
@@ -26,9 +27,26 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   if (rateLimitResponse) return rateLimitResponse
 
   const adminClient = createAdminClient()
+  const webhookSecret = process.env.SHIPPO_WEBHOOK_SECRET?.trim()
+
+  if (!webhookSecret) {
+    logger.error('Shippo webhook called but SHIPPO_WEBHOOK_SECRET is missing')
+    return errorResponse('Shippo webhook not configured', 'WEBHOOK_NOT_CONFIGURED', undefined, 500)
+  }
+
+  const rawBody = await req.text()
+  const signatureHeader =
+    req.headers.get('shippo-auth-signature') ??
+    req.headers.get('x-shippo-signature') ??
+    req.headers.get('shippo-webhook-signature')
+
+  if (!signatureHeader || !verifyShippoSignature(rawBody, signatureHeader, webhookSecret)) {
+    logger.warn('Invalid Shippo webhook signature')
+    return errorResponse('Invalid webhook signature', 'INVALID_SIGNATURE', undefined, 401)
+  }
 
   try {
-    const body = await req.json()
+    const body = JSON.parse(rawBody)
 
     // Shippo webhook events
     const eventType = body.event || body.event_type
@@ -41,7 +59,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       // Update shipping label status
       const { data: label, error: labelError } = await adminClient
         .from('shipping_labels')
-        .select('id, order_id, status')
+        .select('id, order_id, status, metadata')
         .eq('tracking_number', trackingNumber)
         .maybeSingle()
 
@@ -59,7 +77,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
           .update({
             status: newStatus,
             metadata: {
-              ...(label.metadata as Record<string, any> || {}),
+              ...((label.metadata as Record<string, unknown> | null) || {}),
               last_webhook: new Date().toISOString(),
               shippo_status: body.status,
             },
