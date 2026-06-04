@@ -334,6 +334,10 @@ export async function invalidateSocialCaches(userId: string, postId?: string) {
  * Health check for Redis connection
  */
 export async function checkCacheHealth(): Promise<boolean> {
+  if (!redis) {
+    return false
+  }
+
   try {
     await redis.ping()
     return true
@@ -347,11 +351,17 @@ export async function checkCacheHealth(): Promise<boolean> {
  * Get cache statistics (for monitoring)
  */
 export async function getCacheStats() {
+  if (!redis) {
+    return {
+      connected: false,
+      error: 'Redis is not configured',
+    }
+  }
+
   try {
-    const info = await redis.info()
+    await redis.ping()
     return {
       connected: true,
-      info,
     }
   } catch (error) {
     logger.error('Failed to get cache stats', error)

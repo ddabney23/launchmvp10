@@ -4,25 +4,27 @@ import type { Database } from '@/integrations/supabase/types'
 
 export type BrowserSupabaseClient = SupabaseClient<Database>
 
-function assertSupabaseConfig(
+function getSupabaseConfig(
   supabaseUrl: string | undefined,
   supabaseAnonKey: string | undefined
-) {
+): { supabaseUrl: string; supabaseAnonKey: string } {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
       'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
     )
   }
+
+  return { supabaseUrl, supabaseAnonKey }
 }
 
 export function createClient(
   supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL,
   supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 ): BrowserSupabaseClient {
-  assertSupabaseConfig(supabaseUrl, supabaseAnonKey)
+  const config = getSupabaseConfig(supabaseUrl, supabaseAnonKey)
 
   return createBrowserClient<Database>(
-    supabaseUrl,
-    supabaseAnonKey
+    config.supabaseUrl,
+    config.supabaseAnonKey
   )
 }
