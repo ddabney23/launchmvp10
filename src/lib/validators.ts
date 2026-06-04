@@ -226,19 +226,27 @@ export const BookingSchema = z.object({
   path: ["end_time"],
 });
 
-export const BookingCreateSchema = z.object({
+const BookingCreateBaseSchema = z.object({
   listing_id: z.string().uuid(),
   buyer: z.string().uuid().optional().nullable(),
   vendor: z.string().uuid().optional().nullable(),
   start_time: z.string().datetime(),
   end_time: z.string().datetime(),
   status: z.enum(["pending", "confirmed", "canceled", "completed"]).default("pending"),
-}).refine((data) => new Date(data.end_time) > new Date(data.start_time), {
+});
+
+export const BookingCreateSchema = BookingCreateBaseSchema.refine((data) => new Date(data.end_time) > new Date(data.start_time), {
   message: "End time must be after start time",
   path: ["end_time"],
 });
 
-export const BookingUpdateSchema = BookingCreateSchema.partial();
+export const BookingUpdateSchema = BookingCreateBaseSchema.partial().refine(
+  (data) => !data.start_time || !data.end_time || new Date(data.end_time) > new Date(data.start_time),
+  {
+    message: "End time must be after start time",
+    path: ["end_time"],
+  }
+);
 
 export type Booking = z.infer<typeof BookingSchema>;
 export type BookingCreate = z.infer<typeof BookingCreateSchema>;
