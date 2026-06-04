@@ -7,23 +7,6 @@ import { webhookRateLimit } from '@/lib/rate-limit'
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
 
-// Validate Stripe environment variables
-if (!STRIPE_SECRET_KEY || !WEBHOOK_SECRET) {
-  const errorMessage = 
-    'Missing Stripe environment variables!\n' +
-    'Please set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in your .env.local file.\n' +
-    'See env.example.txt for reference.'
-  
-  if (process.env.NODE_ENV === 'development') {
-    throw new Error(errorMessage)
-  } else {
-    logger.error('Missing Stripe environment variables', new Error(errorMessage))
-  }
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY || '')
-const webhookSecret = WEBHOOK_SECRET || ''
-
 export async function POST(req: NextRequest) {
   // Webhook rate limit check (100 req/min)
   const rateLimitResponse = await webhookRateLimit(req)
@@ -38,6 +21,9 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  const stripe = new Stripe(STRIPE_SECRET_KEY)
+  const webhookSecret = WEBHOOK_SECRET
+
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')
 
@@ -45,14 +31,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: 'No signature provided' },
       { status: 400 }
-    )
-  }
-
-  if (!webhookSecret) {
-    logger.error('STRIPE_WEBHOOK_SECRET not configured')
-    return NextResponse.json(
-      { error: 'Webhook not configured' },
-      { status: 500 }
     )
   }
 
@@ -228,8 +206,13 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   await supabaseAdmin
     .from('orders')
     .update({ 
-      status: 'payment_failed',
-      stripe_payment_intent: paymentIntent.id
+      status: 'pending',
+      stripe_payment_intent: paymentIntent.id,
+      metadata: {
+        payment_status: 'failed',
+        payment_error: paymentIntent.last_payment_error?.message,
+        payment_failed_at: new Date().toISOString(),
+      },
     })
     .eq('id', orderId)
 
