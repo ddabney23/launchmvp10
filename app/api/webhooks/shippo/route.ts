@@ -66,6 +66,9 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       if (labelError) {
         logger.error('Failed to find shipping label', labelError, { trackingNumber })
       } else if (label) {
+        const labelId = String(label.id)
+        const orderId = typeof label.order_id === 'string' ? label.order_id : null
+
         // Determine status from Shippo event
         const newStatus = body.status === 'DELIVERED' ? 'delivered' : 
                          body.status === 'TRANSIT' ? 'shipped' : 
@@ -82,18 +85,18 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
               shippo_status: body.status,
             },
           })
-          .eq('id', label.id)
+          .eq('id', labelId)
 
         // Update order status if delivered
-        if (body.status === 'DELIVERED' && label.order_id) {
+        if (body.status === 'DELIVERED' && orderId) {
           await adminClient
             .from('orders')
             .update({ status: 'completed' })
-            .eq('id', label.order_id)
+            .eq('id', orderId)
             .eq('status', 'shipped') // Only update if currently shipped
         }
 
-        logger.info('Shipping label updated from webhook', { labelId: label.id, newStatus })
+        logger.info('Shipping label updated from webhook', { labelId, newStatus })
       }
     }
 

@@ -1,6 +1,7 @@
 import Index from '@/views/Index'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/integrations/supabase/types'
+import type { News } from '@/lib/types'
 
 // Fetch news on the server side
 async function getLatestNews() {
@@ -27,7 +28,7 @@ async function getLatestNews() {
       return []
     }
 
-    return data || []
+    return (data || []) as News[]
   } catch (error) {
     console.error('Error fetching news:', error)
     return []
