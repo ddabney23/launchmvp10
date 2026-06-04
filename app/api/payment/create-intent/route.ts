@@ -1,7 +1,7 @@
 // CLERK MIGRATION: Updated to use Clerk authentication
 import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
-import { createClientFromRequest, createAdminClient } from '@/integrations/supabase/server'
+import { createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { PaymentIntentCreateSchema } from '@/lib/validations/schemas'
 import { logger } from '@/lib/logger'
@@ -49,8 +49,6 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Strict rate limit for payment operations (10/min)
   const rateLimitResponse = await strictRateLimit(req, userId)
   if (rateLimitResponse) return rateLimitResponse
-
-  const supabase = createClientFromRequest(req.headers.get('Authorization'))
 
   // Parse and validate request body
   const body = await safeJsonParse<unknown>(req)
