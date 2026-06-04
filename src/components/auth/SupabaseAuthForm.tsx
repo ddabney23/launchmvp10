@@ -136,9 +136,9 @@ export function SupabaseAuthForm({ mode }: SupabaseAuthFormProps) {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : isSignUp ? (
-              'Sign up'
+              'Sign Up'
             ) : (
-              'Sign in'
+              'Sign In'
             )}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
@@ -146,14 +146,14 @@ export function SupabaseAuthForm({ mode }: SupabaseAuthFormProps) {
               <>
                 Already have an account?{' '}
                 <Link href="/auth" className="text-primary underline-offset-4 hover:underline">
-                  Sign in
+                  Sign In
                 </Link>
               </>
             ) : (
               <>
                 New here?{' '}
                 <Link href="/auth/sign-up" className="text-primary underline-offset-4 hover:underline">
-                  Create account
+                  Create Account
                 </Link>
               </>
             )}
