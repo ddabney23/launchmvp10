@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
-  cacheDir: 'C:/Users/Optimix/AppData/Local/optimix-vite-cache',
+  cacheDir: 'node_modules/.cache/vitest',
   plugins: [react()],
   test: {
     environment: 'jsdom',
