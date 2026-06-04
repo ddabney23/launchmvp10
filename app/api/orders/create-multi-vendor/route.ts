@@ -17,10 +17,6 @@ import { calculateApplicationFee } from '@/lib/subscription-utils'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
-
 interface OrderItem {
   listing_id: string
   quantity: number
@@ -42,6 +38,10 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     return internalErrorResponse('Payment system not configured')
   }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-10-29.clover',
+  })
 
   // Authenticate user with Clerk
   let userId: string

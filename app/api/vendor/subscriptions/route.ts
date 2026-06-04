@@ -25,20 +25,12 @@ import { SUBSCRIPTION_TIERS, SubscriptionTier } from '@/lib/subscription-tiers'
 export const dynamic = 'force-dynamic'
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
-if (!STRIPE_SECRET_KEY) {
-  console.error('STRIPE_SECRET_KEY is missing from environment variables')
-  throw new Error('STRIPE_SECRET_KEY is required. Please add it to your .env.local file.')
-}
 
-// Initialize Stripe with error handling
-let stripe: Stripe
-try {
-  stripe = new Stripe(STRIPE_SECRET_KEY, {
+function getStripeClient() {
+  if (!STRIPE_SECRET_KEY) return null
+  return new Stripe(STRIPE_SECRET_KEY, {
     apiVersion: '2025-10-29.clover',
   })
-} catch (stripeError) {
-  console.error('Failed to initialize Stripe client:', stripeError)
-  throw new Error('Failed to initialize Stripe. Please check your STRIPE_SECRET_KEY.')
 }
 
 // Schema for creating/updating subscription
@@ -121,6 +113,11 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
  * Create or upgrade subscription
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -478,6 +475,11 @@ export const PATCH = withErrorHandling(async (req: NextRequest) => {
 
   // If updating to free tier, cancel Stripe subscription
   if (tier === 'free' && subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return internalErrorResponse('Payment system not configured')
+    }
+
     try {
       await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
     } catch (stripeError) {
@@ -508,6 +510,11 @@ export const PATCH = withErrorHandling(async (req: NextRequest) => {
 
   // Update cancel_at_period_end
   if (cancel_at_period_end !== undefined && subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return internalErrorResponse('Payment system not configured')
+    }
+
     try {
       await stripe.subscriptions.update(subscription.stripe_subscription_id, {
         cancel_at_period_end: cancel_at_period_end,
@@ -588,6 +595,11 @@ export const DELETE = withErrorHandling(async (req: NextRequest) => {
 
   // Cancel Stripe subscription if exists
   if (subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return internalErrorResponse('Payment system not configured')
+    }
+
     try {
       await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
     } catch (stripeError) {

@@ -1,7 +1,7 @@
 // CLERK MIGRATION: Updated to use Clerk authentication
 import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
-import { createClientFromRequest, createAdminClient } from '@/integrations/supabase/server'
+import { createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { PaymentIntentCreateSchema } from '@/lib/validations/schemas'
 import { logger } from '@/lib/logger'
@@ -27,15 +27,15 @@ const PaymentIntentSchema = PaymentIntentCreateSchema.extend({
   customerId: z.string().uuid().optional(),
 })
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
-
 export const POST = withErrorHandling(async (req: NextRequest) => {
   // Check if Stripe is configured
   if (!process.env.STRIPE_SECRET_KEY) {
     return internalErrorResponse('Payment system not configured')
   }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-10-29.clover',
+  })
 
   // CLERK MIGRATION: Authenticate user with Clerk
   let userId: string
@@ -52,8 +52,6 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Strict rate limit for payment operations (10/min)
   const rateLimitResponse = await strictRateLimit(req, userId)
   if (rateLimitResponse) return rateLimitResponse
-
-  const supabase = createClientFromRequest(req.headers.get('Authorization'))
 
   // Parse and validate request body
   const body = await safeJsonParse<unknown>(req)

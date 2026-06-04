@@ -15,14 +15,14 @@ import Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
-
 export const GET = withErrorHandling(async (req: NextRequest) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     return internalErrorResponse('Payment system not configured')
   }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-10-29.clover',
+  })
 
   // Authenticate user
   let userId: string

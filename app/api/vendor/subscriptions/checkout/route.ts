@@ -26,14 +26,6 @@ export const dynamic = 'force-dynamic'
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-if (!STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required')
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2025-10-29.clover',
-})
-
 const CheckoutSchema = z.object({
   tier: z.enum(['basic', 'pro', 'premium']), // Free tier doesn't need checkout
   success_url: z.string().url().optional(),
@@ -45,6 +37,14 @@ const CheckoutSchema = z.object({
  * Create Stripe Checkout Session for subscription
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  if (!STRIPE_SECRET_KEY) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
+  const stripe = new Stripe(STRIPE_SECRET_KEY, {
+    apiVersion: '2025-10-29.clover',
+  })
+
   let userId: string
   try {
     userId = await getAuthUserId()

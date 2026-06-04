@@ -116,7 +116,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
 
 export default async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
-  let response = applySecurityHeaders(supabaseResponse, request)
+  const response = applySecurityHeaders(supabaseResponse, request)
 
   if (request.method === 'OPTIONS' && request.nextUrl.pathname.startsWith('/api')) {
     return new NextResponse(null, { status: 200, headers: response.headers })
