@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -43,8 +43,15 @@ interface VendorDashboardProps {
 
 export default function VendorDashboard({ vendorId: vendorIdProp }: VendorDashboardProps) {
   const router = useRouter();
-  // Use vendorId prop if provided, otherwise try to get from URL (for backward compatibility)
-  const id = vendorIdProp || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : undefined);
+  const pathname = usePathname();
+  // Use vendorId prop if provided, otherwise parse public vendor routes only.
+  const routeVendorId = useMemo(() => {
+    const lastSegment = pathname.split('/').filter(Boolean).pop();
+    return lastSegment && lastSegment !== 'vendor' && lastSegment !== 'dashboard'
+      ? lastSegment
+      : undefined;
+  }, [pathname]);
+  const id = vendorIdProp || routeVendorId;
   const { toast } = useToast();
   const { user, profile: currentProfile } = useAuth();
   const queryClient = useQueryClient();

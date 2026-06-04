@@ -21,12 +21,6 @@ export const runtime = 'nodejs'
  * Uses service role key to bypass RLS policies
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  console.log('[UPLOAD] Request received:', {
-    method: req.method,
-    url: req.url,
-    headers: Object.fromEntries(req.headers.entries()),
-  })
-
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -76,6 +70,9 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Extract filename and extension from path
   const pathSegments = path.split('/')
   const filename = pathSegments[pathSegments.length - 1]
+  if (!filename) {
+    return errorResponse('Invalid upload path', 'INVALID_PATH')
+  }
   const filenameParts = filename.split('.')
   const hasExtension = filenameParts.length > 1
   

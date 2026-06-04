@@ -50,7 +50,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Get vendor's profile UUID
   let { data: profile, error: profileError } = await adminClient
     .from('profiles')
-    .select('id, is_vendor, vendor_verified')
+    .select('id, email, is_vendor, vendor_verified')
     .eq('id', userId)
     .maybeSingle()
 
@@ -99,7 +99,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       const { data: newProfile, error: createError } = await adminClient
         .from('profiles')
         .insert(newProfileData)
-        .select('id, is_vendor, vendor_verified')
+        .select('id, email, is_vendor, vendor_verified')
         .single()
 
       if (createError || !newProfile) {
@@ -126,10 +126,15 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Note: They won't be able to receive payouts until verified, but can start the process
 
   // Get or create vendor profile
-  let vendorProfile: any
+  let vendorProfile: {
+    id: string
+    payout_account_id: string | null
+    stripe_connect_account_id?: string | null
+    stripe_onboard_status: string
+  }
   const { data: existingVendorProfile, error: vendorError } = await adminClient
     .from('vendor_profiles')
-    .select('id, payout_account_id, stripe_onboard_status')
+    .select('id, payout_account_id, stripe_connect_account_id, stripe_onboard_status')
     .eq('id', profile.id)
     .maybeSingle()
 
@@ -154,7 +159,12 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     if (createError) {
       logger.error('Failed to create vendor profile', createError, { vendorId: profile.id })
       // Continue anyway - might fail if table doesn't exist, but we'll try to create account
-      vendorProfile = { id: profile.id, payout_account_id: null, stripe_onboard_status: 'not_started' }
+      vendorProfile = {
+        id: profile.id,
+        payout_account_id: null,
+        stripe_connect_account_id: null,
+        stripe_onboard_status: 'not_started',
+      }
     } else {
       vendorProfile = newVendorProfile
     }
@@ -165,8 +175,8 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   let accountId: string
 
   // Check if Connect account already exists
-  if (vendorProfile.payout_account_id) {
-    accountId = vendorProfile.payout_account_id
+  if (vendorProfile.payout_account_id || vendorProfile.stripe_connect_account_id) {
+    accountId = vendorProfile.payout_account_id || vendorProfile.stripe_connect_account_id || ''
 
     // Verify account still exists in Stripe
     try {
@@ -190,6 +200,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
         .from('vendor_profiles')
         .update({
           payout_account_id: accountId,
+          stripe_connect_account_id: accountId,
           stripe_onboard_status: 'pending',
         })
         .eq('id', profile.id)
@@ -212,6 +223,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       .from('vendor_profiles')
       .update({
         payout_account_id: accountId,
+        stripe_connect_account_id: accountId,
         stripe_onboard_status: 'pending',
       })
       .eq('id', profile.id)

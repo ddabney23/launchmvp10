@@ -21,9 +21,7 @@ const ProfileUpdateSchema = z.object({
   display_name: z.string().min(1).max(100).optional(),
   bio: z.string().max(500).nullable().optional(),
   avatar_url: z.string().url().nullable().optional(),
-  is_vendor: z.boolean().optional(),
   onboarding_completed: z.boolean().optional(),
-  credits: z.number().min(0).optional(),
   store_name: z.string().max(200).optional(),
   store_description: z.string().max(2000).nullable().optional(),
   store_banner_url: z.string().url().nullable().optional(),
@@ -93,10 +91,8 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
         (metadata.avatar_url as string) ||
         null,
       bio: updates.bio ?? null,
-      is_vendor: updates.is_vendor ?? false,
       vendor_verified: false,
       onboarding_completed: updates.onboarding_completed ?? false,
-      credits: updates.credits ?? 0,
       store_name: updates.store_name ?? null,
       store_description: updates.store_description ?? null,
       store_banner_url: updates.store_banner_url ?? null,
@@ -146,9 +142,7 @@ export const PUT = withErrorHandling(async (req: NextRequest) => {
   if (updates.display_name !== undefined) updatePayload.display_name = updates.display_name
   if (updates.bio !== undefined) updatePayload.bio = updates.bio
   if (updates.avatar_url !== undefined) updatePayload.avatar_url = updates.avatar_url
-  if (updates.is_vendor !== undefined) updatePayload.is_vendor = updates.is_vendor
   if (updates.onboarding_completed !== undefined) updatePayload.onboarding_completed = updates.onboarding_completed
-  if (updates.credits !== undefined) updatePayload.credits = updates.credits
   if (updates.store_name !== undefined) updatePayload.store_name = updates.store_name
   if (updates.store_description !== undefined) updatePayload.store_description = updates.store_description
   if (updates.store_banner_url !== undefined) updatePayload.store_banner_url = updates.store_banner_url

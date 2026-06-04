@@ -58,13 +58,13 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
   // Verify user owns this vendor profile
   if (vendorId !== profile.id) {
-    return errorResponse('Unauthorized', 'UNAUTHORIZED', 403)
+    return errorResponse('Unauthorized', 'UNAUTHORIZED', undefined, 403)
   }
 
   // Get vendor's Stripe Connect account
   const { data: vendorProfile } = await adminClient
     .from('vendor_profiles')
-    .select('stripe_connect_account_id, payout_balance')
+    .select('payout_account_id, stripe_connect_account_id, payout_balance')
     .eq('id', vendorId)
     .maybeSingle()
 
@@ -77,7 +77,14 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
   const lifetimeEarnings = orders?.reduce((sum, order) => sum + Number(order.total || 0), 0) || 0
 
-  if (!vendorProfile?.stripe_connect_account_id) {
+  const connectAccountId =
+    typeof vendorProfile?.payout_account_id === 'string'
+      ? vendorProfile.payout_account_id
+      : typeof vendorProfile?.stripe_connect_account_id === 'string'
+        ? vendorProfile.stripe_connect_account_id
+        : null
+
+  if (!connectAccountId) {
     return successResponse({
       current_balance: Number(vendorProfile?.payout_balance || 0),
       pending_balance: 0,
@@ -88,9 +95,7 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
   try {
     // Get balance from Stripe
-    const balance = await stripe.balance.retrieve({
-      stripeAccount: vendorProfile.stripe_connect_account_id,
-    })
+    const balance = await stripe.balance.retrieve({}, { stripeAccount: connectAccountId })
 
     // Calculate balances
     const available = balance.available.reduce((sum, b) => sum + b.amount, 0) / 100

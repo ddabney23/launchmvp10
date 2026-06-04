@@ -21,6 +21,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2025-10-29.clover',
 })
 
+const STRIPE_REFUND_REASONS = new Set<Stripe.RefundCreateParams.Reason>([
+  'duplicate',
+  'fraudulent',
+  'requested_by_customer',
+])
+
+function normalizeRefundReason(reason?: string): Stripe.RefundCreateParams.Reason | undefined {
+  if (!reason) return undefined
+  return STRIPE_REFUND_REASONS.has(reason as Stripe.RefundCreateParams.Reason)
+    ? (reason as Stripe.RefundCreateParams.Reason)
+    : 'requested_by_customer'
+}
+
 export const POST = withErrorHandling(async (req: NextRequest) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     return internalErrorResponse('Payment system not configured')
@@ -91,7 +104,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     const refund = await stripe.refunds.create({
       charge: paymentIntent.latest_charge,
       amount: refundAmount,
-      reason: reason ? (reason as any) : undefined,
+      reason: normalizeRefundReason(reason),
       metadata: {
         order_id: order_id,
         vendor_id: profile.id,
@@ -102,7 +115,13 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     await adminClient
       .from('orders')
       .update({
-        status: refundAmount && refundAmount < Math.round(Number(order.total) * 100) ? 'partially_refunded' : 'refunded',
+        status: 'refunded',
+        metadata: {
+          refund_id: refund.id,
+          refund_amount: refund.amount / 100,
+          refund_status: refund.status,
+          partial_refund: Boolean(refundAmount && refundAmount < Math.round(Number(order.total) * 100)),
+        },
         updated_at: new Date().toISOString(),
       })
       .eq('id', order_id)

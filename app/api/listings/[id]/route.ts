@@ -80,6 +80,28 @@ export async function GET(
       return notFoundResponse('Listing not found')
     }
 
+    const active = listing.active !== false
+    if (!active) {
+      let canViewInactive = false
+
+      try {
+        const userId = await getAuthUserId()
+        const { data: profile } = await adminClient
+          .from('profiles')
+          .select('id, is_admin')
+          .eq('id', userId)
+          .maybeSingle() as { data: { id: string; is_admin: boolean | null } | null }
+
+        canViewInactive = profile?.id === listing.vendor || profile?.is_admin === true
+      } catch {
+        canViewInactive = false
+      }
+
+      if (!canViewInactive) {
+        return notFoundResponse('Listing not found')
+      }
+    }
+
     return successResponse({ listing })
   } catch (error) {
     logger.error('Listing GET error', error)
@@ -108,10 +130,10 @@ export async function PATCH(
 
     const validation = ListingUpdateSchema.safeParse(body)
     if (!validation.success) {
-      return validationErrorResponse(validation.error.issues)
+      return validationErrorResponse(validation.error)
     }
 
-    const updates = { ...validation.data } as Record<string, any>
+    const updates = { ...validation.data } as Record<string, unknown>
     if (updates.vendor) {
       // Only admins can reassign vendors
       if (!authResult.profile?.is_admin) {

@@ -182,11 +182,16 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       // Get vendor's Stripe Connect account if available
       const { data: vendorProfile } = await adminClient
         .from('vendor_profiles')
-        .select('stripe_connect_account_id')
+        .select('payout_account_id, stripe_connect_account_id')
         .eq('id', vendorId)
         .maybeSingle()
 
-      const connectAccountId = vendorProfile?.stripe_connect_account_id
+      const connectAccountId =
+        typeof vendorProfile?.payout_account_id === 'string'
+          ? vendorProfile.payout_account_id
+          : typeof vendorProfile?.stripe_connect_account_id === 'string'
+            ? vendorProfile.stripe_connect_account_id
+            : null
 
       // Calculate application fee
       let applicationFeeAmount = 0

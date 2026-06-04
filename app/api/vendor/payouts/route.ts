@@ -59,17 +59,24 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
   // Verify user owns this vendor profile
   if (vendorId !== profile.id) {
-    return errorResponse('Unauthorized', 'UNAUTHORIZED', 403)
+    return errorResponse('Unauthorized', 'UNAUTHORIZED', undefined, 403)
   }
 
   // Get vendor's Stripe Connect account
   const { data: vendorProfile } = await adminClient
     .from('vendor_profiles')
-    .select('stripe_connect_account_id')
+    .select('payout_account_id, stripe_connect_account_id')
     .eq('id', vendorId)
     .maybeSingle()
 
-  if (!vendorProfile?.stripe_connect_account_id) {
+  const connectAccountId =
+    typeof vendorProfile?.payout_account_id === 'string'
+      ? vendorProfile.payout_account_id
+      : typeof vendorProfile?.stripe_connect_account_id === 'string'
+        ? vendorProfile.stripe_connect_account_id
+        : null
+
+  if (!connectAccountId) {
     return successResponse([]) // No Connect account, no payouts
   }
 
@@ -80,7 +87,7 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
         limit,
       },
       {
-        stripeAccount: vendorProfile.stripe_connect_account_id,
+        stripeAccount: connectAccountId,
       }
     )
 

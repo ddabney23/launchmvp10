@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { isAdminEmail } from '@/lib/admin'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function DebugAdminPage() {
@@ -16,6 +17,7 @@ export default function DebugAdminPage() {
   const finalIsAdmin = dbIsAdmin || emailIsAdmin
 
   return (
+    <ProtectedRoute requireAdmin>
     <div className="container mx-auto p-8 space-y-4">
       <Card>
         <CardHeader>
@@ -57,5 +59,6 @@ export default function DebugAdminPage() {
         </CardContent>
       </Card>
     </div>
+    </ProtectedRoute>
   )
 }

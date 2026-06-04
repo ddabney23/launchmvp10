@@ -183,7 +183,8 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 /**
  * GET /api/listings
  * Get listings (public endpoint - no auth required for browsing)
- * Supports filtering by vendor (for vendor dashboard - shows all listings including inactive)
+ * Supports filtering by vendor. Inactive vendor listings are only returned to the
+ * vendor owner or an admin; public viewers only see active listings.
  */
 export const GET = withErrorHandling(async (req: NextRequest) => {
   const adminClient = createAdminClient()
@@ -200,8 +201,8 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
       .select('*')
       .order('created_at', { ascending: false })
 
-    // If vendor filter is provided, show all their listings (active and inactive)
-    // Otherwise, only show active listings (public marketplace)
+    // If vendor filter is provided, restrict inactive listings to the owner/admin.
+    // Otherwise, only show active listings (public marketplace).
     if (vendor) {
       // Check if vendor is a Clerk ID or UUID
       const isClerkId = vendor.startsWith('user_')
@@ -215,11 +216,30 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
         
         if (profile?.id) {
           query = query.eq('vendor', profile.id)
+          query = query.eq('active', true)
         } else {
           return successResponse({ listings: [] })
         }
       } else {
         query = query.eq('vendor', vendor)
+        let canViewInactive = false
+
+        try {
+          const authUserId = await getAuthUserId()
+          const { data: viewerProfile } = await adminClient
+            .from('profiles')
+            .select('id, is_admin')
+            .eq('id', authUserId)
+            .maybeSingle() as { data: { id: string; is_admin: boolean | null } | null }
+
+          canViewInactive = viewerProfile?.id === vendor || viewerProfile?.is_admin === true
+        } catch {
+          canViewInactive = false
+        }
+
+        if (!canViewInactive) {
+          query = query.eq('active', true)
+        }
       }
     } else {
       // Public marketplace - only active listings

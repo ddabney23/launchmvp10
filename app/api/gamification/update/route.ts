@@ -187,46 +187,48 @@ async function checkBadgeUnlocks(
 
   for (const threshold of badgeThresholds) {
     if (totalPoints >= threshold.points) {
+      // Find badge ID
+      const { data: badge } = await supabase
+        .from('badges')
+        .select('id')
+        .eq('name', threshold.badgeName)
+        .maybeSingle()
+
+      if (!badge) {
+        continue
+      }
+
       // Check if user already has this badge
       const { data: existingBadge } = await supabase
         .from('user_badges')
         .select('id')
         .eq('user_id', userId)
-        .eq('badge_name', threshold.badgeName)
+        .eq('badge_id', badge.id)
         .maybeSingle()
 
       if (!existingBadge) {
-        // Find badge ID
-        const { data: badge } = await supabase
-          .from('badges')
-          .select('id')
-          .eq('name', threshold.badgeName)
-          .maybeSingle()
+        // Award badge
+        await supabase
+          .from('user_badges')
+          .insert({
+            user_id: userId,
+            badge_id: badge.id,
+            awarded_at: new Date().toISOString(),
+          })
 
-        if (badge) {
-          // Award badge
-          await supabase
-            .from('user_badges')
-            .insert({
-              user_id: userId,
-              badge_id: badge.id,
-              earned_at: new Date().toISOString(),
-            })
-
-          // Create notification
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: userId,
-              type: 'badge_earned',
-              data: { 
-                badgeId: badge.id, 
-                badgeName: threshold.badgeName,
-                title: 'Badge Unlocked!',
-                message: `Congratulations! You've earned the ${threshold.badgeName} badge!`,
-              },
-            })
-        }
+        // Create notification
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: userId,
+            type: 'badge_earned',
+            data: {
+              badgeId: badge.id,
+              badgeName: threshold.badgeName,
+              title: 'Badge Unlocked!',
+              message: `Congratulations! You've earned the ${threshold.badgeName} badge!`,
+            },
+          })
       }
     }
   }

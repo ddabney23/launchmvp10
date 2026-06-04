@@ -1,5 +1,5 @@
 import Index from '@/views/Index'
-import { createClient } from '@/integrations/supabase/client'
+import { createServerClient } from '@/integrations/supabase/server'
 
 // Fetch news on the server side
 async function getLatestNews() {
@@ -11,7 +11,7 @@ async function getLatestNews() {
       return []
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = await createServerClient()
     
     const { data, error } = await supabase
       .from('news')

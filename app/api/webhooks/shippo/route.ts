@@ -4,6 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
 import {
@@ -15,6 +16,38 @@ import {
 import { webhookRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
+
+type ShippoWebhookPayload = {
+  event?: string
+  event_type?: string
+  tracking_number?: string
+  transaction?: string
+  transaction_id?: string
+  status?: string
+}
+
+function safeCompare(value: string, expected: string) {
+  const valueBuffer = Buffer.from(value, 'hex')
+  const expectedBuffer = Buffer.from(expected, 'hex')
+  return valueBuffer.length === expectedBuffer.length && timingSafeEqual(valueBuffer, expectedBuffer)
+}
+
+function verifyShippoSignature(rawBody: string, signatureHeader: string | null) {
+  const secret = process.env.SHIPPO_WEBHOOK_SECRET
+  if (!secret || !signatureHeader) return false
+
+  const timestampMatch = signatureHeader.match(/(?:^|,)t=([^,]+)/)
+  const v1Match = signatureHeader.match(/(?:^|,)v1=([a-f0-9]+)/i)
+
+  if (timestampMatch?.[1] && v1Match?.[1]) {
+    const signedPayload = `${timestampMatch[1]}.${rawBody}`
+    const expected = createHmac('sha256', secret).update(signedPayload).digest('hex')
+    return safeCompare(v1Match[1], expected)
+  }
+
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  return /^[a-f0-9]+$/i.test(signatureHeader) && safeCompare(signatureHeader, expected)
+}
 
 /**
  * POST /api/webhooks/shippo
@@ -28,7 +61,17 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const adminClient = createAdminClient()
 
   try {
-    const body = await req.json()
+    const rawBody = await req.text()
+    const signature =
+      req.headers.get('shippo-auth-signature') ||
+      req.headers.get('x-shippo-signature')
+
+    if (!verifyShippoSignature(rawBody, signature)) {
+      logger.warn('Rejected Shippo webhook with invalid signature')
+      return errorResponse('Invalid webhook signature', 'INVALID_SIGNATURE', undefined, 401)
+    }
+
+    const body = JSON.parse(rawBody) as ShippoWebhookPayload
 
     // Shippo webhook events
     const eventType = body.event || body.event_type
@@ -59,7 +102,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
           .update({
             status: newStatus,
             metadata: {
-              ...(label.metadata as Record<string, any> || {}),
+              ...((label.metadata as Record<string, unknown>) || {}),
               last_webhook: new Date().toISOString(),
               shippo_status: body.status,
             },

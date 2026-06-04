@@ -58,19 +58,19 @@ export const PATCH = withErrorHandling(async (
 
   // Verify user is the vendor for this order
   if (order.vendor !== profile.id) {
-    return errorResponse('Unauthorized', 'UNAUTHORIZED', 403)
+    return errorResponse('Unauthorized', 'UNAUTHORIZED', undefined, 403)
   }
 
   // Parse request body
-  const body = await safeJsonParse<{ status?: string; [key: string]: any }>(req)
+  const body = await safeJsonParse<{ status?: string }>(req)
   if (!body) {
     return errorResponse('Invalid request body', 'PARSE_ERROR', 400)
   }
 
   // Validate status transitions
-  const validStatuses = ['pending', 'paid', 'processing', 'shipped', 'completed', 'cancelled']
+  const validStatuses = ['pending', 'paid', 'shipped', 'completed', 'refunded', 'canceled']
   if (body.status && !validStatuses.includes(body.status)) {
-    return errorResponse('Invalid order status', 'INVALID_STATUS', 400)
+    return errorResponse('Invalid order status', 'INVALID_STATUS', undefined, 400)
   }
 
   // Validate status transitions
@@ -79,12 +79,12 @@ export const PATCH = withErrorHandling(async (
 
   if (newStatus) {
     const validTransitions: Record<string, string[]> = {
-      'pending': ['paid', 'cancelled'],
-      'paid': ['processing', 'cancelled'],
-      'processing': ['shipped', 'cancelled'],
+      'pending': ['paid', 'canceled'],
+      'paid': ['shipped', 'canceled', 'refunded'],
       'shipped': ['completed'],
+      'refunded': [],
       'completed': [], // Cannot change from completed
-      'cancelled': [], // Cannot change from cancelled
+      'canceled': [], // Cannot change from canceled
     }
 
     const allowedTransitions = validTransitions[currentStatus] || []
@@ -92,6 +92,7 @@ export const PATCH = withErrorHandling(async (
       return errorResponse(
         `Cannot change status from ${currentStatus} to ${newStatus}`,
         'INVALID_STATUS_TRANSITION',
+        undefined,
         400
       )
     }
@@ -101,7 +102,7 @@ export const PATCH = withErrorHandling(async (
   const { data: updatedOrder, error: updateError } = await adminClient
     .from('orders')
     .update({
-      ...body,
+      ...(newStatus ? { status: newStatus } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq('id', orderId)
