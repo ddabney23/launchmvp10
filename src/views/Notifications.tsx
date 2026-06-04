@@ -4,7 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Bell, Inbox } from "lucide-react";
+import { Check, Inbox } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,7 +82,6 @@ export default function Notifications() {
   };
 
   const getNotificationMessage = (notification: Notification): string => {
-    const data = notification.data as any;
     switch (notification.type) {
       case "post_liked":
         return "liked your post";
@@ -145,7 +144,7 @@ export default function Notifications() {
                 <Inbox className="h-16 w-16 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No notifications yet</h3>
                 <p className="text-muted-foreground text-center mb-4">
-                  When you get likes, comments, follows, or messages, they'll show up here
+                  When you get likes, comments, follows, or messages, they&apos;ll show up here
                 </p>
               </CardContent>
             </Card>
