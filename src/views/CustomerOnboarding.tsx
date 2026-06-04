@@ -255,11 +255,11 @@ export default function CustomerOnboarding() {
   const selectedCategories = interestsForm.watch("categories") || [];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
       <Card className="w-full max-w-2xl shadow-primary">
         <CardHeader className="space-y-4">
           <div>
-            <CardTitle className="text-3xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Welcome to Optimix!
             </CardTitle>
             <CardDescription>Let's personalize your experience</CardDescription>
@@ -395,7 +395,7 @@ export default function CustomerOnboarding() {
           {/* Step 3: Welcome Badge & Credits */}
           {currentStep === 3 && (
             <div className="text-center space-y-6 py-8">
-              <div className="mx-auto w-20 h-20 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
+              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <Gift className="h-10 w-10 text-white" />
               </div>
               <div>

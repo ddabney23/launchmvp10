@@ -49,7 +49,7 @@ export default function Cart() {
       <Navigation />
       <PageShell>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Shopping Cart
           </h1>
 
@@ -59,7 +59,7 @@ export default function Cart() {
                 <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
                 <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
                 <p className="text-muted-foreground mb-6">Add items to get started</p>
-                <Button onClick={() => router.push("/explore")}>
+                <Button onClick={() => router.push("/marketplace")}>
                   Browse Marketplace
                 </Button>
               </CardContent>
@@ -77,7 +77,7 @@ export default function Cart() {
                         <div className="flex gap-4">
                           {/* Image */}
                           <Link
-                            to={`/listing/${item.listing_id}`}
+                            href={`/listing/${item.listing_id}`}
                             className="flex-shrink-0 w-24 h-24 bg-muted rounded-lg overflow-hidden"
                           >
                             {item.listing.images && item.listing.images.length > 0 ? (
@@ -199,7 +199,7 @@ export default function Cart() {
                     </div>
 
                     <Button
-                      className="w-full bg-linear-to-r from-primary to-secondary hover:opacity-90"
+                      className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
                       onClick={handleCheckout}
                       disabled={items.length === 0}
                     >
@@ -209,7 +209,7 @@ export default function Cart() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => router.push("/explore")}
+                      onClick={() => router.push("/marketplace")}
                     >
                       Continue Shopping
                     </Button>

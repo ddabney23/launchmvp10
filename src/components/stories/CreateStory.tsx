@@ -354,7 +354,7 @@ export function CreateStory({ open, onClose }: CreateStoryProps) {
             <Button
               onClick={handleSubmit}
               disabled={!file || isUploading}
-              className="flex-1 bg-linear-to-r from-primary to-secondary"
+              className="flex-1 bg-gradient-to-r from-primary to-secondary"
             >
               {isUploading ? (
                 <>

@@ -295,11 +295,11 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
       <Card className="w-full max-w-2xl shadow-primary animate-scale-in">
         <CardHeader className="space-y-4 text-center">
           <div>
-            <CardTitle className="text-3xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               {currentStep === 1 ? "Welcome to Optimix! 🎉" : "Vendor Application"}
             </CardTitle>
             <CardDescription className="mt-2 text-base">
@@ -563,7 +563,7 @@ export default function Onboarding() {
                 </p>
                 <Button
                   type="submit"
-                  className="flex-1 bg-linear-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
                   disabled={submitting}
                 >
                   {submitting ? (
@@ -667,7 +667,7 @@ export default function Onboarding() {
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 bg-linear-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
+                  className="flex-1 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
                   disabled={submitting}
                 >
                   {submitting ? (

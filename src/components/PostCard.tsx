@@ -575,7 +575,7 @@ export const PostCard = ({ post, currentUserId }: PostCardProps) => {
         <div className="flex items-center gap-3 flex-1">
           <Avatar className="h-10 w-10 ring-2 ring-primary/20">
             <AvatarImage src={profile?.avatar_url || undefined} />
-            <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
               {profile?.username?.[0]?.toUpperCase() || profile?.display_name?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>

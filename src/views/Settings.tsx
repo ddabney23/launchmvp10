@@ -250,7 +250,7 @@ export default function Settings() {
       <PageShell>
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Settings
             </h1>
             <p className="text-muted-foreground">Manage your account settings and preferences</p>

@@ -12,14 +12,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
-import { isAdminEmail } from "@/lib/admin";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
   const pathname = usePathname();
   const { toast } = useToast();
   const { getItemCount } = useCart();
-  const { user, profile, signOut } = useAuth();
+  const { profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const cartItemCount = getItemCount();
 
@@ -60,7 +59,7 @@ export const Navigation = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link 
             href="/home" 
-            className="text-2xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent"
+            className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
             aria-label="Optimix Home"
           >
             Optimix
@@ -105,7 +104,7 @@ export const Navigation = () => {
               <Link href={profilePath}>
                 <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/50 transition-all">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
                     {profile.username?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -118,7 +117,7 @@ export const Navigation = () => {
               <Link href={profilePath} aria-label="Your profile">
                 <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white text-xs">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-xs">
                     {profile.username?.[0]?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -151,7 +150,7 @@ export const Navigation = () => {
                       >
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={profile.avatar_url ?? undefined} />
-                          <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
                             {profile.username?.[0]?.toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
@@ -186,7 +185,7 @@ export const Navigation = () => {
                       </Button>
                     </Link>
 
-                    {profile && (profile.is_admin || isAdminEmail(user?.email)) && (
+                    {profile?.is_admin === true && (
                       <Link href="/admin" onClick={handleNavClick}>
                         <Button variant={isActive("/admin") ? "default" : "ghost"} className="w-full justify-start gap-3">
                           <Shield className="h-5 w-5" />

@@ -93,7 +93,7 @@ export default function OnboardingFunnel() {
 
   if (loading || !isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
@@ -102,10 +102,10 @@ export default function OnboardingFunnel() {
   // Step 1: Choose Role (Vendor or Customer)
   if (currentStep === 'choose-role') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
         <Card className="w-full max-w-4xl shadow-primary animate-scale-in">
           <CardHeader className="space-y-4 text-center">
-            <CardTitle className="text-4xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Welcome to Optimix! 🎉
             </CardTitle>
             <CardDescription className="text-lg">
@@ -208,7 +208,7 @@ export default function OnboardingFunnel() {
   // Step 2: Route to appropriate onboarding flow (handled by useEffect)
   if (currentStep === 'vendor' || currentStep === 'customer') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )

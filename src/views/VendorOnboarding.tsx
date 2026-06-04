@@ -642,7 +642,7 @@ export default function VendorOnboarding() {
           setTimeout(async () => {
             try {
               const profile = await getProfile(userId);
-              router.push(profile?.id && profile.id !== userId ? `/vendor/${profile.id}` : '/vendor');
+              router.push(profile?.id ? `/vendor/${profile.id}` : '/vendor/dashboard');
             } catch {
               router.push('/vendor/dashboard');
             }
@@ -913,11 +913,11 @@ export default function VendorOnboarding() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-background to-secondary/10 p-3 sm:p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-3 sm:p-4">
       <Card className="w-full max-w-3xl shadow-primary">
         <CardHeader className="space-y-3 sm:space-y-4 p-4 sm:p-6">
           <div>
-            <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Vendor Onboarding
             </CardTitle>
             <CardDescription className="text-sm">Complete these steps to set up your vendor account</CardDescription>

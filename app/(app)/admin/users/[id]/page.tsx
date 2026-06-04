@@ -44,7 +44,7 @@ export default function AdminUserPage({ params }: { params: Promise<{ id: string
   const router = useRouter()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const { user: currentUser, profile: currentProfile } = useAuth()
+  const { user: currentUser, profile: currentProfile, loading: authLoading } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
@@ -350,6 +350,19 @@ export default function AdminUserPage({ params }: { params: Promise<{ id: string
       setIsDeleteDialogOpen(false)
     },
   })
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-8">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!isAdmin) {
     return (

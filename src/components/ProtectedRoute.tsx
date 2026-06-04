@@ -1,6 +1,5 @@
 'use client'
 
-// CLERK MIGRATION: Updated to use Clerk authentication
 /**
  * Protected Route Component
  * Wraps routes that require authentication
@@ -9,7 +8,6 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Loader2 } from 'lucide-react'
-import { isAdminEmail } from '@/lib/admin'
 import { useEffect } from 'react'
 
 interface ProtectedRouteProps {
@@ -32,7 +30,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
       // Check admin requirement
       if (requireAdmin) {
-        const isAdmin = profile?.is_admin || isAdminEmail(user.email)
+        const isAdmin = profile?.is_admin === true
         if (!isAdmin) {
           router.push('/home')
           return
@@ -56,7 +54,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (requireAdmin) {
-    const isAdmin = profile?.is_admin || isAdminEmail(user.email)
+    const isAdmin = profile?.is_admin === true
     if (!isAdmin) {
       return null
     }

@@ -4,6 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
+import crypto from 'node:crypto'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
 import {
@@ -16,6 +17,34 @@ import { webhookRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
+function verifyShippoSignature(rawBody: string, signatureHeader: string, secret: string) {
+  let timestamp: string | undefined
+  let signature: string | undefined
+
+  for (const part of signatureHeader.split(',')) {
+    const [key, value] = part.split('=')
+    if (key === 't') timestamp = value
+    if (key === 'v1') signature = value
+  }
+
+  if (!timestamp || !signature || !/^[0-9a-f]+$/i.test(signature)) {
+    return false
+  }
+
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${rawBody}`)
+    .digest('hex')
+
+  const expectedBuffer = Buffer.from(expected, 'hex')
+  const signatureBuffer = Buffer.from(signature, 'hex')
+
+  return (
+    expectedBuffer.length === signatureBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, signatureBuffer)
+  )
+}
+
 /**
  * POST /api/webhooks/shippo
  * Handle Shippo webhook events
@@ -25,10 +54,24 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const rateLimitResponse = await webhookRateLimit(req)
   if (rateLimitResponse) return rateLimitResponse
 
+  const rawBody = await req.text()
+  const webhookSecret = process.env.SHIPPO_WEBHOOK_SECRET
+  const signatureHeader =
+    req.headers.get('shippo-auth-signature') ?? req.headers.get('x-shippo-signature')
+
+  if (webhookSecret) {
+    if (!signatureHeader || !verifyShippoSignature(rawBody, signatureHeader, webhookSecret)) {
+      return errorResponse('Invalid webhook signature', 'INVALID_SIGNATURE', null, 401)
+    }
+  } else if (process.env.NODE_ENV === 'production') {
+    logger.error('Shippo webhook called without SHIPPO_WEBHOOK_SECRET configured')
+    return errorResponse('Shippo webhook not configured', 'WEBHOOK_NOT_CONFIGURED', null, 503)
+  }
+
   const adminClient = createAdminClient()
 
   try {
-    const body = await req.json()
+    const body = JSON.parse(rawBody || '{}')
 
     // Shippo webhook events
     const eventType = body.event || body.event_type
@@ -41,7 +84,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       // Update shipping label status
       const { data: label, error: labelError } = await adminClient
         .from('shipping_labels')
-        .select('id, order_id, status')
+        .select('id, order_id, status, metadata')
         .eq('tracking_number', trackingNumber)
         .maybeSingle()
 
@@ -59,7 +102,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
           .update({
             status: newStatus,
             metadata: {
-              ...(label.metadata as Record<string, any> || {}),
+              ...((label.metadata as Record<string, unknown>) || {}),
               last_webhook: new Date().toISOString(),
               shippo_status: body.status,
             },

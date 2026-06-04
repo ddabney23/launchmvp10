@@ -214,7 +214,7 @@ export default function VendorStoreProfile({ vendorId }: VendorStoreProfileProps
             alt={`${profile.display_name || profile.username} store banner`}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
         </div>
       )}
 
@@ -226,7 +226,7 @@ export default function VendorStoreProfile({ vendorId }: VendorStoreProfileProps
               {/* Avatar */}
               <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-lg">
                 <AvatarImage src={profile.avatar_url || undefined} />
-                <AvatarFallback className="text-3xl bg-linear-to-br from-primary to-secondary text-white">
+                <AvatarFallback className="text-3xl bg-gradient-to-br from-primary to-secondary text-white">
                   {profile.username?.[0]?.toUpperCase() || "S"}
                 </AvatarFallback>
               </Avatar>

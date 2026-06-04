@@ -367,7 +367,7 @@ export default function Feed() {
                 <div className="shrink-0">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={profile?.avatar_url} />
-                    <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white text-sm">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-sm">
                       {profile?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>

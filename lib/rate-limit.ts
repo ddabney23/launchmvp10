@@ -1,15 +1,23 @@
 import { Redis } from '@upstash/redis'
 import { Ratelimit } from '@upstash/ratelimit'
-import { env } from './env'
 
-// Initialize Redis client
-const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-})
+type RateLimitType = 'api' | 'write' | 'login' | 'ip' | 'search' | 'upload'
 
-// Define all rate limiters
-export const rateLimiters = {
+const redisUrl = process.env['UPSTASH_REDIS_REST_URL']
+const redisToken = process.env['UPSTASH_REDIS_REST_TOKEN']
+
+const redis =
+  redisUrl && redisToken
+    ? new Redis({
+        url: redisUrl,
+        token: redisToken,
+      })
+    : null
+
+// Define all rate limiters when Upstash is configured. Without Redis, proxy
+// rate limiting is intentionally fail-open so builds and local dev still work.
+export const rateLimiters: Partial<Record<RateLimitType, Ratelimit>> = redis
+  ? {
   // General API rate limit: 60 requests per minute per user
   api: new Ratelimit({
     redis,
@@ -58,13 +66,30 @@ export const rateLimiters = {
     prefix: 'ratelimit:upload',
   }),
 }
+  : {}
 
 // Helper function with response headers
 export async function checkRateLimit(
   identifier: string,
-  type: keyof typeof rateLimiters = 'api'
+  type: RateLimitType = 'api'
 ) {
-  const { success, limit, reset, remaining } = await rateLimiters[type].limit(identifier)
+  const limiter = rateLimiters[type]
+
+  if (!limiter) {
+    return {
+      success: true,
+      limit: 0,
+      reset: Date.now(),
+      remaining: 0,
+      headers: {
+        'X-RateLimit-Limit': '0',
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': Date.now().toString(),
+      },
+    }
+  }
+
+  const { success, limit, reset, remaining } = await limiter.limit(identifier)
   
   return {
     success,

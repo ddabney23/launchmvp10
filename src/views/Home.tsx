@@ -225,12 +225,12 @@ export default function Home() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                Welcome back, <span className="bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">{profile.display_name || profile.username}!</span>
+                Welcome back, <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{profile.display_name || profile.username}!</span>
               </h1>
               <p className="text-muted-foreground">Here's what's happening in your Optimix community</p>
             </div>
             <Link href="/create" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto bg-linear-to-r from-primary to-secondary" aria-label="Create post">
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary" aria-label="Create post">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Create Post
               </Button>
@@ -480,7 +480,7 @@ export default function Home() {
                             <CardContent className="pt-6 flex flex-col items-center text-center">
                               <Avatar className="h-16 w-16 mb-3">
                                 <AvatarImage src={vendor.avatar_url} />
-                                <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white">
+                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
                                   {vendor.username?.[0]?.toUpperCase() || "V"}
                                 </AvatarFallback>
                               </Avatar>

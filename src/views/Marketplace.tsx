@@ -158,7 +158,7 @@ export default function Marketplace() {
       <Navigation />
       <PageShell>
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Marketplace
           </h1>
           <p className="text-muted-foreground">Discover and shop from verified vendors</p>
@@ -186,7 +186,7 @@ export default function Marketplace() {
                     >
                       <Avatar className="h-16 w-16">
                         <AvatarImage src={vendor.avatar_url || undefined} />
-                        <AvatarFallback className="bg-linear-to-br from-primary to-secondary text-white font-bold text-xl">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white font-bold text-xl">
                           {vendor.username?.[0]?.toUpperCase() || "V"}
                         </AvatarFallback>
                       </Avatar>
