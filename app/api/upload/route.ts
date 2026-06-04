@@ -21,12 +21,6 @@ export const runtime = 'nodejs'
  * Uses service role key to bypass RLS policies
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  console.log('[UPLOAD] Request received:', {
-    method: req.method,
-    url: req.url,
-    headers: Object.fromEntries(req.headers.entries()),
-  })
-
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -43,18 +37,25 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   const adminClient = createAdminClient()
 
-    // Parse form data
-    const formData = await req.formData()
-    const file = formData.get('file') as File
-    const bucket = formData.get('bucket') as string
-    const path = formData.get('path') as string
+  const formData = await req.formData()
+  const fileEntry = formData.get('file')
+  const bucketEntry = formData.get('bucket')
+  const pathEntry = formData.get('path')
 
-  if (!file || !bucket || !path) {
+  if (!(fileEntry instanceof File) || typeof bucketEntry !== 'string' || typeof pathEntry !== 'string') {
+    return errorResponse('Missing required fields: file, bucket, or path', 'MISSING_FIELDS')
+  }
+
+  const file = fileEntry
+  const bucket = bucketEntry.trim()
+  const path = pathEntry.trim()
+
+  if (!bucket || !path) {
     return errorResponse('Missing required fields: file, bucket, or path', 'MISSING_FIELDS')
   }
 
   // Validate bucket name (security: only allow specific buckets)
-  const allowedBuckets = ['vendor-assets', 'vendor-docs', 'listings', 'avatars', 'posts', 'stories', 'store-banners']
+  const allowedBuckets = ['vendor-assets', 'vendor-docs', 'listings', 'avatars', 'posts', 'stories', 'store-banners', 'news']
   if (!allowedBuckets.includes(bucket)) {
     return errorResponse('Invalid bucket name', 'INVALID_BUCKET')
   }
@@ -76,6 +77,10 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Extract filename and extension from path
   const pathSegments = path.split('/')
   const filename = pathSegments[pathSegments.length - 1]
+  if (!filename) {
+    return errorResponse('Invalid upload path', 'INVALID_PATH')
+  }
+
   const filenameParts = filename.split('.')
   const hasExtension = filenameParts.length > 1
   

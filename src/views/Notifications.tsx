@@ -72,13 +72,13 @@ export default function Notifications() {
   }, [user?.id, queryClient]);
 
   const getNotificationLink = (notification: Notification): string => {
-    const data = notification.data as any;
-    if (data?.post_id) return `/post/${data.post_id}`;
+    const data = notification.data as Record<string, string | undefined>;
+    if (data?.post_id) return "/feed";
     if (data?.listing_id) return `/listing/${data.listing_id}`;
-    if (data?.order_id) return `/orders/${data.order_id}`;
-    if (data?.booking_id) return `/bookings/${data.booking_id}`;
+    if (data?.order_id) return `/order/${data.order_id}`;
+    if (data?.booking_id) return "/orders";
     if (data?.follower) return `/profile/${data.follower}`;
-    return "#";
+    return "/notifications";
   };
 
   const getNotificationMessage = (notification: Notification): string => {

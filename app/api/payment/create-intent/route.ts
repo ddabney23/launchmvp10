@@ -1,10 +1,11 @@
 // CLERK MIGRATION: Updated to use Clerk authentication
 import { NextRequest } from 'next/server'
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 import { createClientFromRequest, createAdminClient } from '@/integrations/supabase/server'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { PaymentIntentCreateSchema } from '@/lib/validations/schemas'
 import { logger } from '@/lib/logger'
+import { getStripeClient } from '@/lib/stripe'
 import { strictRateLimit } from '@/lib/rate-limit'
 import {
   successResponse,
@@ -27,13 +28,9 @@ const PaymentIntentSchema = PaymentIntentCreateSchema.extend({
   customerId: z.string().uuid().optional(),
 })
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
-
 export const POST = withErrorHandling(async (req: NextRequest) => {
-  // Check if Stripe is configured
-  if (!process.env.STRIPE_SECRET_KEY) {
+  const stripe = getStripeClient()
+  if (!stripe) {
     return internalErrorResponse('Payment system not configured')
   }
 

@@ -1,27 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
 import { webhookRateLimit } from '@/lib/rate-limit'
+import { getStripeClient } from '@/lib/stripe'
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
-
-// Validate Stripe environment variables
-if (!STRIPE_SECRET_KEY || !WEBHOOK_SECRET) {
-  const errorMessage = 
-    'Missing Stripe environment variables!\n' +
-    'Please set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in your .env.local file.\n' +
-    'See env.example.txt for reference.'
-  
-  if (process.env.NODE_ENV === 'development') {
-    throw new Error(errorMessage)
-  } else {
-    logger.error('Missing Stripe environment variables', new Error(errorMessage))
-  }
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY || '')
 const webhookSecret = WEBHOOK_SECRET || ''
 
 export async function POST(req: NextRequest) {
@@ -30,7 +14,9 @@ export async function POST(req: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   // Validate Stripe configuration at runtime
-  if (!STRIPE_SECRET_KEY || !WEBHOOK_SECRET) {
+  const stripe = getStripeClient()
+
+  if (!stripe || !WEBHOOK_SECRET) {
     logger.error('Stripe webhook called but environment variables are missing')
     return NextResponse.json(
       { error: 'Stripe webhook not configured' },

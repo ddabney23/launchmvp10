@@ -10,7 +10,6 @@ const PUBLIC_PATHS = [
   /^\/register(\/.*)?$/,
   /^\/api\/webhooks(\/.*)?$/,
   /^\/api\/health(\/.*)?$/,
-  /^\/api\/test-auth(\/.*)?$/,
 ]
 
 const PROTECTED_PATHS = [
@@ -21,12 +20,16 @@ const PROTECTED_PATHS = [
   /^\/marketplace(\/.*)?$/,
   /^\/cart(\/.*)?$/,
   /^\/checkout(\/.*)?$/,
+  /^\/order(\/.*)?$/,
   /^\/orders(\/.*)?$/,
   /^\/messages(\/.*)?$/,
   /^\/notifications(\/.*)?$/,
   /^\/groups(\/.*)?$/,
+  /^\/listing(\/.*)?$/,
+  /^\/stories(\/.*)?$/,
   /^\/vendor(\/.*)?$/,
   /^\/admin(\/.*)?$/,
+  /^\/debug-admin(\/.*)?$/,
   /^\/onboarding(\/.*)?$/,
   /^\/create(\/.*)?$/,
   /^\/explore(\/.*)?$/,
@@ -34,8 +37,24 @@ const PROTECTED_PATHS = [
   /^\/rewards(\/.*)?$/,
   /^\/news(\/.*)?$/,
   /^\/api\/admin(\/.*)?$/,
+  /^\/api\/ads(\/.*)?$/,
+  /^\/api\/bookings(\/.*)?$/,
+  /^\/api\/gamification(\/.*)?$/,
+  /^\/api\/leaderboard(\/.*)?$/,
+  /^\/api\/notifications(\/.*)?$/,
+  /^\/api\/onboarding(\/.*)?$/,
+  /^\/api\/orders(\/.*)?$/,
+  /^\/api\/payment(\/.*)?$/,
+  /^\/api\/polls(\/.*)?$/,
   /^\/api\/posts(\/.*)?$/,
+  /^\/api\/profile(\/.*)?$/,
+  /^\/api\/reviews(\/.*)?$/,
+  /^\/api\/shipping(\/.*)?$/,
   /^\/api\/stories(\/.*)?$/,
+  /^\/api\/test-auth(\/.*)?$/,
+  /^\/api\/upload(\/.*)?$/,
+  /^\/api\/users(\/.*)?$/,
+  /^\/api\/vendor(\/.*)?$/,
   /^\/api\/listings(\/.*)?$/,
 ]
 
@@ -44,9 +63,6 @@ function matchesPath(pathname: string, patterns: RegExp[]) {
 }
 
 function isPublicRoute(pathname: string) {
-  if (pathname === '/api/listings' || pathname.startsWith('/api/listings/')) {
-    return true
-  }
   return matchesPath(pathname, PUBLIC_PATHS)
 }
 
@@ -61,6 +77,15 @@ function isWriteOperation(pathname: string): boolean {
     (pathname.endsWith('/create') ||
       pathname.includes('/update') ||
       pathname.includes('/delete'))
+  )
+}
+
+function isPublicListingRead(pathname: string, method: string): boolean {
+  return (
+    method === 'GET' &&
+    (pathname === '/api/listings' ||
+      /^\/api\/listings\/[^/]+$/.test(pathname) ||
+      /^\/api\/listings\/[^/]+\/availability$/.test(pathname))
   )
 }
 
@@ -102,7 +127,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
     response.headers.set('Access-Control-Allow-Credentials', 'true')
     response.headers.set(
       'Access-Control-Allow-Origin',
-      process.env['NEXT_PUBLIC_APP_URL'] || '*'
+      process.env['NEXT_PUBLIC_APP_URL'] || request.nextUrl.origin
     )
     response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
     response.headers.set(
@@ -116,7 +141,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
 
 export default async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
-  let response = applySecurityHeaders(supabaseResponse, request)
+  const response = applySecurityHeaders(supabaseResponse, request)
 
   if (request.method === 'OPTIONS' && request.nextUrl.pathname.startsWith('/api')) {
     return new NextResponse(null, { status: 200, headers: response.headers })
@@ -125,12 +150,7 @@ export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isApiRoute = pathname.startsWith('/api')
   const isUploadRoute = pathname === '/api/upload'
-  const isListingsGet = pathname === '/api/listings' && request.method === 'GET'
-  const isListingsPost = pathname === '/api/listings' && request.method === 'POST'
-
-  if (isUploadRoute) {
-    return response
-  }
+  const isListingsPublicRead = isPublicListingRead(pathname, request.method)
 
   if (isApiRoute && !isUploadRoute) {
     try {
@@ -177,13 +197,9 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  if (isListingsPost) {
-    return response
-  }
-
   if (
     !isPublicRoute(pathname) &&
-    !isListingsGet &&
+    !isListingsPublicRead &&
     isProtectedRoute(pathname) &&
     !user
   ) {

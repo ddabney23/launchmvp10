@@ -4,10 +4,10 @@
  */
 
 import { NextRequest } from 'next/server'
-import Stripe from 'stripe'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
+import { getStripeClient } from '@/lib/stripe'
 import {
   successResponse,
   errorResponse,
@@ -18,21 +18,16 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
-
-if (!STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required')
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2025-10-29.clover',
-})
-
 /**
  * GET /api/vendor/connect/status
  * Get Connect account status
  */
 export const GET = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()
