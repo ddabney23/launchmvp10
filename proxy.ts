@@ -22,11 +22,13 @@ const PROTECTED_PATHS = [
   /^\/cart(\/.*)?$/,
   /^\/checkout(\/.*)?$/,
   /^\/orders(\/.*)?$/,
+  /^\/order(\/.*)?$/,
   /^\/messages(\/.*)?$/,
   /^\/notifications(\/.*)?$/,
   /^\/groups(\/.*)?$/,
   /^\/vendor(\/.*)?$/,
   /^\/admin(\/.*)?$/,
+  /^\/debug-admin(\/.*)?$/,
   /^\/onboarding(\/.*)?$/,
   /^\/create(\/.*)?$/,
   /^\/explore(\/.*)?$/,
@@ -43,9 +45,9 @@ function matchesPath(pathname: string, patterns: RegExp[]) {
   return patterns.some((p) => p.test(pathname))
 }
 
-function isPublicRoute(pathname: string) {
+function isPublicRoute(pathname: string, method = 'GET') {
   if (pathname === '/api/listings' || pathname.startsWith('/api/listings/')) {
-    return true
+    return method === 'GET'
   }
   return matchesPath(pathname, PUBLIC_PATHS)
 }
@@ -126,7 +128,6 @@ export default async function proxy(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api')
   const isUploadRoute = pathname === '/api/upload'
   const isListingsGet = pathname === '/api/listings' && request.method === 'GET'
-  const isListingsPost = pathname === '/api/listings' && request.method === 'POST'
 
   if (isUploadRoute) {
     return response
@@ -177,12 +178,8 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  if (isListingsPost) {
-    return response
-  }
-
   if (
-    !isPublicRoute(pathname) &&
+    !isPublicRoute(pathname, request.method) &&
     !isListingsGet &&
     isProtectedRoute(pathname) &&
     !user

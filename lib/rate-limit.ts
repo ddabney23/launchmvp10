@@ -1,62 +1,75 @@
 import { Redis } from '@upstash/redis'
 import { Ratelimit } from '@upstash/ratelimit'
-import { env } from './env'
 
-// Initialize Redis client
-const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-})
+const redis =
+  process.env['UPSTASH_REDIS_REST_URL'] && process.env['UPSTASH_REDIS_REST_TOKEN']
+    ? new Redis({
+        url: process.env['UPSTASH_REDIS_REST_URL'],
+        token: process.env['UPSTASH_REDIS_REST_TOKEN'],
+      })
+    : null
 
 // Define all rate limiters
 export const rateLimiters = {
   // General API rate limit: 60 requests per minute per user
-  api: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(60, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:api',
-  }),
+  api: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(60, '1 m'),
+        analytics: true,
+        prefix: 'ratelimit:api',
+      })
+    : null,
   
   // Strict rate limit for write operations: 10 requests per minute
-  write: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(10, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:write',
-  }),
+  write: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(10, '1 m'),
+        analytics: true,
+        prefix: 'ratelimit:write',
+      })
+    : null,
   
   // Login attempts: 5 per 15 minutes
-  login: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '15 m'),
-    analytics: true,
-    prefix: 'ratelimit:login',
-  }),
+  login: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, '15 m'),
+        analytics: true,
+        prefix: 'ratelimit:login',
+      })
+    : null,
   
   // IP-based fallback: 120 requests per minute per IP
-  ip: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(120, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:ip',
-  }),
+  ip: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(120, '1 m'),
+        analytics: true,
+        prefix: 'ratelimit:ip',
+      })
+    : null,
   
   // Search queries: 30 per minute
-  search: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(30, '1 m'),
-    analytics: true,
-    prefix: 'ratelimit:search',
-  }),
+  search: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, '1 m'),
+        analytics: true,
+        prefix: 'ratelimit:search',
+      })
+    : null,
   
   // File uploads: 5 per 5 minutes
-  upload: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, '5 m'),
-    analytics: true,
-    prefix: 'ratelimit:upload',
-  }),
+  upload: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, '5 m'),
+        analytics: true,
+        prefix: 'ratelimit:upload',
+      })
+    : null,
 }
 
 // Helper function with response headers
@@ -64,7 +77,23 @@ export async function checkRateLimit(
   identifier: string,
   type: keyof typeof rateLimiters = 'api'
 ) {
-  const { success, limit, reset, remaining } = await rateLimiters[type].limit(identifier)
+  const limiter = rateLimiters[type]
+
+  if (!limiter) {
+    return {
+      success: true,
+      limit: Number.MAX_SAFE_INTEGER,
+      reset: Date.now(),
+      remaining: Number.MAX_SAFE_INTEGER,
+      headers: {
+        'X-RateLimit-Limit': Number.MAX_SAFE_INTEGER.toString(),
+        'X-RateLimit-Remaining': Number.MAX_SAFE_INTEGER.toString(),
+        'X-RateLimit-Reset': Date.now().toString(),
+      },
+    }
+  }
+
+  const { success, limit, reset, remaining } = await limiter.limit(identifier)
   
   return {
     success,

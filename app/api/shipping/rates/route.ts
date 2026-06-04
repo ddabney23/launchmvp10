@@ -4,10 +4,10 @@
  */
 
 import { NextRequest } from 'next/server'
-import shippo from 'shippo'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
+import { getShippoClient } from '@/lib/shippo'
 import {
   successResponse,
   errorResponse,
@@ -21,11 +21,6 @@ import { strictRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
-
-const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY
-
-// Only initialize Shippo client if API key is available (allows build to succeed)
-const shippoClient = SHIPPO_API_KEY ? shippo({ apiKey: SHIPPO_API_KEY }) : null
 
 const ShippingRatesSchema = z.object({
   order_id: z.string().uuid(),
@@ -77,6 +72,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   const rateLimitResponse = await strictRateLimit(req, userId)
   if (rateLimitResponse) return rateLimitResponse
 
+  const shippoClient = getShippoClient()
   if (!shippoClient) {
     return errorResponse('Shippo API is not configured', 'SHIPPO_NOT_CONFIGURED', null, 503)
   }
@@ -121,11 +117,18 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   try {
     // Create shipment in Shippo
-    const shipment = await shippoClient.shipment.create({
-      address_from: from_address,
-      address_to: to_address,
-      parcels: [parcel],
-      carrier_accounts: carrier_accounts,
+    const shipment = await shippoClient.shipments.create({
+      addressFrom: from_address,
+      addressTo: to_address,
+      parcels: [{
+        length: parcel.length,
+        width: parcel.width,
+        height: parcel.height,
+        distanceUnit: parcel.distance_unit,
+        weight: parcel.weight,
+        massUnit: parcel.mass_unit,
+      }],
+      carrierAccounts: carrier_accounts,
       async: false, // Synchronous request
     })
 
@@ -134,28 +137,29 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     }
 
     // Format rates for response
-    const rates = shipment.rates.map((rate: any) => ({
-      object_id: rate.object_id,
+    const rates = shipment.rates.map((rate) => ({
+      object_id: rate.objectId,
       provider: rate.provider,
       servicelevel: rate.servicelevel,
       amount: rate.amount,
       currency: rate.currency,
-      estimated_days: rate.estimated_days,
-      duration_terms: rate.duration_terms,
+      estimated_days: rate.estimatedDays,
+      duration_terms: rate.durationTerms,
     }))
 
     return successResponse({
-      shipment_id: shipment.object_id,
+      shipment_id: shipment.objectId,
       rates: rates,
-      address_from: shipment.address_from,
-      address_to: shipment.address_to,
+      address_from: shipment.addressFrom,
+      address_to: shipment.addressTo,
     })
-  } catch (shippoError: any) {
+  } catch (shippoError: unknown) {
     logger.error('Shippo API error', shippoError, { orderId: order_id })
+    const message = shippoError instanceof Error ? shippoError.message : 'Unknown Shippo error'
     return errorResponse(
       'Failed to get shipping rates',
       'SHIPPO_ERROR',
-      shippoError?.message || 'Unknown Shippo error',
+      message,
       500
     )
   }

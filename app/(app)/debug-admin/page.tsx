@@ -3,8 +3,17 @@
 import { useAuth } from '@/hooks/useAuth'
 import { isAdminEmail } from '@/lib/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 export default function DebugAdminPage() {
+  return (
+    <ProtectedRoute requireAdmin>
+      <DebugAdminContent />
+    </ProtectedRoute>
+  )
+}
+
+function DebugAdminContent() {
   const { user, profile, loading } = useAuth()
 
   if (loading) {
@@ -46,14 +55,9 @@ export default function DebugAdminPage() {
             </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold">Hardcoded Admin Emails:</h3>
-            <ul className="list-disc list-inside">
-              <li>ddabney23@gmail.com</li>
-              <li>*@admin*</li>
-              <li>admin@*</li>
-            </ul>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Email allowlists are loaded from deployment environment variables; profile.is_admin is the preferred authorization source.
+          </p>
         </CardContent>
       </Card>
     </div>

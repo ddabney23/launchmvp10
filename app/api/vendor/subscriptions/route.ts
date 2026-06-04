@@ -4,7 +4,6 @@
  */
 
 import { NextRequest } from 'next/server'
-import Stripe from 'stripe'
 import { getAuthUserId, getAuthUser } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
@@ -21,25 +20,9 @@ import {
 import { strictRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 import { SUBSCRIPTION_TIERS, SubscriptionTier } from '@/lib/subscription-tiers'
+import { getStripeClient } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
-
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
-if (!STRIPE_SECRET_KEY) {
-  console.error('STRIPE_SECRET_KEY is missing from environment variables')
-  throw new Error('STRIPE_SECRET_KEY is required. Please add it to your .env.local file.')
-}
-
-// Initialize Stripe with error handling
-let stripe: Stripe
-try {
-  stripe = new Stripe(STRIPE_SECRET_KEY, {
-    apiVersion: '2025-10-29.clover',
-  })
-} catch (stripeError) {
-  console.error('Failed to initialize Stripe client:', stripeError)
-  throw new Error('Failed to initialize Stripe. Please check your STRIPE_SECRET_KEY.')
-}
 
 // Schema for creating/updating subscription
 const CreateSubscriptionSchema = z.object({
@@ -279,7 +262,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   // For paid tiers, create Stripe subscription
   try {
-    // Validate Stripe is initialized
+    const stripe = getStripeClient()
     if (!stripe) {
       logger.error('Stripe client not initialized', undefined, { vendorId: profile.id })
       return errorResponse('Stripe is not configured', 'STRIPE_NOT_CONFIGURED', 'Please configure STRIPE_SECRET_KEY in environment variables', 500)
@@ -478,6 +461,11 @@ export const PATCH = withErrorHandling(async (req: NextRequest) => {
 
   // If updating to free tier, cancel Stripe subscription
   if (tier === 'free' && subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return errorResponse('Stripe is not configured', 'STRIPE_NOT_CONFIGURED', 'Please configure STRIPE_SECRET_KEY in environment variables', 500)
+    }
+
     try {
       await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
     } catch (stripeError) {
@@ -508,6 +496,11 @@ export const PATCH = withErrorHandling(async (req: NextRequest) => {
 
   // Update cancel_at_period_end
   if (cancel_at_period_end !== undefined && subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return errorResponse('Stripe is not configured', 'STRIPE_NOT_CONFIGURED', 'Please configure STRIPE_SECRET_KEY in environment variables', 500)
+    }
+
     try {
       await stripe.subscriptions.update(subscription.stripe_subscription_id, {
         cancel_at_period_end: cancel_at_period_end,
@@ -588,6 +581,11 @@ export const DELETE = withErrorHandling(async (req: NextRequest) => {
 
   // Cancel Stripe subscription if exists
   if (subscription.stripe_subscription_id) {
+    const stripe = getStripeClient()
+    if (!stripe) {
+      return errorResponse('Stripe is not configured', 'STRIPE_NOT_CONFIGURED', 'Please configure STRIPE_SECRET_KEY in environment variables', 500)
+    }
+
     try {
       await stripe.subscriptions.cancel(subscription.stripe_subscription_id)
     } catch (stripeError) {

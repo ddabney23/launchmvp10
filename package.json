@@ -28,8 +28,6 @@
     "verify:db": "ts-node scripts/verify-db.ts",
     "verify:env": "node scripts/verify-env.js",
     "type-check": "tsc --noEmit",
-    "migrate:clerk-users": "npx tsx scripts/migrate-clerk-users-to-supabase.ts",
-    "migrate:clerk-users:dry-run": "npx tsx scripts/migrate-clerk-users-to-supabase.ts --dry-run",
     "verify:all": "npm run verify:env && npm run verify:db",
     "setup": "npm install && npm run prisma:generate",
     "setup:env": "node scripts/setup-env.js",

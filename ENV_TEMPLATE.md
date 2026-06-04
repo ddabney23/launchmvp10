@@ -113,17 +113,12 @@ NODE_ENV=development
 3. Add **Redirect URLs**: `http://localhost:3000/auth/callback` and your production callback URL
 4. Copy **service_role** key from **Settings** → **API** → `SUPABASE_SERVICE_ROLE_KEY` (server-only; never expose to the client)
 
-### Migrating existing Clerk users (one-time)
+### Supabase Auth migration status
 
-After applying migration `048_supabase_auth_realign.sql`:
-
-```bash
-npm run migrate:clerk-users
-```
-
-Then apply `049_profiles_auth_fkey.sql`, `052_restore_profiles_rls.sql`, `053_fix_profiles_rls_recursion.sql`, and later `050_drop_clerk_user_id.sql` when all clients use `profiles.id` = `auth.users.id`.
-
-If you see `infinite recursion detected in policy for relation "profiles"` in dev logs, run migration `053` in the Supabase SQL editor.
+The application currently uses Supabase Auth at runtime. Legacy Clerk migration
+commands were removed because the referenced migration script is not present in
+this repository. Use the checked-in `supabase/migrations` files as the source of
+truth for schema changes.
 
 ### Rate Limiting (Upstash Redis)
 
