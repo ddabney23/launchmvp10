@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useRealtimeSubscription } from '@/lib/realtime'
@@ -19,7 +19,7 @@ interface EventLog {
   type: 'post' | 'comment' | 'message' | 'booking' | 'listing'
   event: 'INSERT' | 'UPDATE' | 'DELETE'
   table: string
-  data: any
+  data: unknown
 }
 
 interface WebhookLog {
@@ -28,7 +28,7 @@ interface WebhookLog {
   source: 'stripe'
   event: string
   status: 'success' | 'failed' | 'pending'
-  payload?: any
+  payload?: unknown
   error?: string
 }
 
@@ -45,7 +45,7 @@ function RealtimeDiagnosticsContent() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [eventLogs, setEventLogs] = useState<EventLog[]>([])
-  const [webhookLogs, setWebhookLogs] = useState<WebhookLog[]>([])
+  const [webhookLogs] = useState<WebhookLog[]>([])
   const [isRecording, setIsRecording] = useState(true)
   const logsEndRef = useRef<HTMLDivElement>(null)
 
@@ -187,7 +187,7 @@ function RealtimeDiagnosticsContent() {
   // 2. Define the webhook_logs table schema
   // 3. Uncomment the query below
   // Note: This is an optional feature for debugging webhook issues
-  const webhookLogsData: WebhookLog[] | undefined = undefined
+  // Webhook log fetching is intentionally disabled until the optional table exists.
   // const { data: webhookLogsData } = useQuery({
   //   queryKey: ['webhook-logs'],
   //   queryFn: async () => {
@@ -215,12 +215,6 @@ function RealtimeDiagnosticsContent() {
   //   enabled: isRecording && !!user,
   //   refetchInterval: 5000, // Refresh every 5 seconds
   // })
-
-  useEffect(() => {
-    if (webhookLogsData) {
-      setWebhookLogs(webhookLogsData)
-    }
-  }, [webhookLogsData])
 
   const getStatusIcon = (status: string) => {
     switch (status) {

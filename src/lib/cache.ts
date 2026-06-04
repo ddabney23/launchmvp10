@@ -12,11 +12,17 @@
 import { Redis } from '@upstash/redis'
 import { logger } from './logger'
 
-// Initialize Redis client (uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN from env)
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+// Cache is optional: when Redis is not configured, cache operations no-op.
+const redis =
+  redisUrl && redisToken
+    ? new Redis({
+        url: redisUrl,
+        token: redisToken,
+      })
+    : null
 
 // Cache TTL (Time To Live) in seconds
 export const CACHE_TTL = {
@@ -46,6 +52,8 @@ export const CACHE_KEYS = {
  * Returns null if key doesn't exist or on error
  */
 export async function getCache<T>(key: string): Promise<T | null> {
+  if (!redis) return null
+
   try {
     const value = await redis.get<T>(key)
     if (value) {
@@ -68,6 +76,8 @@ export async function setCache<T>(
   value: T, 
   ttl: number = CACHE_TTL.USER_STATS
 ): Promise<void> {
+  if (!redis) return
+
   try {
     await redis.setex(key, ttl, JSON.stringify(value))
     logger.debug('Cache set', { key, ttl })
@@ -81,6 +91,8 @@ export async function setCache<T>(
  * Delete a single cache key
  */
 export async function deleteCache(key: string): Promise<void> {
+  if (!redis) return
+
   try {
     await redis.del(key)
     logger.debug('Cache deleted', { key })
@@ -94,6 +106,8 @@ export async function deleteCache(key: string): Promise<void> {
  * Note: SCAN is more efficient than KEYS for production
  */
 export async function deleteCachePattern(pattern: string): Promise<void> {
+  if (!redis) return
+
   try {
     const keys = await redis.keys(pattern)
     if (keys.length > 0) {
