@@ -13,6 +13,7 @@ _nm_staging/
 
 # testing
 /coverage
+/.vitest-cache
 
 # next.js
 /.next/
