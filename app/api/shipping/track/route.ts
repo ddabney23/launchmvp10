@@ -18,6 +18,18 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+interface TrackingOrderRow {
+  tracking_number: string | null
+  vendor: string | null
+  buyer: string | null
+}
+
+interface ShippingLabelRow {
+  tracking_number: string | null
+  vendor_id: string | null
+  carrier: string | null
+}
+
 /**
  * GET /api/shipping/track
  * Get tracking status for a shipment.
@@ -60,11 +72,12 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
   // If order_id provided, get tracking number from order or shipping label
   if (orderId && !trackingNum) {
     // Try to get from order
-    const { data: order } = await adminClient
+    const { data: orderResult } = await adminClient
       .from('orders')
       .select('tracking_number, vendor, buyer')
       .eq('id', orderId)
       .maybeSingle()
+    const order = orderResult as TrackingOrderRow | null
 
     if (order) {
       // Verify user has access (vendor or buyer)
@@ -76,11 +89,12 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
 
     // Always try shipping_labels for carrier, and for tracking number fallback.
     if (!trackingCarrier || !trackingNum) {
-      const { data: label } = await adminClient
+      const { data: labelResult } = await adminClient
         .from('shipping_labels')
         .select('tracking_number, vendor_id, carrier')
         .eq('order_id', orderId)
         .maybeSingle()
+      const label = labelResult as ShippingLabelRow | null
 
       if (label) {
         // Verify user has access
