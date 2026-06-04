@@ -7,6 +7,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPost, updatePost, deletePost } from '@/lib/api'
 
+const mockFetch = vi.fn()
+
 // Create a chainable mock for Supabase queries
 const createChainableMock = (finalResult: any = { data: null, error: null }) => {
   const chain = {
@@ -42,18 +44,12 @@ vi.mock('@/integrations/supabase/client', () => ({
 describe('Post API Functions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockFetch.mockReset()
+    vi.stubGlobal('fetch', mockFetch)
   })
 
   describe('createPost', () => {
     it('should create a post successfully', async () => {
-      const mockSupabase = await import('@/integrations/supabase/client')
-      
-      const mockProfile = {
-        id: 'test-user-id',
-        username: 'testuser',
-        display_name: 'Test User',
-      };
-
       const mockPost = {
         id: 'test-post-id',
         content: 'Test post content',
@@ -61,23 +57,12 @@ describe('Post API Functions', () => {
         visibility: 'public'
       };
 
-      // Mock getSession
-      vi.mocked(mockSupabase.supabase.auth.getSession).mockResolvedValue({
-        data: { session: { user: { id: 'test-user-id' } } },
-        error: null
-      } as any);
-
-      // Mock from() to return profile then post
-      (mockSupabase.supabase.from as any) = vi.fn((table: string) => {
-        if (table === 'profiles') {
-          return createChainableMock({ data: mockProfile, error: null });
-        } else if (table === 'posts') {
-          return createChainableMock({ data: mockPost, error: null });
-        }
-        return createChainableMock();
-      });
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true, data: mockPost }), { status: 200 })
+      )
 
       const result = await createPost({
+        author: 'test-user-id',
         content: 'Test post content',
         visibility: 'public',
         media_urls: []
@@ -89,15 +74,15 @@ describe('Post API Functions', () => {
     })
 
     it('should throw error when not authenticated', async () => {
-      const mockSupabase = await import('@/integrations/supabase/client')
-      
-      // Mock unauthenticated state
-      vi.mocked(mockSupabase.supabase.auth.getSession).mockResolvedValueOnce({
-        data: { session: null },
-        error: null
-      } as any)
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ success: false, message: 'Unauthorized', code: 'UNAUTHORIZED' }),
+          { status: 401 }
+        )
+      )
 
       await expect(createPost({
+        author: 'test-user-id',
         content: 'Test',
         visibility: 'public',
         media_urls: []
@@ -107,27 +92,15 @@ describe('Post API Functions', () => {
 
   describe('updatePost', () => {
     it('should update own post successfully', async () => {
-      const mockSupabase = await import('@/integrations/supabase/client')
-      
       const mockPost = {
         id: 'test-post-id',
         content: 'Updated content',
         author: 'test-user-id'
       };
 
-      // Mock getUser for updatePost
-      vi.mocked(mockSupabase.supabase.auth.getUser).mockResolvedValue({
-        data: { user: { id: 'test-user-id' } },
-        error: null
-      } as any);
-
-      // Mock from() for ownership check and update
-      (mockSupabase.supabase.from as any) = vi.fn((table: string) => {
-        if (table === 'posts') {
-          return createChainableMock({ data: mockPost, error: null });
-        }
-        return createChainableMock();
-      });
+      mockFetch.mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true, data: mockPost }), { status: 200 })
+      )
 
       const result = await updatePost('test-post-id', { content: 'Updated content' })
       
@@ -138,26 +111,7 @@ describe('Post API Functions', () => {
 
   describe('deletePost', () => {
     it('should delete own post successfully', async () => {
-      const mockSupabase = await import('@/integrations/supabase/client')
-      
-      const mockPost = {
-        id: 'test-post-id',
-        author: 'test-user-id'
-      };
-
-      // Mock getUser
-      vi.mocked(mockSupabase.supabase.auth.getUser).mockResolvedValue({
-        data: { user: { id: 'test-user-id' } },
-        error: null
-      } as any);
-
-      // Mock from() for ownership check and delete
-      (mockSupabase.supabase.from as any) = vi.fn((table: string) => {
-        if (table === 'posts') {
-          return createChainableMock({ data: mockPost, error: null });
-        }
-        return createChainableMock();
-      });
+      mockFetch.mockResolvedValueOnce(new Response(null, { status: 204 }))
 
       await expect(deletePost('test-post-id')).resolves.not.toThrow()
     })
