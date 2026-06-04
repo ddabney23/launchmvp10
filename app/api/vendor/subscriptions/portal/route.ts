@@ -4,7 +4,6 @@
  */
 
 import { NextRequest } from 'next/server'
-import Stripe from 'stripe'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
@@ -17,25 +16,23 @@ import {
   withErrorHandling,
 } from '@/lib/api-response'
 import { strictRateLimit } from '@/lib/rate-limit'
+import { getStripeClient } from '@/lib/stripe'
 
 export const dynamic = 'force-dynamic'
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-if (!STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required')
-}
-
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2025-10-29.clover',
-})
 
 /**
  * POST /api/vendor/subscriptions/portal
  * Create Stripe Customer Portal session
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+
+  if (!stripe) {
+    return errorResponse('Stripe is not configured', 'STRIPE_NOT_CONFIGURED', 'Please configure STRIPE_SECRET_KEY in environment variables', 500)
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()

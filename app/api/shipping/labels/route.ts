@@ -4,7 +4,6 @@
  */
 
 import { NextRequest } from 'next/server'
-import shippo from 'shippo'
 import { getAuthUserId } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
 import { logger } from '@/lib/logger'
@@ -19,18 +18,14 @@ import {
 } from '@/lib/api-response'
 import { strictRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
+import { getShippoClient } from '@/lib/shippo'
 
 export const dynamic = 'force-dynamic'
-
-const SHIPPO_API_KEY = process.env.SHIPPO_API_KEY
-
-// Only initialize Shippo client if API key is available (allows build to succeed)
-const shippoClient = SHIPPO_API_KEY ? shippo({ apiKey: SHIPPO_API_KEY }) : null
 
 const PurchaseLabelSchema = z.object({
   order_id: z.string().uuid(),
   rate_id: z.string(), // Shippo rate object_id
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**
@@ -47,6 +42,8 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   const rateLimitResponse = await strictRateLimit(req, userId)
   if (rateLimitResponse) return rateLimitResponse
+
+  const shippoClient = getShippoClient()
 
   if (!shippoClient) {
     return errorResponse('Shippo API is not configured', 'SHIPPO_NOT_CONFIGURED', null, 503)
@@ -92,14 +89,14 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 
   try {
     // Purchase label using rate
-    const transaction = await shippoClient.transaction.create({
+    const transaction = await shippoClient.transactions.create({
       rate: rate_id,
       async: false, // Synchronous request
-      metadata: metadata || {},
+      metadata: metadata ? JSON.stringify(metadata) : undefined,
     })
 
     if (transaction.status !== 'SUCCESS') {
-      logger.error('Shippo transaction failed', null, { transactionId: transaction.object_id, status: transaction.status })
+      logger.error('Shippo transaction failed', null, { transactionId: transaction.objectId, status: transaction.status })
       return errorResponse(
         'Failed to purchase label',
         'LABEL_PURCHASE_FAILED',
@@ -109,16 +106,17 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
     }
 
     // Get tracking number and label URL
-    const trackingNumber = transaction.tracking_number
-    const labelUrl = transaction.label_url
-    const trackingUrl = transaction.tracking_url_provider
+    const trackingNumber = transaction.trackingNumber
+    const labelUrl = transaction.labelUrl
+    const trackingUrl = transaction.trackingUrlProvider
+    const transactionRate = typeof transaction.rate === 'object' ? transaction.rate : null
 
     // Update order with shipping information
     await adminClient
       .from('orders')
       .update({
         tracking_number: trackingNumber,
-        shippo_transaction_id: transaction.object_id,
+        shippo_transaction_id: transaction.objectId,
         label_url: labelUrl,
         status: 'shipped', // Update order status to shipped
       })
@@ -130,16 +128,16 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       .insert({
         order_id: order_id,
         vendor_id: profile.id,
-        shippo_transaction_id: transaction.object_id,
+        shippo_transaction_id: transaction.objectId,
         tracking_number: trackingNumber,
-        carrier: transaction.rate?.provider || null,
-        service_level: transaction.rate?.servicelevel?.name || null,
+        carrier: transactionRate?.provider || null,
+        service_level: transactionRate?.servicelevelName || null,
         label_url: labelUrl,
         tracking_url: trackingUrl,
         status: 'purchased',
-        cost: parseFloat(transaction.rate?.amount || '0'),
+        cost: parseFloat(transactionRate?.amount || '0'),
         metadata: {
-          transaction_id: transaction.object_id,
+          transaction_id: transaction.objectId,
           rate_id: rate_id,
           ...metadata,
         },
@@ -148,27 +146,27 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
       .single()
 
     if (labelError) {
-      logger.error('Failed to create shipping label record', labelError, { orderId: order_id, transactionId: transaction.object_id })
+      logger.error('Failed to create shipping label record', labelError, { orderId: order_id, transactionId: transaction.objectId })
       // Don't fail the request, but log the error
     }
 
     return successResponse({
       label: shippingLabel || null,
       transaction: {
-        id: transaction.object_id,
+        id: transaction.objectId,
         tracking_number: trackingNumber,
         label_url: labelUrl,
         tracking_url: trackingUrl,
         status: transaction.status,
-        cost: parseFloat(transaction.rate?.amount || '0'),
+        cost: parseFloat(transactionRate?.amount || '0'),
       },
     }, 'Shipping label purchased successfully')
-  } catch (shippoError: any) {
+  } catch (shippoError: unknown) {
     logger.error('Shippo API error purchasing label', shippoError, { orderId: order_id, rateId: rate_id })
     return errorResponse(
       'Failed to purchase shipping label',
       'SHIPPO_ERROR',
-      shippoError?.message || 'Unknown Shippo error',
+      shippoError instanceof Error ? shippoError.message : 'Unknown Shippo error',
       500
     )
   }
