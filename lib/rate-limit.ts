@@ -2,14 +2,22 @@ import { Redis } from '@upstash/redis'
 import { Ratelimit } from '@upstash/ratelimit'
 import { env } from './env'
 
+type RateLimitType = 'api' | 'write' | 'login' | 'ip' | 'search' | 'upload'
+
+const isRedisConfigured =
+  Boolean(env.UPSTASH_REDIS_REST_URL) && Boolean(env.UPSTASH_REDIS_REST_TOKEN)
+
 // Initialize Redis client
-const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-})
+const redis = isRedisConfigured
+  ? new Redis({
+      url: env.UPSTASH_REDIS_REST_URL,
+      token: env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null
 
 // Define all rate limiters
-export const rateLimiters = {
+export const rateLimiters = redis
+  ? {
   // General API rate limit: 60 requests per minute per user
   api: new Ratelimit({
     redis,
@@ -58,12 +66,27 @@ export const rateLimiters = {
     prefix: 'ratelimit:upload',
   }),
 }
+  : null
 
 // Helper function with response headers
 export async function checkRateLimit(
   identifier: string,
-  type: keyof typeof rateLimiters = 'api'
+  type: RateLimitType = 'api'
 ) {
+  if (!rateLimiters) {
+    return {
+      success: true,
+      limit: 0,
+      reset: Date.now(),
+      remaining: 0,
+      headers: {
+        'X-RateLimit-Limit': 'disabled',
+        'X-RateLimit-Remaining': 'disabled',
+        'X-RateLimit-Reset': 'disabled',
+      },
+    }
+  }
+
   const { success, limit, reset, remaining } = await rateLimiters[type].limit(identifier)
   
   return {

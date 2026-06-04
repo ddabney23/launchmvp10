@@ -11,7 +11,15 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerClient();
-    const authUser = await getAuthUser();
+    let authUser: Awaited<ReturnType<typeof getAuthUser>>;
+    try {
+      authUser = await getAuthUser();
+    } catch {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     const userId = authUser?.id;
 
     // Get query parameters
@@ -42,7 +50,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url, points, level, badges')
+      .select('id, username, display_name, avatar_url, points, level, badges')
       .order('points', { ascending: false })
       .limit(limit);
 
@@ -66,7 +74,7 @@ export async function GET(request: NextRequest) {
       rank: index + 1,
       userId: profile.id,
       username: profile.username || 'Anonymous',
-      fullName: profile.full_name,
+      fullName: profile.display_name,
       avatarUrl: profile.avatar_url,
       points: profile.points || 0,
       level: profile.level || 1,
@@ -87,7 +95,7 @@ export async function GET(request: NextRequest) {
         // User not in top N, fetch their actual rank
         const { data: userProfile } = await supabase
           .from('profiles')
-          .select('id, username, full_name, avatar_url, points, level, badges')
+          .select('id, username, display_name, avatar_url, points, level, badges')
           .eq('id', userId)
           .single();
 
@@ -102,7 +110,7 @@ export async function GET(request: NextRequest) {
             rank: (count || 0) + 1,
             userId: userProfile.id,
             username: userProfile.username || 'Anonymous',
-            fullName: userProfile.full_name,
+            fullName: userProfile.display_name,
             avatarUrl: userProfile.avatar_url,
             points: userProfile.points || 0,
             level: userProfile.level || 1,

@@ -4,9 +4,9 @@
  */
 
 import { NextRequest } from 'next/server'
-import Stripe from 'stripe'
 import { getAuthUserId, getAuthUser } from '@/lib/supabase-auth'
 import { createAdminClient } from '@/integrations/supabase/server'
+import { getStripeClient } from '@/lib/stripe'
 import { logger } from '@/lib/logger'
 import {
   successResponse,
@@ -23,23 +23,6 @@ import { z } from 'zod'
 import { SUBSCRIPTION_TIERS, SubscriptionTier } from '@/lib/subscription-tiers'
 
 export const dynamic = 'force-dynamic'
-
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
-if (!STRIPE_SECRET_KEY) {
-  console.error('STRIPE_SECRET_KEY is missing from environment variables')
-  throw new Error('STRIPE_SECRET_KEY is required. Please add it to your .env.local file.')
-}
-
-// Initialize Stripe with error handling
-let stripe: Stripe
-try {
-  stripe = new Stripe(STRIPE_SECRET_KEY, {
-    apiVersion: '2025-10-29.clover',
-  })
-} catch (stripeError) {
-  console.error('Failed to initialize Stripe client:', stripeError)
-  throw new Error('Failed to initialize Stripe. Please check your STRIPE_SECRET_KEY.')
-}
 
 // Schema for creating/updating subscription
 const CreateSubscriptionSchema = z.object({
@@ -121,6 +104,11 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
  * Create or upgrade subscription
  */
 export const POST = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -424,6 +412,11 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
  * Update subscription (downgrade, cancel, etc.)
  */
 export const PATCH = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()
@@ -542,6 +535,11 @@ export const PATCH = withErrorHandling(async (req: NextRequest) => {
  * Cancel subscription immediately
  */
 export const DELETE = withErrorHandling(async (req: NextRequest) => {
+  const stripe = getStripeClient()
+  if (!stripe) {
+    return internalErrorResponse('Payment system not configured')
+  }
+
   let userId: string
   try {
     userId = await getAuthUserId()

@@ -9,28 +9,43 @@ import { getAuthUser, getAuthUserId } from '@/lib/supabase-auth'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  try {
-    const user = await getAuthUser()
-    let userId: string | null = null
-    try {
-      userId = await getAuthUserId()
-    } catch {
-      userId = null
-    }
+  let user: Awaited<ReturnType<typeof getAuthUser>>
+  let userId: string
 
+  try {
+    user = await getAuthUser()
+    userId = await getAuthUserId()
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Authentication required',
+      },
+      { status: 401 }
+    )
+  }
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Authentication required',
+      },
+      { status: 401 }
+    )
+  }
+
+  try {
     const cookies = req.headers.get('cookie')
 
     return NextResponse.json({
       success: true,
-      user: user
-        ? {
-            id: user.id,
-            email: user.email,
-          }
-        : null,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
       getAuthUserId: userId,
       hasCookies: !!cookies,
-      cookieCount: cookies ? cookies.split(';').length : 0,
     })
   } catch (error) {
     return NextResponse.json(

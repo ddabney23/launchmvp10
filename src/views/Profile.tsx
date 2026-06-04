@@ -251,19 +251,13 @@ export default function Profile({ userId }: ProfileProps) {
       formData.append('bucket', 'avatars');
       formData.append('path', `avatar.${file.name.split('.').pop()}`);
 
-      console.log('Uploading avatar...', { 
-        fileName: file.name, 
-        fileSize: file.size, 
-        fileType: file.type 
-      });
-
       const response = await fetch('/api/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       });
 
       const responseData = await response.json();
-      console.log('Upload response:', responseData);
 
       if (!response.ok) {
         throw new Error(responseData.error || responseData.details || 'Upload failed');
@@ -273,7 +267,6 @@ export default function Profile({ userId }: ProfileProps) {
       const uploadData = responseData.data || responseData;
       const url = uploadData.url || uploadData.publicUrl;
       if (!url) {
-        console.error('Upload response missing URL:', responseData);
         throw new Error('No URL returned from upload');
       }
 

@@ -10,7 +10,6 @@ const PUBLIC_PATHS = [
   /^\/register(\/.*)?$/,
   /^\/api\/webhooks(\/.*)?$/,
   /^\/api\/health(\/.*)?$/,
-  /^\/api\/test-auth(\/.*)?$/,
 ]
 
 const PROTECTED_PATHS = [
@@ -21,6 +20,7 @@ const PROTECTED_PATHS = [
   /^\/marketplace(\/.*)?$/,
   /^\/cart(\/.*)?$/,
   /^\/checkout(\/.*)?$/,
+  /^\/order(\/.*)?$/,
   /^\/orders(\/.*)?$/,
   /^\/messages(\/.*)?$/,
   /^\/notifications(\/.*)?$/,
@@ -33,9 +33,22 @@ const PROTECTED_PATHS = [
   /^\/search(\/.*)?$/,
   /^\/rewards(\/.*)?$/,
   /^\/news(\/.*)?$/,
+  /^\/stories(\/.*)?$/,
+  /^\/debug-admin(\/.*)?$/,
   /^\/api\/admin(\/.*)?$/,
+  /^\/api\/bookings(\/.*)?$/,
+  /^\/api\/gamification(\/.*)?$/,
+  /^\/api\/leaderboard(\/.*)?$/,
+  /^\/api\/notifications(\/.*)?$/,
+  /^\/api\/onboarding(\/.*)?$/,
+  /^\/api\/orders(\/.*)?$/,
+  /^\/api\/payment(\/.*)?$/,
+  /^\/api\/profile(\/.*)?$/,
   /^\/api\/posts(\/.*)?$/,
+  /^\/api\/shipping(\/.*)?$/,
   /^\/api\/stories(\/.*)?$/,
+  /^\/api\/test-auth(\/.*)?$/,
+  /^\/api\/vendor(\/.*)?$/,
   /^\/api\/listings(\/.*)?$/,
 ]
 
@@ -54,13 +67,25 @@ function isProtectedRoute(pathname: string) {
   return matchesPath(pathname, PROTECTED_PATHS)
 }
 
-function isWriteOperation(pathname: string): boolean {
-  const writePaths = ['/api/posts', '/api/comments', '/api/messages', '/api/listings', '/api/orders']
+function isWriteOperation(pathname: string, method: string): boolean {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    return false
+  }
+
+  const writePaths = [
+    '/api/posts',
+    '/api/comments',
+    '/api/messages',
+    '/api/listings',
+    '/api/orders',
+    '/api/profile',
+    '/api/vendor',
+  ]
   return (
-    writePaths.some((path) => pathname.includes(path)) &&
-    (pathname.endsWith('/create') ||
-      pathname.includes('/update') ||
-      pathname.includes('/delete'))
+    writePaths.some((path) => pathname.includes(path)) ||
+    pathname.endsWith('/create') ||
+    pathname.includes('/update') ||
+    pathname.includes('/delete')
   )
 }
 
@@ -102,7 +127,7 @@ function applySecurityHeaders(response: NextResponse, request: NextRequest) {
     response.headers.set('Access-Control-Allow-Credentials', 'true')
     response.headers.set(
       'Access-Control-Allow-Origin',
-      process.env['NEXT_PUBLIC_APP_URL'] || '*'
+      process.env['NEXT_PUBLIC_APP_URL'] || request.nextUrl.origin
     )
     response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
     response.headers.set(
@@ -139,7 +164,7 @@ export default async function proxy(request: NextRequest) {
         request.headers.get('x-real-ip') ??
         '127.0.0.1'
 
-      const isWrite = isWriteOperation(pathname)
+      const isWrite = isWriteOperation(pathname, request.method)
       const isSearch = pathname.includes('/search')
       const isUpload = pathname.includes('/upload')
 
