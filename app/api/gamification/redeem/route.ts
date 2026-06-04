@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger'
 import { z } from 'zod'
 
 const RedeemSchema = z.object({
-  rewardId: z.string().uuid(),
+  rewardId: z.string().min(1),
   credits: z.number().int().positive(),
 })
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.errors },
+        { error: 'Invalid request data', details: validation.error.issues },
         { status: 400 }
       )
     }
