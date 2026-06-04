@@ -39,8 +39,8 @@ Production feature variables also required for complete functionality:
 
 ### TypeScript / Lint / Build
 
-- Baseline `npm run type-check`: 547 TypeScript error lines.
-- Post-fix `npm run type-check`: 546 TypeScript error lines.
+- Baseline `npm run type-check`: over 500 TypeScript error lines.
+- Post-fix `npm run type-check`: over 500 TypeScript error lines remain.
 - Baseline/post-fix lint: 593 problems, 314 errors, 279 warnings.
 - `next.config.ts` still sets `typescript.ignoreBuildErrors: true`, so production build skips type validation.
 - With missing env vars, `npm run build` fails during prerender because Supabase URL/key are required.
@@ -135,7 +135,7 @@ Commands run after fixes:
 | Command | Result |
 | --- | --- |
 | `npm run verify:env` | Fails: required Supabase/DB env vars are missing in this workspace |
-| `npm run type-check` | Fails: 546 TypeScript error lines remain |
+| `npm run type-check` | Fails: over 500 TypeScript error lines remain |
 | `npm run lint` | Fails: 593 problems remain |
 | `npm run build` | Fails without env; passes with non-secret placeholder Supabase env values |
 | `npm run test` | Passes: 10 files, 184 tests |
@@ -154,7 +154,7 @@ npm run build
 ## Step 5 - Final Project Health
 
 - **Build Status:** Code builds with required env placeholders; actual workspace build fails until required env vars are configured.
-- **Type Safety Score:** Low. TypeScript is currently not production-enforced because `ignoreBuildErrors` is enabled and 546 error lines remain.
+- **Type Safety Score:** Low. TypeScript is currently not production-enforced because `ignoreBuildErrors` is enabled and over 500 TypeScript error lines remain.
 - **Security Issues:** Critical leaked secrets require rotation; service-role route authorization needs a full audit; npm vulnerabilities remain.
 - **Performance Recommendations:** Keep Upstash configured in production for rate limiting/cache; investigate Sentry/OpenTelemetry webpack warning; add loading/error boundaries.
 - **Missing Features:** Stripe payment collection UI, UploadThing/Clerk/Zustand if those remain product requirements, authenticated API E2E coverage.
